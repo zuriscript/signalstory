@@ -9,10 +9,11 @@ const config = {
   title: 'signalstory | Empower Your Angular State Management',
   tagline: 'Efficiency, Flexibility, and Control at Your Stateful Fingertips',
   favicon: 'img/favicon.ico',
-  url: 'https://your-docusaurus-test-site.com',  
-  baseUrl: '/signalstory',
+  url: 'https://zuriscript.github.io/',  
+  baseUrl: '/signalstory/',
   organizationName: 'zuriscript',
   projectName: 'signalstory',
+  deploymentBranch: 'gh-pages',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   i18n: {
@@ -59,7 +60,7 @@ const config = {
             label: 'Docs',
           },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/zuriscript/signalstory',
             label: 'GitHub',
             position: 'right',
           },
@@ -106,7 +107,7 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/zuriscript/signalstory',
               },
             ],
           },
