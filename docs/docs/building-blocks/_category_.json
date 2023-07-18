@@ -1,0 +1,8 @@
+{
+  "label": "Building Blocks",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "The signalstory library is built upon four fundamental building blocks: Queries, Commands, Events, and Effects. These building blocks provide a structured approach to manage state and handle interactions within your application."
+  }
+}

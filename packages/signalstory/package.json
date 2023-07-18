@@ -1,0 +1,39 @@
+{
+  "name": "signalstory",
+  "version": "0.0.0",
+  "description": "Signal-based state management for Angular applications",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/zuriscript/signalstory/issues"
+  },
+  "homepage": "https://github.com/zuriscript/signalstory#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zuriscript/signalstory"
+  },
+  "keywords": [
+    "state management",
+    "angular state management",
+    "signalstory",
+    "signal",
+    "store",
+    "event handling",
+    "reactive",
+    "library"
+  ],
+  "author": {
+    "name": "Zur Vonarburg-Shmaria",
+    "url": "https://zuriscript.ch"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^16.0.0",
+    "@angular/core": "^16.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

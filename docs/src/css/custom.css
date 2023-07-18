@@ -1,0 +1,208 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* base */
+.hero {
+  background-color: #fcf2c1;
+  min-height: calc(100vh - 60px);
+  padding: 0;
+  display: block;
+}
+
+.background-yellow {
+  background-color: #fcf2c1;
+}
+
+.color-black {
+  color: #000000;
+}
+
+.col {
+  margin-bottom: 50px;
+}
+
+.hero-caption {
+  text-align: center;
+  color: #000000;
+  margin-bottom: 50px;
+}
+
+.hero-caption img {
+  margin-bottom: 20px;
+  width: 200px;
+}
+
+.hero-caption h1 {
+  font-size: 12vw;
+}
+
+.hero-caption p {
+  font-size: 7vw;
+}
+
+#docs-button {
+  font-size: 4vw;
+  color: #fcf2c1;
+  background-color: #de5d77;
+}
+
+.landing-page-nav-sibling+.navbar {
+  background-color: #fcf2c1;
+}
+
+.landing-page-nav-sibling+.navbar>:not(.navbar-sidebar),
+.landing-page-nav-sibling+.navbar>:not(.navbar-sidebar) a {
+  color: black;
+}
+
+.fluid {
+  background: linear-gradient(to right,
+          #7c46cb 20%,
+          #db65f6 30%,
+          #ec6177 70%,
+          #764ada 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  background-size: 500% auto;
+  animation: textShine 5s ease-in-out infinite alternate;
+}
+
+@keyframes textShine {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Larger than tablet */
+@media (min-width: 650px) and (max-width: 996px) {
+  .hero-caption img {
+    width: 400px;
+  }
+
+  .hero-caption h1 {
+    font-size: 7vw;
+  }
+
+  .hero-caption p {
+    font-size: 5vw;
+    line-height: 50px;
+    margin-bottom: 40px;
+  }
+}
+
+@media (min-width: 997px) {
+  .hero {
+    background-image: url('/img/signalstory_full_page.png');
+    background-repeat: no-repeat;
+    background-position: top 28vh left;
+    min-height: 1200px;
+  }
+
+  .hero-caption h1 {
+    font-size: 3rem;
+  }
+
+  .hero-caption p {
+    font-size: 1.5rem;
+  }
+
+  #docs-button {
+    font-size: calc(0.875rem * var(--ifm-button-size-multiplier));
+  }
+
+  #hero-mobile-logo {
+    display: none;
+  }
+
+  .landing-page-nav-sibling+.navbar {
+    background-color: #fcf2c1;
+    color: black;
+    box-shadow: none;
+    position: relative;
+  }
+
+  .landing-page-nav-sibling+.navbar a {
+    color: black;
+  }
+
+  .landing-page-nav-sibling+.navbar a:hover {
+    color: #de5d77;
+  }
+}
+
+/* Larger Desktops */
+@media screen and (min-width: 1260px) {
+  .hero {
+    background-position: top left;
+    min-height: 1000px;
+  }
+
+  .hero-caption {
+    left: 33%;
+    top: 130px;
+    position: absolute;
+    max-width: 900px;
+  }
+
+  .hero-caption h1 {
+    font-size: 3.5vw;
+  }
+}
+
+/* wide Screens */
+@media screen and (min-width: 1970px) {
+  .hero-caption {
+    max-width: 50%;
+  }
+
+  .hero-caption p {
+    font-size: 2rem;
+  }
+
+  #docs-button {
+    font-size: calc(1.25rem * var(--ifm-button-size-multiplier));
+  }
+}
+
+/* Ultra wide Screens */
+@media screen and (min-width: 2730px) {
+  .hero-caption {
+    max-width: 50%;
+    top: 80px;
+    left: 25%;
+  }
+}
