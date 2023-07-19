@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'signalstory | Empower Your Angular State Management',
-  tagline: 'Efficiency, Flexibility, and Control at Your Stateful Fingertips',
+  tagline: 'Signal-based state management for Angular applications',
   favicon: 'img/favicon.ico',
   url: 'https://zuriscript.github.io/',  
   baseUrl: '/signalstory/',
