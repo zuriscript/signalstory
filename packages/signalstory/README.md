@@ -56,7 +56,7 @@ Here's an improved usage section based on the provided sample app code:
 To demonstrate the usage of signalstory, let's create a very simple counter application.
 Please look at the sample app for more realistic use cases.
 
-First, let's create a `CounterStore` that extends `signalstory<number>`. This store will manage the counter state.
+First, let's create a `CounterStore` that extends `Store<number>`. This store will manage the counter state.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -65,7 +65,7 @@ import { signalstory } from 'signalstory';
 @Injectable({
   providedIn: 'root',
 })
-export class CounterStore extends signalstory<number> {
+export class CounterStore extends Store<number> {
   constructor() {
     super({ initialState: 0 });
   }
