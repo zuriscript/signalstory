@@ -22,6 +22,7 @@ class CounterStore extends Store<number> {
   }
 
   // highlight-start
+  // Use getter methods for parameterless queries to simplify call syntax
   public get plus100() {
     return computed(() => this.state() + 100);
   }
@@ -112,7 +113,9 @@ export class AppComponent {
   constructor(counterStore: CounterStore) {
     console.log(counterStore.runQuery(counterAndWordQuery)); // prints Magnificent7
     console.log(
+      // highlight-start
       counterStore.runQuery(counterAndWordWithParameterQuery, ' - the movie')
+      // highlight-end
     ); // prints Magnificent7 - the movie
   }
 }

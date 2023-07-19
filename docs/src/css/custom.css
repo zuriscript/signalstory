@@ -124,12 +124,17 @@
   }
 }
 
-@media (min-width: 997px) {
+@media (min-width: 995px) {
   .hero {
     background-image: url('/img/signalstory_full_page.png');
     background-repeat: no-repeat;
-    background-position: top 28vh left;
+    background-position: top 280px left;
     min-height: 1200px;
+  }
+
+  .hero-caption {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .hero-caption h1 {
