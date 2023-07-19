@@ -211,24 +211,25 @@ export class Store<TState> extends StoreBase {
   /**
    * Runs an effect with the provided arguments and returns the result.
    * The effect may be associated with the store itself but it may also be unrelated
+   * @typeparam TStore The types of the effect's target store.
    * @typeparam TArgs The types of the effect's arguments.
    * @typeparam TResult The type of the effect's result.
    * @param effect The store effect to run.
    * @param args The arguments to pass to the effect.
    * @returns The result of the effect.
    */
-  public runEffect<TArgs extends any[], TResult>(
-    effect: StoreEffect<TState, TArgs, TResult>,
+  public runEffect<TStore extends Store<TState>, TArgs extends any[], TResult>(
+    effect: StoreEffect<TStore, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
     this.log('Effect', `Running ${effect.name}`, effect, ...args);
 
     if (effect.withInjectionContext && this.injector) {
       return runInInjectionContext(this.injector, () => {
-        return effect.func(this, ...args);
+        return effect.func(this as unknown as TStore, ...args);
       });
     } else {
-      return effect.func(this, ...args);
+      return effect.func(this as unknown as TStore, ...args);
     }
   }
 

@@ -1,7 +1,10 @@
 /* eslint-disable @angular-eslint/component-selector */
 import { Component } from '@angular/core';
 import { BooksStore } from './state/books.store';
-import { getGoogleBooksBySearchArgument } from './state/books.effects';
+import {
+  getGoogleBooksBySearchArgument,
+  postCollection,
+} from './state/books.effects';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +20,7 @@ import { getGoogleBooksBySearchArgument } from './state/books.effects';
 
     <div>
       <h2>My Collection</h2>
+      <button (click)="onPostCollection()">Post Collection</button>
       <app-book-collection
         [books]="store.getBooksInCollection()"
         (remove)="store.removeFromCollection($event)">
@@ -30,6 +34,11 @@ import { getGoogleBooksBySearchArgument } from './state/books.effects';
         text-align: center;
         margin-bottom: 20px;
         font-family: 'Helvetica', sans-serif;
+      }
+
+      button {
+        width: 100%;
+        margin-bottom: 10px;
       }
 
       body {
@@ -51,5 +60,9 @@ export class AppComponent {
     this.store
       .runEffect(getGoogleBooksBySearchArgument, searchText)
       .subscribe();
+  }
+
+  onPostCollection() {
+    this.store.runEffect(postCollection);
   }
 }

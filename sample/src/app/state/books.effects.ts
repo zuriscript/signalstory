@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Store, createEffect, createEvent } from 'signalstory';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { BookData } from './books.state';
+import { Book, BookData } from './books.state';
+import { BooksStore } from './books.store';
+import { FakeService } from '../services/fake.service';
 
 export const googleBooksLoadedSuccess = createEvent<BookData[]>(
   'Google books loaded successfully'
@@ -35,5 +37,14 @@ export const getGoogleBooksBySearchArgument = createEffect(
           return of(error);
         })
       );
+  }
+);
+
+export const postCollection = createEffect(
+  'Post collection book titles',
+  (store: BooksStore) => {
+    inject(FakeService).postFakeData(
+      store.getBooksInCollection().map(b => b.volumeInfo.title)
+    );
   }
 );
