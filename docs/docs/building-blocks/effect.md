@@ -53,6 +53,7 @@ class UserEffectService {
   fetchUsers() {
     this.userService.getUsers().subscribe(
       users => {
+        // Prefer dedicated class method commands instead
         this.userStore.set({ users }, 'Fetch Users');
       },
       error => {
@@ -65,11 +66,11 @@ class UserEffectService {
 
 ## Effect Objects
 
-signalstory provides a `createEffect` function that allows you to create standalone effect objects. This approach promotes even better separation of concerns and modularity. Effect objects can be defined separately from the store and can be used by multiple stores or services. Also testing is simpler and cleaner, since we're handling here with a standalone and fully encapsulated object with only one single purpose.
+signalstory provides a `createEffect` function that allows you to create standalone effect objects. This approach promotes even better separation of concerns and modularity. Effect objects can be defined separately from the store and can be used by multiple stores or services. Also testing is simpler and cleaner, since we're handling a standalone and fully encapsulated object with only one single purpose.
 
-Effects are imperatively run in an injection context, hence, we can use `inject` inisde the function implementation to make use of registered services like `HttpClient`.
+Effects run in an injection context, hence, we can use `inject` inisde the function implementation to make use of registered services like `HttpClient`. If you don't need an injection context for a command, you can set the optional parameter `withInjectionContext` to false.
 
-Effects can take parameter, are invoked imperatively can return any type (does not have to be an `observable`). An effect object either targets a specific store (store coupled effect) or can be used more generally (decoupled effect).
+Effects can take parameter, are invoked imperatively can return any type (does not have to be an `observable`). An effect object either targets a specific store (`store coupled effect`) or can be used more generally (`decoupled effect`).
 
 ### Store coupled effect object
 
@@ -78,11 +79,11 @@ Store coupled effects provide a way to directly modify a specific store within a
 ```typescript
 export const fetchUsers = createEffect(
   'Fetch Users from User Service',
-  (store: Store<UserState>, searchArgument: string) => {
+  (store: UserStore, searchArgument: string) => {
     const service = inject(UserService);
     return service.fetchUsers(searchArgument).pipe(
       tap(users => {
-        this.userStore.set({ users }, 'Set Users');
+        this.userStore.setUsers(users);
       })
     );
   }

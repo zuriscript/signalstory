@@ -10,7 +10,7 @@ All modification methods take an optional `commandName` parameter, which is used
 
 :::tip
 
-Although, the consumer can use `set`, `update` and `mutate` directly and even pass a decorative command name as argument, it is recommendet to expose class methods encapsulating modification logic, as this follows as a well structured and discoverable `repository` approach and consolidates modification in a more controlled fashion.
+Although, the consumer can use `set`, `update` and `mutate` directly and even pass a decorative command name as argument, it is recommendet to expose store class methods that encapsulate the modification logic, as this follows a well structured and discoverable `repository` approach and consolidates modification in a more controlled fashion.
 
 :::
 
