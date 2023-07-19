@@ -1,6 +1,6 @@
 {
   "name": "signalstory",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Signal-based state management for Angular applications",
   "publishConfig": {
     "access": "public"
