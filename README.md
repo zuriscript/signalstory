@@ -64,7 +64,7 @@ First, let's create a `CounterStore` that extends `Store<number>`. This store wi
 
 ```typescript
 import { Injectable } from '@angular/core';
-import { signalstory } from 'signalstory';
+import { Store } from 'signalstory';
 
 @Injectable({
   providedIn: 'root',
