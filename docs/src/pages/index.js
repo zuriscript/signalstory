@@ -13,15 +13,15 @@ function HomepageHeader() {
        <div className='hero-caption'>
         <img id="hero-mobile-logo" src={useBaseUrl('/img/signalstory_no_background.png')}/>
             <h1 className="hero__title">
-              <span className='fluid'>signalstory
+              <span className='big fluid'>signalstory
               </span> | Empower Your Angular State Management</h1>
-            <p className="hero__subtitle">Enter the Realm of stored Signals, Embark on a Data-driven Adventure with signalstory, Your Lightweight Backpack</p>
+            <p className="hero__subtitle">Unlock the Power of Signals: Level up your Application State</p>
             <div className={styles.buttons}>
               <Link
                 id="docs-button"
                 className="button button--secondary button--lg"
                 to="/docs/prolog">
-                Every odyssey starts at the docs 🧭
+                Start Adventure 🧙‍♀️
               </Link>
             </div> 
         </div>

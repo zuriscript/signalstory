@@ -69,7 +69,6 @@
 }
 
 #docs-button {
-  font-size: 4vw;
   color: #fcf2c1;
   background-color: #de5d77;
 }
@@ -81,6 +80,11 @@
 .landing-page-nav-sibling+.navbar>:not(.navbar-sidebar),
 .landing-page-nav-sibling+.navbar>:not(.navbar-sidebar) a {
   color: black;
+}
+
+.big {
+  line-height: normal;
+  font-size: 14vw;
 }
 
 .fluid {
@@ -117,6 +121,10 @@
     font-size: 7vw;
   }
 
+  .big {
+    font-size: 9vw;
+  }
+
   .hero-caption p {
     font-size: 5vw;
     line-height: 50px;
@@ -139,6 +147,10 @@
 
   .hero-caption h1 {
     font-size: 3rem;
+  }
+
+  .big {
+    font-size: 4rem;
   }
 
   .hero-caption p {
