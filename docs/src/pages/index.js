@@ -14,14 +14,14 @@ function HomepageHeader() {
         <img id="hero-mobile-logo" src={useBaseUrl('/img/signalstory_no_background.png')}/>
             <h1 className="hero__title">
               <span className='big fluid'>signalstory
-              </span> | Empower Your Angular State Management</h1>
+              </span> <span className='small'>| Empower Your Angular State Management</span></h1>
             <p className="hero__subtitle">Unlock the Power of Signals: Level up your Application State</p>
             <div className={styles.buttons}>
               <Link
                 id="docs-button"
                 className="button button--secondary button--lg"
                 to="/docs/prolog">
-                Start Adventure 🧙‍♀️
+                Start the Adventure 🧙‍♀️
               </Link>
             </div> 
         </div>
