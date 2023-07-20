@@ -48,7 +48,7 @@ const config = {
         title: 'signalstory',
         logo: {
           alt: 'signalstory',
-          src: 'img/signalstory.png',
+          src: 'img/signalstory_small.avif',
         },
         items: [
           {
