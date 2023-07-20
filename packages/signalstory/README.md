@@ -2,6 +2,8 @@
 
 **Simplify State Management, Embrace the Signal-way-of-doing**
 
+> [Visit the docs 🚀](https://zuriscript.github.io/signalstory/)
+
 signalstory is a flexible and powerful TypeScript library designed specifically for Angular applications. By leveraging signals, signalstory simplifies state management and greatly reduces the reliance on asynchronous observables in components and templates.It offers a range of architectural options, from simple repository-based state management to decoupled commands, side effects, and inter-store communication using an event-based approach. With signalstory, you have the freedom to choose the store implementation that best suits your needs.
 
 > 🚧 **Heads Up: signalstory is Evolving!**
@@ -60,7 +62,7 @@ First, let's create a `CounterStore` that extends `Store<number>`. This store wi
 
 ```typescript
 import { Injectable } from '@angular/core';
-import { signalstory } from 'signalstory';
+import { Store } from 'signalstory';
 
 @Injectable({
   providedIn: 'root',
