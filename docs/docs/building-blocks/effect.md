@@ -83,7 +83,7 @@ export const fetchUsers = createEffect(
     const service = inject(UserService);
     return service.fetchUsers(searchArgument).pipe(
       tap(users => {
-        this.userStore.setUsers(users);
+        store.setUsers(users);
       })
     );
   }
@@ -136,7 +136,6 @@ export class OrganizationStore extends Store<Organization> {
 
 // Here we are using an effect targeting a less specific type than Organization
 // Note: Effects do not have to be async
-// But for this use case, a command might be better suited
 export const resetUser = createEffect(
   'Reset Users Effect',
   // highlight-start
