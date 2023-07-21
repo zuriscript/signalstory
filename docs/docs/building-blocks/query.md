@@ -96,7 +96,7 @@ const counterAndWordQuery = createQuery(
 // highlight-end
 
 // highlight-start
-export const counterAndWordWithParameterQuery = createQuery(
+export const counterAndWordWithParamQuery = createQuery(
   [CounterStore, WordStore],
   (counter, word, suffix: string) => word.state() + counter.state() + suffix
 );
@@ -111,12 +111,10 @@ export const counterAndWordWithParameterQuery = createQuery(
 })
 export class AppComponent {
   constructor(counterStore: CounterStore) {
+    // highlight-start
     console.log(counterStore.runQuery(counterAndWordQuery)); // prints Magnificent7
-    console.log(
-      // highlight-start
-      counterStore.runQuery(counterAndWordWithParameterQuery, ' - the movie')
-      // highlight-end
-    ); // prints Magnificent7 - the movie
+    console.log(counterStore.runQuery(counterAndWordWithParamQuery, '-movie')); // prints Magnificent7-movie
+    // highlight-end
   }
 }
 ```
