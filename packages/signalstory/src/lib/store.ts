@@ -8,11 +8,11 @@ import {
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { Mediator } from './mediator';
-import { HistoryItem, StoreHistory } from './store-history';
-import { StoreEvent } from './store-event';
-import { StoreEffect } from './store-effect';
 import { StoreConfig } from './store-config';
+import { StoreEffect } from './store-effect';
+import { StoreEvent } from './store-event';
+import { HistoryItem, StoreHistory } from './store-history';
+import { publish, register, rootRegistry, unregister } from './store-mediator';
 import {
   clearLocalStorage,
   loadFromStorage,
@@ -21,30 +21,10 @@ import {
 import { StoreQuery } from './store-query';
 
 /**
- * The base class for signal stores, providing common functionality and access to the mediator.
- */
-abstract class StoreBase {
-  private static _mediator: Mediator | undefined;
-  static get mediator(): Mediator {
-    if (!StoreBase._mediator) {
-      StoreBase._mediator = new Mediator();
-    }
-
-    return StoreBase._mediator;
-  }
-
-  protected constructor(enableEvents: boolean) {
-    if (enableEvents && !StoreBase._mediator) {
-      StoreBase._mediator = new Mediator();
-    }
-  }
-}
-
-/**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
  * @typeparam TState The type of the store's state.
  */
-export class Store<TState> extends StoreBase {
+export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
   private readonly config: Required<StoreConfig<TState>>;
   private readonly history: StoreHistory<TState> | undefined;
@@ -55,11 +35,9 @@ export class Store<TState> extends StoreBase {
    * @param config The configuration options for the store.
    */
   public constructor(config: StoreConfig<TState>) {
-    super(config.enableEvents ?? false);
     this.config = {
       name: config.name ?? this.constructor.name,
       initialState: config.initialState,
-      enableEvents: config.enableEvents ?? false,
       enableEffectsAndQueries: config.enableEffectsAndQueries ?? false,
       enableLogging: config.enableLogging ?? false,
       enableStateHistory: config.enableStateHistory ?? false,
@@ -92,6 +70,13 @@ export class Store<TState> extends StoreBase {
       this._state = signal(config.initialState);
       this.log('Init', 'Store initialized', config);
     }
+  }
+
+  /**
+   * Gets the name of the store
+   */
+  public get name(): string {
+    return this.config.name;
   }
 
   /**
@@ -168,22 +153,27 @@ export class Store<TState> extends StoreBase {
    * Registers a handler for the specified event in the store's mediator.
    * @param event The event to register the handler for.
    * @param handler The handler function to be executed when the event is published.
-   * @param withReplay Specifies whether to replay events upon registration. Default value is false.
    */
-  public registerHandler<T>(
-    event: StoreEvent<T>,
-    handler: (event: StoreEvent<T>) => void,
-    withReplay: boolean = false
+  public registerHandler<TPayload>(
+    event: StoreEvent<TPayload>,
+    handler: (store: this, event: StoreEvent<TPayload>) => void
   ) {
-    const source = this.config.name;
-
-    Store.mediator.register<T>(event, source, handler);
-
-    if (withReplay) {
-      Store.mediator.replay(source);
-    }
-
+    register(rootRegistry, this, event, handler);
     this.log('Init', `Register handler for event ${event.name}`);
+  }
+
+  /**
+   * Unregister a handler for the specified event(s) in the store's mediator.
+   * @param event The event to remove the handler for.
+   * @param events Additional events to remove the handlers for.
+   */
+  public unregisterHandler(
+    event: StoreEvent<any>,
+    ...events: StoreEvent<any>[]
+  ): void;
+  public unregisterHandler(...events: StoreEvent<any>[]): void {
+    unregister(rootRegistry, this, ...events);
+    this.log('Init', `Unregister handler for events: [${events.join(', ')}]`);
   }
 
   /**
@@ -198,7 +188,7 @@ export class Store<TState> extends StoreBase {
       this.log('Event', `Publish event ${event.name}`);
     }
 
-    const executedHandlerSources = Store.mediator.publish(event, payload);
+    const executedHandlerSources = publish(rootRegistry, event, payload);
 
     for (const handlerSource of executedHandlerSources) {
       this.logWithGeneralStore(handlerSource, 'Handler', `Handled Event`, {
@@ -218,18 +208,18 @@ export class Store<TState> extends StoreBase {
    * @param args The arguments to pass to the effect.
    * @returns The result of the effect.
    */
-  public runEffect<TStore extends Store<TState>, TArgs extends any[], TResult>(
-    effect: StoreEffect<TStore, TArgs, TResult>,
+  public runEffect<TArgs extends any[], TResult>(
+    effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
     this.log('Effect', `Running ${effect.name}`, effect, ...args);
 
     if (effect.withInjectionContext && this.injector) {
       return runInInjectionContext(this.injector, () => {
-        return effect.func(this as unknown as TStore, ...args);
+        return effect.func(this, ...args);
       });
     } else {
-      return effect.func(this as unknown as TStore, ...args);
+      return effect.func(this, ...args);
     }
   }
 

@@ -7,7 +7,6 @@ export interface StoreConfig<TState> {
   name?: string; // The name of the store (optional).
   enableStateHistory?: boolean; // Indicates whether state history is enabled (optional, default: false).
   enableLogging?: boolean; // Indicates whether logging is enabled (optional, default: false).
-  enableEvents?: boolean; // Indicates whether communication over events are enabled (optional, default: false).
-  enableEffectsAndQueries?: boolean; // Indicates whether effects and queries are enabled. (optional, default: false).
+  enableEffectsAndQueries?: boolean; // Indicates whether effects and queries are enabled for this store. (optional, default: false).
   enableLocalStorageSync?: boolean; // Persists the actual state to local storage and loads it on initialization rather than the initialState (optional, default: false).
 }
