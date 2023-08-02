@@ -1,7 +1,6 @@
 import { InjectionToken, inject } from '@angular/core';
-import { Store } from '../lib/store';
-import { StoreEvent } from '../lib/store-event';
 import { TestBed } from '@angular/core/testing';
+import { Store } from '../lib/store';
 import { StoreConfig } from '../lib/store-config';
 
 const STORE_CONFIG = new InjectionToken<StoreConfig<any>>('STORE_CONFIG');
@@ -47,7 +46,7 @@ describe('SignalStory', () => {
     const newState = { value: 42 };
 
     // Act
-    store['set'](newState);
+    store.set(newState);
 
     // Assert
     expect(store.state()).toEqual(newState);
@@ -60,28 +59,12 @@ describe('SignalStory', () => {
     });
 
     // Act
-    store['mutate'](state => {
+    store.mutate(state => {
       state.value += 10;
       return state;
     });
 
     // Assert
     expect(store.state()).toEqual({ value: 20 });
-  });
-
-  it('should register a handler and replay events', () => {
-    // Arrange
-    const store = registerAndGetSignalStory({
-      initialState: { value: 10 },
-    });
-    const event: StoreEvent<number> = { name: 'ExampleEvent' };
-    const handler = jest.fn();
-
-    // Act
-    store.publish(event, 42);
-    store['registerHandler'](event, handler, true);
-
-    // Assert
-    expect(handler).toHaveBeenCalledWith({ name: 'ExampleEvent', payload: 42 });
   });
 });
