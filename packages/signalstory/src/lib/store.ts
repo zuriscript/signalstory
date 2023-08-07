@@ -12,7 +12,7 @@ import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
 import { HistoryItem, StoreHistory } from './store-history';
-import { publish, register, rootRegistry, unregister } from './store-mediator';
+import { register, rootRegistry, unregister } from './store-mediator';
 import {
   clearLocalStorage,
   loadFromStorage,
@@ -26,9 +26,9 @@ import { StoreQuery } from './store-query';
  */
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
-  private readonly config: Required<StoreConfig<TState>>;
   private readonly history: StoreHistory<TState> | undefined;
   private readonly injector: Injector | undefined;
+  protected readonly config: Readonly<Required<StoreConfig<TState>>>;
 
   /**
    * Creates a new instance of the store class.
@@ -42,6 +42,9 @@ export class Store<TState> {
       enableLogging: config.enableLogging ?? false,
       enableStateHistory: config.enableStateHistory ?? false,
       enableLocalStorageSync: config.enableLocalStorageSync ?? false,
+      localStorageKey:
+        config.localStorageKey ??
+        `_persisted_state_of_${config.name ?? this.constructor.name}_`,
     };
 
     if (config.enableStateHistory) {
@@ -53,10 +56,12 @@ export class Store<TState> {
     }
 
     if (config.enableLocalStorageSync) {
-      const persistedState = loadFromStorage<TState>(this.config.name);
+      const persistedState = loadFromStorage<TState>(
+        this.config.localStorageKey
+      );
       this._state = signal(persistedState ?? config.initialState);
       effect(() => {
-        saveToStorage(this.config.name, this._state());
+        saveToStorage(this.config.localStorageKey, this._state());
       });
       this.log(
         'Init',
@@ -98,7 +103,7 @@ export class Store<TState> {
    * Does not affect the current state of the store
    */
   public clearPersistence() {
-    clearLocalStorage(this.config.name);
+    clearLocalStorage(this.config.localStorageKey);
   }
 
   /**
@@ -139,7 +144,10 @@ export class Store<TState> {
    * @param mutator A function that mutates the current state.
    * @param commandName The name of the command associated with the state mutation.
    */
-  public mutate(mutator: (currentState: TState) => void, commandName?: string) {
+  public mutate(
+    mutator: (currentState: TState) => void,
+    commandName?: string
+  ): void {
     this.addToHistory(commandName);
 
     this._state.mutate(mutator);
@@ -174,28 +182,6 @@ export class Store<TState> {
   public unregisterHandler(...events: StoreEvent<any>[]): void {
     unregister(rootRegistry, this, ...events);
     this.log('Init', `Unregister handler for events: [${events.join(', ')}]`);
-  }
-
-  /**
-   * Publishes an event to the mediator, executing all associated event handlers.
-   * @param event The event to publish.
-   * @param payload The payload to pass to the event handlers.
-   */
-  public publish(event: StoreEvent<never>, payload?: undefined): void;
-  public publish<T>(event: StoreEvent<T>, payload: T): void;
-  public publish<T>(event: StoreEvent<T>, payload?: T): void {
-    if (this.config.enableLogging) {
-      this.log('Event', `Publish event ${event.name}`);
-    }
-
-    const executedHandlerSources = publish(rootRegistry, event, payload);
-
-    for (const handlerSource of executedHandlerSources) {
-      this.logWithGeneralStore(handlerSource, 'Handler', `Handled Event`, {
-        name: event.name,
-        payload: payload,
-      });
-    }
   }
 
   /**

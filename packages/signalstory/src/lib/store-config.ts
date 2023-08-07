@@ -9,4 +9,5 @@ export interface StoreConfig<TState> {
   enableLogging?: boolean; // Indicates whether logging is enabled (optional, default: false).
   enableEffectsAndQueries?: boolean; // Indicates whether effects and queries are enabled for this store. (optional, default: false).
   enableLocalStorageSync?: boolean; // Persists the actual state to local storage and loads it on initialization rather than the initialState (optional, default: false).
+  localStorageKey?: string; // The key to use for the local storage entry. Only in combination with enableLocalStorageSync. (optional, default: _persisted_state_of_<storeName>_)
 }

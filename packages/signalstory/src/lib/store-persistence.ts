@@ -1,16 +1,8 @@
 /**
- * Constructs the identifier for a specific store name in local storage.
- * @param storeName The name of the store.
- * @returns The constructed identifier for the store.
- */
-const localStorageIdentifier = (storeName: string) =>
-  `_persisted_state_of_${storeName}_`;
-
-/**
  * Tries to retrieve the local storage object, if available.
  * @returns The local storage object if available, otherwise undefined.
  */
-export function tryGetLocalStorage(): Storage | undefined {
+function tryGetLocalStorage(): Storage | undefined {
   try {
     return typeof localStorage !== 'undefined' ? localStorage : undefined;
   } catch {
@@ -20,12 +12,13 @@ export function tryGetLocalStorage(): Storage | undefined {
 
 /**
  * Loads a value from local storage.
- * @param storeName The name of the store to load the value from.
- * @returns The loaded value if available and successfully parsed, otherwise undefined.
+ *
+ * @param {string} localStorageKey - The key associated with the value to load from local storage.
+ * @returns {T | undefined} - The loaded value if available and successfully parsed, otherwise undefined.
  */
-export function loadFromStorage<T>(storeName: string): T | undefined {
+export function loadFromStorage<T>(localStorageKey: string): T | undefined {
   const storage = tryGetLocalStorage();
-  const value = storage?.getItem(localStorageIdentifier(storeName));
+  const value = storage?.getItem(localStorageKey);
 
   try {
     return value ? (JSON.parse(value) as T) : undefined;
@@ -36,23 +29,24 @@ export function loadFromStorage<T>(storeName: string): T | undefined {
 
 /**
  * Saves a value to local storage.
- * @param storeName The name of the store to save the value to.
- * @param value The value to be saved.
+ *
+ * @param {string} localStorageKey - The key under which to save the value in local storage.
+ * @param {T} value - The value to be saved.
  */
-export function saveToStorage<T>(storeName: string, value: T) {
+export function saveToStorage<T>(localStorageKey: string, value: T): void {
   const storage = tryGetLocalStorage();
   if (storage) {
-    storage.setItem(localStorageIdentifier(storeName), JSON.stringify(value));
+    storage.setItem(localStorageKey, JSON.stringify(value));
   }
 }
 
 /**
- * Clears the value from local storage.
- * @param storeName The name of the store to clear the value from.
+ * Clears the value associated with the provided key from local storage.
+ * @param {string} localStorageKey - The key associated with the value to clear from local storage.
  */
-export function clearLocalStorage(storeName: string) {
+export function clearLocalStorage(localStorageKey: string): void {
   const storage = tryGetLocalStorage();
   if (storage) {
-    storage.removeItem(localStorageIdentifier(storeName));
+    storage.removeItem(localStorageKey);
   }
 }
