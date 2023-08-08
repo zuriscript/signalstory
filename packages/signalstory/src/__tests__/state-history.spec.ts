@@ -1,4 +1,4 @@
-import { StoreHistory } from '../lib/store-history';
+import { StoreHistory } from '../lib/utility/state-history';
 
 describe('StoreHistory', () => {
   let storeHistory: StoreHistory<string>;

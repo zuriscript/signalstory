@@ -6,8 +6,8 @@ export type HistoryItem<TState> = {
   before: TState; // The state before the command was applied.
 };
 
-const UndoCommand = '_UNDO_';
-const RedoCommand = '_REDO_';
+export const UndoCommand = '_UNDO_';
+export const RedoCommand = '_REDO_';
 
 /**
  * Represents the history of a store, tracking the executed commands and their associated states.
@@ -17,9 +17,9 @@ export class StoreHistory<TState> {
   private history: HistoryItem<TState>[] = []; // The array to store the history items.
 
   /**
-   * Returns the array of history items.
+   * Returns the array of history items as readonly
    */
-  public get entries(): HistoryItem<TState>[] {
+  public get entries(): ReadonlyArray<HistoryItem<TState>> {
     return this.history;
   }
 

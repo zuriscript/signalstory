@@ -1,7 +1,7 @@
+import { Store } from '../store';
 import { naiveCloneAndMutateFunc } from './immutable-naive-mutation';
 import { ImmutableStoreConfig } from './immutable-store-config';
 import { Immutable } from './immutable-type';
-import { Store } from './store';
 
 export class ImmutableStore<TState> extends Store<Immutable<TState>> {
   private readonly cloneAndMutateFunc: (
