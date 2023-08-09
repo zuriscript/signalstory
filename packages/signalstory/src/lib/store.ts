@@ -4,6 +4,7 @@ import {
   Signal,
   WritableSignal,
   computed,
+  effect,
   inject,
   runInInjectionContext,
   signal,
@@ -11,17 +12,9 @@ import {
 import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
+import { addToHistory, registerStateHistory } from './store-history';
 import { register, rootRegistry, unregister } from './store-mediator';
-import {
-  CommandPostprocessor,
-  CommandPreprocessor,
-  ConstructorPostprocessor,
-  EffectPreprocessor,
-  isCommandPostprocessor,
-  isCommandPreprocessor,
-  isConstructorPostprocessor,
-  isEffectPreprocessor,
-} from './store-plugins/store-plugin';
+import { loadFromStorage, saveToStorage } from './store-persistence';
 import { StoreQuery } from './store-query';
 
 /**
@@ -31,11 +24,7 @@ import { StoreQuery } from './store-query';
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
   private readonly injector: Injector | undefined;
-  private readonly commandPreprocessors: CommandPreprocessor<TState>[];
-  private readonly commandPostprocessors: CommandPostprocessor<TState>[];
-  private readonly effectPreprocessors: EffectPreprocessor<TState>[];
-  private readonly constructorPostprocessors: ConstructorPostprocessor<TState>[];
-
+  private readonly addToHistory?: (s: this, c: string) => void | undefined;
   /**
    * The config of the store as readonly
    */
@@ -49,32 +38,36 @@ export class Store<TState> {
     this.config = {
       name: config.name ?? this.constructor.name,
       initialState: config.initialState,
+      enableStateHistory: config.enableStateHistory ?? false,
       enableEffectsAndQueries: config.enableEffectsAndQueries ?? false,
-      plugins: config.plugins ?? [],
+      enablePersistence: config.enablePersistence ?? false,
+      persistenceKey:
+        config.persistenceKey ??
+        `_persisted_state_of_${config.name ?? this.constructor.name}_`,
+      persistenceStorage: localStorage,
     };
 
-    this.commandPreprocessors = this.config.plugins.filter(
-      isCommandPreprocessor<TState>
-    );
-    this.commandPostprocessors = this.config.plugins.filter(
-      isCommandPostprocessor<TState>
-    );
-    this.effectPreprocessors = this.config.plugins.filter(
-      isEffectPreprocessor<TState>
-    );
-    this.constructorPostprocessors = this.config.plugins.filter(
-      isConstructorPostprocessor<TState>
-    );
+    this._state = signal(this.config.initialState);
+
+    if (this.config.enableStateHistory) {
+      registerStateHistory(this);
+      this.addToHistory = addToHistory;
+    }
 
     if (this.config.enableEffectsAndQueries) {
       this.injector = inject(Injector);
     }
 
-    this._state = signal(this.config.initialState);
+    if (this.config.enablePersistence) {
+      const persistedState = loadFromStorage(this);
+      if (persistedState) {
+        this.set(persistedState, 'Load state from local storage');
+      }
 
-    this.constructorPostprocessors.forEach(plugin => {
-      plugin.postprocessConstructor(this);
-    });
+      effect(() => {
+        saveToStorage(this);
+      });
+    }
   }
 
   /**
@@ -97,15 +90,9 @@ export class Store<TState> {
    * @param commandName The name of the command associated with the state change.
    */
   public set(newState: TState, commandName?: string): void {
-    this.commandPreprocessors.forEach(plugin => {
-      plugin.preprocessCommand(this.state(), commandName);
-    });
+    this.addToHistory?.(this, commandName ?? 'Unspecified Set Command');
 
     this._state.set(newState);
-
-    this.commandPostprocessors.forEach(plugin => {
-      plugin.postprocessCommand(this.state(), commandName);
-    });
   }
 
   /**
@@ -117,15 +104,9 @@ export class Store<TState> {
     updateFn: (currentState: TState) => TState,
     commandName?: string
   ): void {
-    this.commandPreprocessors.forEach(plugin => {
-      plugin.preprocessCommand(this.state(), commandName);
-    });
+    this.addToHistory?.(this, commandName ?? 'Unspecified Update Command');
 
     this._state.update(state => updateFn(state));
-
-    this.commandPostprocessors.forEach(plugin => {
-      plugin.postprocessCommand(this.state(), commandName);
-    });
   }
 
   /**
@@ -137,15 +118,9 @@ export class Store<TState> {
     mutator: (currentState: TState) => void,
     commandName?: string
   ): void {
-    this.commandPreprocessors.forEach(plugin => {
-      plugin.preprocessCommand(this.state(), commandName);
-    });
+    this.addToHistory?.(this, commandName ?? 'Unspecified Mutate Command');
 
     this._state.mutate(mutator);
-
-    this.commandPostprocessors.forEach(plugin => {
-      plugin.postprocessCommand(this.state(), commandName);
-    });
   }
 
   /**
@@ -187,13 +162,6 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
-    this.effectPreprocessors.forEach(plugin => {
-      plugin.preprocessEffect(
-        this,
-        effect as StoreEffect<Store<TState>, any[], TResult>
-      );
-    });
-
     if (effect.withInjectionContext && this.injector) {
       return runInInjectionContext(this.injector, () => {
         return effect.func(this, ...args);

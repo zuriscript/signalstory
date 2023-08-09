@@ -35,13 +35,3 @@ export function createEffect<
     withInjectionContext,
   };
 }
-
-export function createNopEffect<TStore extends Store<any>>(
-  name: string
-): StoreEffect<TStore, any[], void> {
-  return {
-    name,
-    func: _ => {},
-    withInjectionContext: false,
-  };
-}
