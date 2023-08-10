@@ -24,7 +24,8 @@ import { StoreQuery } from './store-query';
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
   private readonly injector: Injector | undefined;
-  private readonly addToHistory?: (s: this, c: string) => void | undefined;
+  private addToHistory?: (s: this, c: string) => void | undefined;
+  private log?: (action: string, description?: string, ...data: any[]) => void;
   /**
    * The config of the store as readonly
    */
@@ -44,10 +45,20 @@ export class Store<TState> {
       persistenceKey:
         config.persistenceKey ??
         `_persisted_state_of_${config.name ?? this.constructor.name}_`,
-      persistenceStorage: localStorage,
+      persistenceStorage: config.persistenceStorage ?? localStorage,
+      enableLogging: config.enableLogging ?? false,
+      logFunc: config.logFunc ?? console.log,
     };
 
     this._state = signal(this.config.initialState);
+
+    if (this.config.enableLogging) {
+      this.log = (action: string, description?: string, ...data: any[]) =>
+        this.config.logFunc(
+          `[${this.config.name}->${action}] ${description ?? 'Unspecified'}`,
+          ...data
+        );
+    }
 
     if (this.config.enableStateHistory) {
       registerStateHistory(this);
@@ -61,11 +72,11 @@ export class Store<TState> {
     if (this.config.enablePersistence) {
       const persistedState = loadFromStorage(this);
       if (persistedState) {
-        this.set(persistedState, 'Load state from local storage');
+        this.set(persistedState, 'Load state from storage');
       }
 
       effect(() => {
-        saveToStorage(this);
+        saveToStorage(this, this._state());
       });
     }
   }
@@ -93,6 +104,8 @@ export class Store<TState> {
     this.addToHistory?.(this, commandName ?? 'Unspecified Set Command');
 
     this._state.set(newState);
+
+    this.log?.('Command', commandName, newState);
   }
 
   /**
@@ -107,6 +120,8 @@ export class Store<TState> {
     this.addToHistory?.(this, commandName ?? 'Unspecified Update Command');
 
     this._state.update(state => updateFn(state));
+
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -121,6 +136,8 @@ export class Store<TState> {
     this.addToHistory?.(this, commandName ?? 'Unspecified Mutate Command');
 
     this._state.mutate(mutator);
+
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -133,6 +150,7 @@ export class Store<TState> {
     handler: (store: this, event: StoreEvent<TPayload>) => void
   ) {
     register(rootRegistry, this, event, handler);
+    this.log?.('Event', `Register handler for event ${event.name}`);
   }
 
   /**
@@ -146,6 +164,10 @@ export class Store<TState> {
   ): void;
   public unregisterHandler(...events: StoreEvent<any>[]): void {
     unregister(rootRegistry, this, ...events);
+    this.log?.(
+      'Event',
+      `Unregister handler for event(s) ${events.map(X => X.name).join(', ')}`
+    );
   }
 
   /**
@@ -162,6 +184,12 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
+    this.log?.(
+      'Effect',
+      `Running effect ${effect.name} with arguments`,
+      ...args
+    );
+
     if (effect.withInjectionContext && this.injector) {
       return runInInjectionContext(this.injector, () => {
         return effect.func(this, ...args);

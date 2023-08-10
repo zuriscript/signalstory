@@ -1,5 +1,5 @@
-import { StoreConfig } from '../store-config';
 import { Immutable } from './immutable-type';
+import { StoreConfig } from './store-config';
 
 /**
  * Configuration options for an immutable signal store.
@@ -7,12 +7,6 @@ import { Immutable } from './immutable-type';
  */
 export interface ImmutableStoreConfig<TState>
   extends StoreConfig<Immutable<TState>> {
-  /**
-   * Indicates whether state history is enabled.
-   * @remarks Setting this option to true enables state history tracking.
-   * @default false
-   */
-  enableStateHistory?: boolean;
   /**
    * Custom clone and mutate strategy function.
    * @remarks You can provide your own cloning and mutation strategy function similar to libraries like 'immer.js'.

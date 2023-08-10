@@ -1,38 +1,10 @@
 import { Store } from '../lib/store'; // Import the necessary types and classes
-import { StoreConfig } from '../lib/store-config';
 import {
   clearStorage,
   loadFromStorage,
   saveToStorage,
 } from '../lib/store-persistence'; // Import the functions to be tested
-import { registerAndGetStore } from './helpers';
-
-describe('store-persistence', () => {
-  // Mocks for StoreConfig and StorePersistence
-  const mockStoreConfig: StoreConfig<number> = {
-    initialState: 0,
-    name: 'TestStore',
-    enableStateHistory: true,
-    enableEffectsAndQueries: true,
-    enablePersistence: true,
-    persistenceKey: 'test-store-key',
-    persistenceStorage: {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    },
-  };
-
-  // Mock Store instance for testing
-  const mockStore = new Store(mockStoreConfig);
-
-  // Mocked values for local storage interactions
-  const mockStoredValue = JSON.stringify(42);
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-});
+import { registerAndGetStore } from './helper';
 
 describe('loadFromStorage', () => {
   const initialValue = { val: 'initial' };
@@ -51,15 +23,15 @@ describe('loadFromStorage', () => {
   });
 
   it('should load the stored value from persistence storage', () => {
-    // Arrange
+    // arrange
     store.config.persistenceStorage.getItem = jest.fn(() =>
       JSON.stringify(initialValue)
     );
 
-    // Act
+    // act
     const loadedValue = loadFromStorage(store);
 
-    // Assert
+    // assert
     expect(loadedValue).toStrictEqual(initialValue);
     expect(store.config.persistenceStorage.getItem).toHaveBeenCalledWith(
       store.config.persistenceKey
@@ -67,13 +39,13 @@ describe('loadFromStorage', () => {
   });
 
   it('should return undefined when unable to parse the stored value', () => {
-    // Arrange
+    // arrange
     store.config.persistenceStorage.getItem = jest.fn(() => 'INVALID STATE');
 
-    // Act
+    // act
     const loadedValue = loadFromStorage(store);
 
-    // Assert
+    // assert
     expect(loadedValue).toBeUndefined();
     expect(store.config.persistenceStorage.getItem).toHaveBeenCalledWith(
       store.config.persistenceKey
@@ -81,13 +53,13 @@ describe('loadFromStorage', () => {
   });
 
   it('should return undefined when no stored value is available', () => {
-    // Arrange
+    // arrange
     store.config.persistenceStorage.getItem = jest.fn(() => null);
 
-    // Act
+    //act
     const loadedValue = loadFromStorage(store);
 
-    // Assert
+    // assert
     expect(loadedValue).toBeUndefined();
     expect(store.config.persistenceStorage.getItem).toHaveBeenCalledWith(
       store.config.persistenceKey
@@ -100,7 +72,7 @@ describe('saveToStorage', () => {
   let store: Store<{ val: string }>;
 
   beforeEach(() => {
-    store = new Store({
+    store = registerAndGetStore({
       initialState: initialValue,
       enablePersistence: true,
       persistenceStorage: {
@@ -112,10 +84,10 @@ describe('saveToStorage', () => {
   });
 
   it('should save the store state to persistence storage', () => {
-    // Arrange & Act
-    saveToStorage(store);
+    // act
+    saveToStorage(store, store.state());
 
-    // Assert
+    // assert
     expect(store.config.persistenceStorage.setItem).toHaveBeenCalledWith(
       store.config.persistenceKey,
       JSON.stringify(store.state())
@@ -128,7 +100,7 @@ describe('clearStorage', () => {
   let store: Store<{ val: string }>;
 
   beforeEach(() => {
-    store = new Store({
+    store = registerAndGetStore({
       initialState: initialValue,
       enablePersistence: true,
       persistenceStorage: {
@@ -139,10 +111,10 @@ describe('clearStorage', () => {
     });
   });
   it('should remove the stored value from persistence storage', () => {
-    // Act
+    // act
     clearStorage(store);
 
-    // Assert
+    // assert
     expect(store.config.persistenceStorage!.removeItem).toHaveBeenCalledWith(
       store.config.persistenceKey
     );

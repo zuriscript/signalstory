@@ -1,3 +1,4 @@
+import { ImmutableStore } from '../lib/immutable-store';
 import { Store } from '../lib/store';
 import {
   RedoCommand,
@@ -10,57 +11,118 @@ import {
 } from '../lib/store-history';
 
 describe('addToHistory', () => {
-  it('should add an item to history if history is enabled', () => {
-    // arrange
-    const store = new Store<number>({ initialState: 10 });
-    const commandName = 'Command';
-    registerStateHistory(store);
+  describe('with mutable store', () => {
+    let initialState: { value: number };
+    let store: Store<{ value: number }>;
 
-    // act
-    addToHistory(store, commandName);
+    beforeEach(() => {
+      initialState = { value: 10 };
+      store = new Store<{ value: number }>({ initialState });
+    });
 
-    // assert
-    const history = getHistory(store);
-    expect(history).toStrictEqual([
-      {
-        command: commandName,
-        before: store.state(),
-      },
-    ]);
+    it('should clone and add an item to history if history is enabled', () => {
+      // arrange
+      const commandName = 'Command';
+      registerStateHistory(store);
+
+      // act
+      addToHistory(store, commandName);
+
+      // assert
+      const history = getHistory(store);
+      expect(history).toStrictEqual([
+        {
+          command: commandName,
+          before: initialState,
+        },
+      ]);
+      expect(history[0].before).not.toBe(initialState);
+    });
+
+    it('should not add an item to history if history is disabled', () => {
+      // act
+      addToHistory(store, 'Command');
+
+      // assert
+      expect(getHistory(store)).toHaveLength(0);
+    });
+
+    it('should not add undo or redo commands to history', () => {
+      // arrange
+      registerStateHistory(store);
+
+      // act
+      addToHistory(store, UndoCommand);
+      addToHistory(store, RedoCommand);
+
+      // assert
+      expect(getHistory(store)).toHaveLength(0);
+    });
   });
 
-  it('should not add an item to history if history is disabled', () => {
-    // arrange
-    const store = new Store<number>({ initialState: 10 });
+  describe('with immutable store', () => {
+    let initialState: { value: number };
+    let store: ImmutableStore<{ value: number }>;
 
-    // act
-    addToHistory(store, 'Command');
+    beforeEach(() => {
+      initialState = { value: 10 };
+      store = new ImmutableStore<{ value: number }>({ initialState });
+    });
 
-    // assert
-    expect(getHistory(store)).toHaveLength(0);
-  });
+    it('should add an item to history if history is enabled without cloning', () => {
+      // arrange
+      const commandName = 'Command';
+      registerStateHistory(store);
 
-  it('should not add undo or redo commands to history', () => {
-    const store = new Store<number>({ initialState: 10 });
-    registerStateHistory(store);
+      // act
+      addToHistory(store, commandName);
 
-    addToHistory(store, UndoCommand);
-    addToHistory(store, RedoCommand);
+      // assert
+      const history = getHistory(store);
+      expect(history).toStrictEqual([
+        {
+          command: commandName,
+          before: initialState,
+        },
+      ]);
+      expect(history[0].before).toBe(initialState);
+    });
 
-    expect(getHistory(store)).toHaveLength(0);
+    it('should not add an item to history if history is disabled', () => {
+      // act
+      addToHistory(store, 'Command');
+
+      // assert
+      expect(getHistory(store)).toHaveLength(0);
+    });
+
+    it('should not add undo or redo commands to history', () => {
+      // arrange
+      registerStateHistory(store);
+
+      // act
+      addToHistory(store, UndoCommand);
+      addToHistory(store, RedoCommand);
+
+      // assert
+      expect(getHistory(store)).toHaveLength(0);
+    });
   });
 });
 
 describe('undo', () => {
-  let store: Store<number>;
-  const initialState = 10;
+  let store: Store<{ value: number }>;
+  const initialState = { value: 10 };
 
   beforeEach(() => {
-    store = new Store<number>({ initialState, enableStateHistory: true });
+    store = new Store<{ value: number }>({
+      initialState,
+      enableStateHistory: true,
+    });
   });
 
   it('should do nothing if history is disabled', () => {
-    // arrange & act
+    // act
     undo(store);
 
     // assert
@@ -80,10 +142,10 @@ describe('undo', () => {
     expect(getHistory(store)).toHaveLength(0);
   });
 
-  it('should undo the last command starting with empty history', () => {
+  it('should undo the last command and revert to inital state', () => {
     // arrange
     const command = 'Command';
-    const newState = 22;
+    const newState = { value: 22 };
     registerStateHistory(store);
     store.set(newState, command);
 
@@ -91,7 +153,7 @@ describe('undo', () => {
     undo(store);
 
     // assert
-    expect(store.state()).toBe(initialState);
+    expect(store.state()).toStrictEqual(initialState);
     expect(getHistory(store)).toMatchObject([
       {
         command: command,
@@ -107,8 +169,8 @@ describe('undo', () => {
     // arrange
     const command1 = 'Command1';
     const command2 = 'Command2';
-    const newState1 = 22;
-    const newState2 = 33;
+    const newState1 = { value: 22 };
+    const newState2 = { value: 33 };
     registerStateHistory(store);
     store.set(newState1, command1);
     store.set(newState2, command2);
@@ -117,7 +179,7 @@ describe('undo', () => {
     undo(store);
 
     // assert
-    expect(store.state()).toBe(newState1);
+    expect(store.state()).toStrictEqual(newState1);
     expect(getHistory(store)).toMatchObject([
       {
         command: command1,
@@ -134,35 +196,12 @@ describe('undo', () => {
     ]);
   });
 
-  it('should undo the last command starting with empty history', () => {
-    // arrange
-    const command = 'Command';
-    const newState = 22;
-    registerStateHistory(store);
-    store.set(newState, command);
-
-    // act
-    undo(store);
-
-    // assert
-    expect(store.state()).toBe(initialState);
-    expect(getHistory(store)).toMatchObject([
-      {
-        command: command,
-        before: initialState,
-      },
-      {
-        command: UndoCommand,
-        before: newState,
-      },
-    ]);
-  });
   it('should undo the last two commands when called twice', () => {
     // arrange
     const command1 = 'Command1';
     const command2 = 'Command2';
-    const newState1 = 22;
-    const newState2 = 33;
+    const newState1 = { value: 22 };
+    const newState2 = { value: 33 };
     registerStateHistory(store);
     store.set(newState1, command1);
     store.set(newState2, command2);
@@ -172,7 +211,7 @@ describe('undo', () => {
     undo(store);
 
     // assert
-    expect(store.state()).toBe(initialState);
+    expect(store.state()).toStrictEqual(initialState);
     expect(getHistory(store)).toMatchObject([
       {
         command: command1,
@@ -195,19 +234,22 @@ describe('undo', () => {
 });
 
 describe('redo', () => {
-  let store: Store<number>;
-  const initialState = 10;
+  let store: Store<{ value: number }>;
+  const initialState = { value: 10 };
 
   beforeEach(() => {
-    store = new Store<number>({ initialState, enableStateHistory: true });
+    store = new Store<{ value: number }>({
+      initialState,
+      enableStateHistory: true,
+    });
   });
 
   it('should do nothing if history is disabled', () => {
-    // arrange & act
+    // act
     redo(store);
 
     // assert
-    expect(store.state()).toBe(initialState);
+    expect(store.state()).toStrictEqual(initialState);
     expect(getHistory(store)).toHaveLength(0);
   });
 
@@ -227,7 +269,7 @@ describe('redo', () => {
     // arrange
     registerStateHistory(store);
     const command = 'Command';
-    const newState = 22;
+    const newState = { value: 22 };
     registerStateHistory(store);
     store.set(newState, command);
 
@@ -235,14 +277,14 @@ describe('redo', () => {
     redo(store);
 
     // assert
-    expect(store.state()).toBe(newState);
+    expect(store.state()).toStrictEqual(newState);
     expect(getHistory(store)).toHaveLength(1);
   });
 
-  it('should redo the last undone command starting with empty history', () => {
+  it('should redo the last undone command', () => {
     // arrange
     const command = 'Command';
-    const newState = 22;
+    const newState = { value: 22 };
     registerStateHistory(store);
     store.set(newState, command);
     undo(store);
@@ -251,7 +293,7 @@ describe('redo', () => {
     redo(store);
 
     // assert
-    expect(store.state()).toBe(newState);
+    expect(store.state()).toStrictEqual(newState);
     expect(getHistory(store)).toMatchObject([
       {
         command: command,
@@ -268,12 +310,12 @@ describe('redo', () => {
     ]);
   });
 
-  it('should redo the last undone command', () => {
+  it('should redo the last undone command with multiple commands in history', () => {
     // arrange
     const command1 = 'Command1';
     const command2 = 'Command2';
-    const newState1 = 22;
-    const newState2 = 33;
+    const newState1 = { value: 22 };
+    const newState2 = { value: 33 };
     registerStateHistory(store);
     store.set(newState1, command1);
     store.set(newState2, command2);
@@ -283,7 +325,7 @@ describe('redo', () => {
     redo(store);
 
     // assert
-    expect(store.state()).toBe(newState2);
+    expect(store.state()).toStrictEqual(newState2);
     expect(getHistory(store)).toMatchObject([
       {
         command: command1,
@@ -308,8 +350,8 @@ describe('redo', () => {
     // arrange
     const command1 = 'Command1';
     const command2 = 'Command2';
-    const newState1 = 22;
-    const newState2 = 33;
+    const newState1 = { value: 22 };
+    const newState2 = { value: 33 };
     registerStateHistory(store);
     store.set(newState1, command1);
     store.set(newState2, command2);
@@ -321,7 +363,7 @@ describe('redo', () => {
     redo(store);
 
     // assert
-    expect(store.state()).toBe(newState2);
+    expect(store.state()).toStrictEqual(newState2);
     expect(getHistory(store)).toMatchObject([
       {
         command: command1,

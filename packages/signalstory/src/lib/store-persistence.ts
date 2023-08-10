@@ -35,11 +35,15 @@ export function loadFromStorage<TState>(
  *
  * @template TState - The type of state to save.
  * @param {Store<TState>} store - The store instance.
+ * @param {TState} value - The store value to store.
  */
-export function saveToStorage<TState>(store: Store<TState>): void {
+export function saveToStorage<TState>(
+  store: Store<TState>,
+  value: TState
+): void {
   store.config.persistenceStorage.setItem(
     store.config.persistenceKey,
-    JSON.stringify(store.state())
+    JSON.stringify(value)
   );
 }
 
