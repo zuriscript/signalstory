@@ -12,7 +12,7 @@ export class BooksStore extends Store<Book[]> {
     super({
       initialState: [],
       enableEffectsAndQueries: true,
-      enableLogging: true,
+      enableDevtools: true,
       enableStateHistory: true,
       enablePersistence: true,
     });

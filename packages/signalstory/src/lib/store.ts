@@ -9,7 +9,7 @@ import {
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { registerForDevtools } from './devtools';
+import { registerForDevtools, sendToDevtools } from './devtools';
 import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
@@ -64,6 +64,13 @@ export class Store<TState> {
 
     if (this.config.enableDevtools) {
       registerForDevtools(this);
+      this.log = (action: string, description?: string, ..._: any[]) => {
+        if (action === 'Command') {
+          sendToDevtools({
+            type: `[${this.config.name}] - ${description ?? 'Command'}`,
+          });
+        }
+      };
     }
 
     if (this.config.enableStateHistory) {
