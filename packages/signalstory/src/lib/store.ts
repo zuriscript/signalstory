@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { StoreConfig } from './store-config';
+import { registerForDevtools } from './store-devtools';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
 import { addToHistory, registerStateHistory } from './store-history';
@@ -41,6 +42,7 @@ export class Store<TState> {
       initialState: config.initialState,
       enableStateHistory: config.enableStateHistory ?? false,
       enableEffectsAndQueries: config.enableEffectsAndQueries ?? false,
+      enableDevtools: config.enableDevtools ?? false,
       enablePersistence: config.enablePersistence ?? false,
       persistenceKey:
         config.persistenceKey ??
@@ -78,6 +80,10 @@ export class Store<TState> {
       effect(() => {
         saveToStorage(this, this._state());
       });
+
+      if (this.config.enableDevtools) {
+        registerForDevtools(this);
+      }
     }
   }
 

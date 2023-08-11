@@ -23,6 +23,10 @@ export interface StoreConfig<TState> {
    */
   enableEffectsAndQueries?: boolean;
   /**
+   * Registers the store for redux devtools. See https://github.com/reduxjs/redux-devtools for further info. (optional, default: false).
+   */
+  enableDevtools?: boolean;
+  /**
    * Persists the actual state to local storage and loads it on initialization rather than the initialState. (optional, default: false).
    */
   enablePersistence?: boolean;
