@@ -9,8 +9,8 @@ import {
   runInInjectionContext,
   signal,
 } from '@angular/core';
+import { registerForDevtools } from './devtools';
 import { StoreConfig } from './store-config';
-import { registerForDevtools } from './store-devtools';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
 import { addToHistory, registerStateHistory } from './store-history';
@@ -62,6 +62,10 @@ export class Store<TState> {
         );
     }
 
+    if (this.config.enableDevtools) {
+      registerForDevtools(this);
+    }
+
     if (this.config.enableStateHistory) {
       registerStateHistory(this);
       this.addToHistory = addToHistory;
@@ -80,10 +84,6 @@ export class Store<TState> {
       effect(() => {
         saveToStorage(this, this._state());
       });
-
-      if (this.config.enableDevtools) {
-        registerForDevtools(this);
-      }
     }
   }
 
