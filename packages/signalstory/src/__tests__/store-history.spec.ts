@@ -8,7 +8,7 @@ import {
   redo,
   registerStateHistory,
   undo,
-} from '../lib/store-history';
+} from '../lib/store-plugin-history';
 
 describe('addToHistory', () => {
   describe('with mutable store', () => {

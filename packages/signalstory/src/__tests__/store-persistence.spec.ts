@@ -3,7 +3,7 @@ import {
   clearStorage,
   loadFromStorage,
   saveToStorage,
-} from '../lib/store-persistence'; // Import the functions to be tested
+} from '../lib/store-plugin-persistence'; // Import the functions to be tested
 import { registerAndGetStore } from './helper';
 
 describe('loadFromStorage', () => {

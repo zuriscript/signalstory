@@ -1,4 +1,5 @@
 import { Store } from './store';
+import { StorePlugin } from './store-plugin';
 
 type Action = { type: string };
 
@@ -110,4 +111,28 @@ export function registerForDevtools<TStore extends Store<any>>(store: TStore) {
 export function removeFromDevtools<TStore extends Store<any>>(store: TStore) {
   registry.delete(store.name);
   sendToDevtools({ type: `[${store.name}] - @Removal` });
+}
+
+export function useDevtools(
+  options: {
+    enableLoging?: boolean;
+    logFunc?: (message: string, ...data: any[]) => void;
+  } = {}
+): StorePlugin {
+  const log = options.enableLoging ? options?.logFunc ?? console.log : null;
+  return {
+    init(store) {
+      registerForDevtools(store);
+      log?.(`[${store.config.name}] - Initialized`, store.config);
+    },
+    postprocessCommand(store, command) {
+      sendToDevtools({
+        type: `[${store.name}] - ${command ?? 'Command'}`,
+      });
+      log?.(
+        `[${store.config.name}] - ${command ?? 'Unspecified Command'}`,
+        store.state()
+      );
+    },
+  };
 }

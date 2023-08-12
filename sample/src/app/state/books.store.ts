@@ -1,5 +1,11 @@
 import { Injectable, computed } from '@angular/core';
-import { Store, StoreEvent } from 'signalstory';
+import {
+  Store,
+  StoreEvent,
+  useDevtools,
+  useStoreHistory,
+  useStorePersistence,
+} from 'signalstory';
 import {
   googleBooksLoadedFailure,
   googleBooksLoadedSuccess,
@@ -11,10 +17,11 @@ export class BooksStore extends Store<Book[]> {
   constructor() {
     super({
       initialState: [],
-      enableEffectsAndQueries: true,
-      enableDevtools: true,
-      enableStateHistory: true,
-      enablePersistence: true,
+      plugins: [
+        useDevtools({}),
+        useStoreHistory(),
+        useStorePersistence({ persistenceKey: 'TempStoreState' }),
+      ],
     });
 
     this.registerHandler(

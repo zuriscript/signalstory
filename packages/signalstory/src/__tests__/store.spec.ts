@@ -195,7 +195,7 @@ describe('runEffect', () => {
     initialState = { value: 10 };
     [store, supportingStore] = registerAndGetStores({
       initialState: initialState,
-      enableEffectsAndQueries: true,
+      enableEffectsAndQueryObjects: true,
     });
   });
 
@@ -239,7 +239,7 @@ describe('runQuery', () => {
     initialState = { value: 10 };
     [store, supportingStore] = registerAndGetStores({
       initialState: initialState,
-      enableEffectsAndQueries: true,
+      enableEffectsAndQueryObjects: true,
     });
   });
 

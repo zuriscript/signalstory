@@ -132,7 +132,7 @@ describe('runQuery', () => {
     const initialState = { value: 10 };
     const store = registerAndGetImmutableStore({
       initialState: initialState,
-      enableEffectsAndQueries: true,
+      enableEffectsAndQueryObjects: true,
     });
     const query = createQuery([ImmutableTestStore], store => store.state());
 
@@ -148,7 +148,7 @@ describe('runQuery', () => {
     const initialState = { value: 10 };
     const store = registerAndGetImmutableStore({
       initialState: initialState,
-      enableEffectsAndQueries: true,
+      enableEffectsAndQueryObjects: true,
     });
     const summandArg = 45;
     const query = createQuery(

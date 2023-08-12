@@ -3,19 +3,17 @@ import {
   ProviderToken,
   Signal,
   WritableSignal,
+  assertInInjectionContext,
   computed,
-  effect,
   inject,
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { registerForDevtools, sendToDevtools } from './devtools';
+import { getInjectorOrNull } from './helper-injection';
 import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
-import { addToHistory, registerStateHistory } from './store-history';
 import { register, rootRegistry, unregister } from './store-mediator';
-import { loadFromStorage, saveToStorage } from './store-persistence';
 import { StoreQuery } from './store-query';
 
 /**
@@ -24,9 +22,16 @@ import { StoreQuery } from './store-query';
  */
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
-  private readonly injector: Injector | undefined;
-  private addToHistory?: (s: this, c: string) => void | undefined;
-  private log?: (action: string, description?: string, ...data: any[]) => void;
+
+  private readonly initPostprocessor: ((store: this) => void)[] = [];
+  private readonly commandPreprocessor: ((
+    store: this,
+    command: string | undefined
+  ) => void)[] = [];
+  private readonly commandPostprocessor: ((
+    store: this,
+    command: string | undefined
+  ) => void)[] = [];
   /**
    * The config of the store as readonly
    */
@@ -40,58 +45,26 @@ export class Store<TState> {
     this.config = {
       name: config.name ?? this.constructor.name,
       initialState: config.initialState,
-      enableStateHistory: config.enableStateHistory ?? false,
-      enableEffectsAndQueries: config.enableEffectsAndQueries ?? false,
-      enableDevtools: config.enableDevtools ?? false,
-      enablePersistence: config.enablePersistence ?? false,
-      persistenceKey:
-        config.persistenceKey ??
-        `_persisted_state_of_${config.name ?? this.constructor.name}_`,
-      persistenceStorage: config.persistenceStorage ?? localStorage,
-      enableLogging: config.enableLogging ?? false,
+      injector: config.injector ?? getInjectorOrNull(),
       logFunc: config.logFunc ?? console.log,
+      plugins: config.plugins ?? [],
     };
 
     this._state = signal(this.config.initialState);
 
-    if (this.config.enableLogging) {
-      this.log = (action: string, description?: string, ...data: any[]) =>
-        this.config.logFunc(
-          `[${this.config.name}->${action}] ${description ?? 'Unspecified'}`,
-          ...data
-        );
-    }
-
-    if (this.config.enableDevtools) {
-      registerForDevtools(this);
-      this.log = (action: string, description?: string, ..._: any[]) => {
-        if (action === 'Command') {
-          sendToDevtools({
-            type: `[${this.config.name}] - ${description ?? 'Command'}`,
-          });
-        }
-      };
-    }
-
-    if (this.config.enableStateHistory) {
-      registerStateHistory(this);
-      this.addToHistory = addToHistory;
-    }
-
-    if (this.config.enableEffectsAndQueries) {
-      this.injector = inject(Injector);
-    }
-
-    if (this.config.enablePersistence) {
-      const persistedState = loadFromStorage(this);
-      if (persistedState) {
-        this.set(persistedState, 'Load state from storage');
+    this.config.plugins.forEach(plugin => {
+      if (plugin.init) {
+        this.initPostprocessor.push(plugin.init);
       }
+      if (plugin.preprocessCommand) {
+        this.commandPreprocessor.push(plugin.preprocessCommand);
+      }
+      if (plugin.postprocessCommand) {
+        this.commandPostprocessor.push(plugin.postprocessCommand);
+      }
+    });
 
-      effect(() => {
-        saveToStorage(this, this._state());
-      });
-    }
+    this.initPostprocessor.forEach(p => p(this));
   }
 
   /**
@@ -114,11 +87,11 @@ export class Store<TState> {
    * @param commandName The name of the command associated with the state change.
    */
   public set(newState: TState, commandName?: string): void {
-    this.addToHistory?.(this, commandName ?? 'Unspecified Set Command');
+    this.commandPreprocessor.forEach(p => p(this, commandName));
 
     this._state.set(newState);
 
-    this.log?.('Command', commandName, newState);
+    this.commandPostprocessor.forEach(p => p(this, commandName));
   }
 
   /**
@@ -130,11 +103,11 @@ export class Store<TState> {
     updateFn: (currentState: TState) => TState,
     commandName?: string
   ): void {
-    this.addToHistory?.(this, commandName ?? 'Unspecified Update Command');
+    this.commandPreprocessor.forEach(p => p(this, commandName));
 
     this._state.update(state => updateFn(state));
 
-    this.log?.('Command', commandName, this.state());
+    this.commandPostprocessor.forEach(p => p(this, commandName));
   }
 
   /**
@@ -146,11 +119,11 @@ export class Store<TState> {
     mutator: (currentState: TState) => void,
     commandName?: string
   ): void {
-    this.addToHistory?.(this, commandName ?? 'Unspecified Mutate Command');
+    this.commandPreprocessor.forEach(p => p(this, commandName));
 
     this._state.mutate(mutator);
 
-    this.log?.('Command', commandName, this.state());
+    this.commandPostprocessor.forEach(p => p(this, commandName));
   }
 
   /**
@@ -163,7 +136,6 @@ export class Store<TState> {
     handler: (store: this, event: StoreEvent<TPayload>) => void
   ) {
     register(rootRegistry, this, event, handler);
-    this.log?.('Event', `Register handler for event ${event.name}`);
   }
 
   /**
@@ -177,10 +149,6 @@ export class Store<TState> {
   ): void;
   public unregisterHandler(...events: StoreEvent<any>[]): void {
     unregister(rootRegistry, this, ...events);
-    this.log?.(
-      'Event',
-      `Unregister handler for event(s) ${events.map(X => X.name).join(', ')}`
-    );
   }
 
   /**
@@ -197,14 +165,8 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
-    this.log?.(
-      'Effect',
-      `Running effect ${effect.name} with arguments`,
-      ...args
-    );
-
-    if (effect.withInjectionContext && this.injector) {
-      return runInInjectionContext(this.injector, () => {
+    if (effect.withInjectionContext && this.config.injector) {
+      return runInInjectionContext(this.config.injector, () => {
         return effect.func(this, ...args);
       });
     } else {
@@ -229,19 +191,26 @@ export class Store<TState> {
     storeQuery: StoreQuery<TResult, TStores, TArgs>,
     ...args: TArgs extends undefined ? [] : [TArgs]
   ): Signal<TResult> {
-    return runInInjectionContext(this.injector!, () => {
-      const queryArgs = [
-        ...(storeQuery.stores.map(x =>
-          x === this.constructor ? this : inject(x)
-        ) as {
-          [K in keyof TStores]: TStores[K] extends ProviderToken<infer U>
-            ? U
-            : never;
-        }),
-        ...(args as any[]),
-      ];
+    if (!this.config.injector) {
+      assertInInjectionContext(this.runQuery);
+    }
 
-      return computed(() => storeQuery.query(...(queryArgs as any)));
-    });
+    return runInInjectionContext(
+      this.config.injector ?? inject(Injector),
+      () => {
+        const queryArgs = [
+          ...(storeQuery.stores.map(x =>
+            x === this.constructor ? this : inject(x)
+          ) as {
+            [K in keyof TStores]: TStores[K] extends ProviderToken<infer U>
+              ? U
+              : never;
+          }),
+          ...(args as any[]),
+        ];
+
+        return computed(() => storeQuery.query(...(queryArgs as any)));
+      }
+    );
   }
 }

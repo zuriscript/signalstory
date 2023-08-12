@@ -1,4 +1,5 @@
-import { StorePersistence } from './store-persistence';
+import { Injector } from '@angular/core';
+import { StorePlugin } from './store-plugin';
 
 /**
  * Configuration options for a signal store.
@@ -15,33 +16,9 @@ export interface StoreConfig<TState> {
    */
   name?: string;
   /**
-   * Indicates whether state history is enabled. (optional, default: false).
+   * Optional Di injector can be passed for effects and query objects. Only useful for dynamic stores, that are not registered in DI (optional, default: false)
    */
-  enableStateHistory?: boolean;
-  /**
-   * Indicates whether effects and queries are enabled for this store. In that case an angular injector is provided. (optional, default: false).
-   */
-  enableEffectsAndQueries?: boolean;
-  /**
-   * Registers the store for redux devtools. See https://github.com/reduxjs/redux-devtools for further info. (optional, default: false).
-   */
-  enableDevtools?: boolean;
-  /**
-   * Persists the actual state to local storage and loads it on initialization rather than the initialState. (optional, default: false).
-   */
-  enablePersistence?: boolean;
-  /**
-   * The key to use for the local storage entry. Only in combination with enablePersistence. (optional, default: _persisted_state_of_storeName_).
-   */
-  persistenceKey?: string;
-  /**
-   * The storage mechanism for persistence. Only in combination with enablePersistence. (optional, default: localStorage).
-   */
-  persistenceStorage?: StorePersistence;
-  /**
-   * Indicates whether logging is enabled. (optional, default: false).
-   */
-  enableLogging?: boolean;
+  injector?: Injector | null;
   /**
    * A logging function to output messages and data. Only in combination with enableLogging. (optional, default: console.log).
    *
@@ -49,4 +26,8 @@ export interface StoreConfig<TState> {
    * @param {...any[]} data - Additional data to be logged.
    */
   logFunc?: (message: string, ...data: any[]) => void;
+  /**
+   * A list of plugins to use
+   */
+  plugins?: StorePlugin[];
 }

@@ -1,6 +1,7 @@
 import { naiveDeepClone } from './immutable-naive-ops';
 import { ImmutableStore } from './immutable-store';
 import { Store } from './store';
+import { StorePlugin } from './store-plugin';
 
 /**
  * Represents a history item in the store's history.
@@ -225,4 +226,15 @@ export function redo<TStore extends Store<any>>(store: TStore): void {
       store.set(toBeRedoneCommand.before, RedoCommand);
     }
   }
+}
+
+export function useStoreHistory(): StorePlugin {
+  return {
+    init(store) {
+      registerStateHistory(store);
+    },
+    preprocessCommand(store, command) {
+      addToHistory(store, command ?? 'Unspecified Command');
+    },
+  };
 }
