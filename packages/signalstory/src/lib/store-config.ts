@@ -1,5 +1,5 @@
 import { Injector } from '@angular/core';
-import { StorePlugin } from './store-plugin';
+import { StorePlugin } from './plugins/store-plugin';
 
 /**
  * Configuration options for a signal store.

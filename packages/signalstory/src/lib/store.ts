@@ -9,12 +9,12 @@ import {
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { getInjectorOrNull } from './helper-injection';
 import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
 import { register, rootRegistry, unregister } from './store-mediator';
 import { StoreQuery } from './store-query';
+import { getInjectorOrNull } from './utility/injector-helper';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.

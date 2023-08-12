@@ -1,4 +1,4 @@
-import { Store } from './store';
+import { Store } from '../store';
 
 export type StorePlugin = {
   init?: (store: Store<any>) => void;

@@ -1,14 +1,14 @@
 import { ImmutableStore } from '../lib/immutable-store';
-import { Store } from '../lib/store';
 import {
-  RedoCommand,
-  UndoCommand,
   addToHistory,
   getHistory,
   redo,
   registerStateHistory,
   undo,
-} from '../lib/store-plugin-history';
+  useStoreHistory,
+} from '../lib/plugins/store-plugin-history';
+import { Store } from '../lib/store';
+import { RedoCommand, UndoCommand } from '../lib/utility/history';
 
 describe('addToHistory', () => {
   describe('with mutable store', () => {
@@ -17,7 +17,10 @@ describe('addToHistory', () => {
 
     beforeEach(() => {
       initialState = { value: 10 };
-      store = new Store<{ value: number }>({ initialState });
+      store = new Store<{ value: number }>({
+        initialState,
+        plugins: [useStoreHistory()],
+      });
     });
 
     it('should clone and add an item to history if history is enabled', () => {
@@ -66,7 +69,10 @@ describe('addToHistory', () => {
 
     beforeEach(() => {
       initialState = { value: 10 };
-      store = new ImmutableStore<{ value: number }>({ initialState });
+      store = new ImmutableStore<{ value: number }>({
+        initialState,
+        plugins: [useStoreHistory()],
+      });
     });
 
     it('should add an item to history if history is enabled without cloning', () => {
@@ -117,7 +123,7 @@ describe('undo', () => {
   beforeEach(() => {
     store = new Store<{ value: number }>({
       initialState,
-      enableStateHistory: true,
+      plugins: [useStoreHistory()],
     });
   });
 
@@ -240,7 +246,7 @@ describe('redo', () => {
   beforeEach(() => {
     store = new Store<{ value: number }>({
       initialState,
-      enableStateHistory: true,
+      plugins: [useStoreHistory()],
     });
   });
 
