@@ -43,11 +43,14 @@ describe('addToHistory', () => {
     });
 
     it('should not add an item to history if history is disabled', () => {
-      // act
-      addToHistory(store, 'Command');
+      // arrange
+      store = new Store<{ value: number }>({
+        initialState,
+      });
+      const act = () => addToHistory(store, 'Command');
 
-      // assert
-      expect(getHistory(store)).toHaveLength(0);
+      // act & assert
+      expect(act).toThrow();
     });
 
     it('should not add undo or redo commands to history', () => {
@@ -95,11 +98,15 @@ describe('addToHistory', () => {
     });
 
     it('should not add an item to history if history is disabled', () => {
-      // act
-      addToHistory(store, 'Command');
+      // arrange
+      store = new ImmutableStore<{ value: number }>({
+        initialState,
+      });
 
-      // assert
-      expect(getHistory(store)).toHaveLength(0);
+      const act = () => addToHistory(store, 'Command');
+
+      // act & assert
+      expect(act).toThrow();
     });
 
     it('should not add undo or redo commands to history', () => {

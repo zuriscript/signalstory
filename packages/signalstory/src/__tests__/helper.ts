@@ -1,4 +1,4 @@
-import { InjectionToken, inject } from '@angular/core';
+import { Component, InjectionToken, inject } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ImmutableStore } from '../lib/immutable-store';
 import { Store, StoreConfig } from '../public-api';
@@ -16,6 +16,12 @@ export class ImmutableTestStore extends ImmutableStore<any> {
     super(inject(STORE_CONFIG));
   }
 }
+
+@Component({
+  template: '',
+  standalone: true,
+})
+export class Cmp {}
 
 export function registerAndGetStore(config: StoreConfig<any>): TestStore {
   TestBed.configureTestingModule({

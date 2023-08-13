@@ -1,4 +1,7 @@
-import { effect } from '@angular/core';
+import { EnvironmentInjector } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { lastValueFrom, take } from 'rxjs';
 import {
   clearStoreStorage,
   loadFromStoreStorage,
@@ -7,7 +10,7 @@ import {
 } from '../lib/plugins/store-plugin-persistence'; // Import the functions to be tested
 import { Store } from '../lib/store'; // Import the necessary types and classes
 import { PersistenceStorage } from '../lib/utility/persistence';
-import { registerAndGetStore } from './helper';
+import { Cmp, registerAndGetStore } from './helper';
 
 describe('loadFromStorage', () => {
   const initialValue = { val: 'initial' };
@@ -140,8 +143,14 @@ describe('automatic sync', () => {
   const initialValue = { val: 'initial' };
   const initialValueFromStorage = { val: 'initialFromStorage' };
   const key = 'myStoreKey';
-  let store: Store<{ val: string }>;
-  let storage: PersistenceStorage;
+  let store!: Store<{ val: string }>;
+  let storage!: PersistenceStorage;
+  let fixture!: ComponentFixture<unknown>;
+  let injector!: EnvironmentInjector;
+
+  function flushEffects(): void {
+    fixture.detectChanges();
+  }
 
   beforeEach(() => {
     storage = {
@@ -159,6 +168,8 @@ describe('automatic sync', () => {
         }),
       ],
     });
+    fixture = TestBed.createComponent(Cmp);
+    injector = TestBed.inject(EnvironmentInjector);
   });
 
   it('Should initialize from storage', () => {
@@ -167,21 +178,26 @@ describe('automatic sync', () => {
     expect(loadFromStoreStorage(store)).toStrictEqual(initialValueFromStorage);
   });
 
-  it('Should persist new state', done => {
+  it('should persist new state', async () => {
     // arrange
+    // Clean prior effect emits and storage applications
+    flushEffects();
+    storage.setItem = jest.fn();
     const newState = { val: 'newState' };
-    effect(
-      () => {
-        if (store['_state']) {
-          console.warn('STATE CHANGED');
-          expect(storage.setItem).toHaveBeenLastCalledWith(newState);
-          done();
-        }
-      },
-      { injector: store.config.injector! }
+    const storeChange = lastValueFrom(
+      toObservable(store.state, { injector }).pipe(take(1))
     );
 
-    // act
     store.set(newState, 'blbal');
+    // emits last store change
+    flushEffects();
+
+    // act
+    const storeChangeResult = await storeChange;
+
+    // assert
+    expect(storeChangeResult).toEqual(newState);
+    expect(storage.setItem).toHaveBeenCalledTimes(1);
+    expect(storage.setItem).toHaveBeenCalledWith(key, JSON.stringify(newState));
   });
 });
