@@ -1,5 +1,5 @@
 import { Store } from '../store';
-import { StorePlugin } from './store-plugin';
+import { StorePlugin } from '../store-plugin';
 
 export interface DevtoolsPluginOptions {
   /**

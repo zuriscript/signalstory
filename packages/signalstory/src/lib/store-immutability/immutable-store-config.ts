@@ -1,5 +1,5 @@
-import { StoreConfig } from './store-config';
-import { Immutable } from './types';
+import { StoreConfig } from '../store-config';
+import { Immutable } from './immutable-type';
 
 /**
  * Configuration options for an immutable signal store.

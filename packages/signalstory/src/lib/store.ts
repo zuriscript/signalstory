@@ -13,6 +13,11 @@ import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
 import { register, rootRegistry, unregister } from './store-mediator';
+import {
+  CommandPostprocessor,
+  CommandPreprocessor,
+  InitPostprocessor,
+} from './store-plugin';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
 
@@ -22,16 +27,9 @@ import { getInjectorOrNull } from './utility/injector-helper';
  */
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
-
-  private readonly initPostprocessor: ((store: this) => void)[] = [];
-  private readonly commandPreprocessor: ((
-    store: this,
-    command: string | undefined
-  ) => void)[] = [];
-  private readonly commandPostprocessor: ((
-    store: this,
-    command: string | undefined
-  ) => void)[] = [];
+  private readonly initPostprocessor: InitPostprocessor[] = [];
+  private readonly commandPreprocessor: CommandPreprocessor[] = [];
+  private readonly commandPostprocessor: CommandPostprocessor[] = [];
   /**
    * The config of the store as readonly
    */

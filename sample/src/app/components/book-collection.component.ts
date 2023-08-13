@@ -1,5 +1,6 @@
 /* eslint-disable @angular-eslint/component-selector */
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Immutable } from 'signalstory';
 import { BookData } from '../state/books.state';
 
 @Component({
@@ -47,6 +48,6 @@ import { BookData } from '../state/books.state';
   ],
 })
 export class BookCollectionComponent {
-  @Input() books: Array<BookData> = [];
+  @Input() books: Array<Immutable<BookData>> = [];
   @Output() remove = new EventEmitter();
 }

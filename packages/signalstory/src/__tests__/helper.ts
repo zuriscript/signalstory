@@ -1,6 +1,6 @@
 import { Component, InjectionToken, inject } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ImmutableStore } from '../lib/immutable-store';
+import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { Store, StoreConfig } from '../public-api';
 
 const STORE_CONFIG = new InjectionToken<StoreConfig<any>>('STORE_CONFIG');

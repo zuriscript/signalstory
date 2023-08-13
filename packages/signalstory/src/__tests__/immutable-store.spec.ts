@@ -1,4 +1,4 @@
-import { ImmutableStore } from '../lib/immutable-store';
+import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { rootRegistry } from '../lib/store-mediator';
 import { createEffect, createEvent, createQuery } from '../public-api';
 import {

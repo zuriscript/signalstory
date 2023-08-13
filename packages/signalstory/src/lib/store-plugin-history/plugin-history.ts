@@ -1,15 +1,14 @@
-import { ImmutableStore } from '../immutable-store';
 import { Store } from '../store';
-import { StoreState } from '../types';
+import { naiveDeepClone } from '../store-immutability/immutable-naive-ops';
+import { ImmutableStore } from '../store-immutability/immutable-store';
+import { StorePlugin, StoreState } from '../store-plugin';
 import {
   History,
   HistoryItem,
   addToHistory as addToHistoryUtil,
   redo as redoUtil,
   undo as undoUtil,
-} from '../utility/history';
-import { naiveDeepClone } from '../utility/immutable-naive-ops';
-import { StorePlugin } from './store-plugin';
+} from './history';
 
 /**
  * Registry to associate a store with its history.

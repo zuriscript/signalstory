@@ -1,13 +1,6 @@
-import { Store } from './store';
-
 /**
- * Extracts the state type from a generic store type.
+ * Define a union type of built-in immutable primitives.
  */
-export type StoreState<TStore> = TStore extends Store<infer TState>
-  ? TState
-  : never;
-
-// Define a union type of built-in immutable primitives.
 type ImmutablePrimitive =
   | string
   | number

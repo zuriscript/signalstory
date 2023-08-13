@@ -1,5 +1,5 @@
 /* eslint-disable @angular-eslint/component-selector */
-import { Component, Injector, effect, inject } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { getHistory, redo, undo } from 'signalstory';
 import {
   getGoogleBooksBySearchArgument,
@@ -94,17 +94,7 @@ export class AppComponent {
       .subscribe();
   }
 
-  getInjectorOrNull(): Injector | null {
-    try {
-      return inject(Injector);
-    } catch (_) {
-      return null;
-    }
-  }
-
   onPostCollection() {
-    const injector = this.getInjectorOrNull();
-    console.log(injector);
     this.store.runEffect(postCollection);
   }
 }

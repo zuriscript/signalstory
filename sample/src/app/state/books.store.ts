@@ -1,6 +1,6 @@
 import { Injectable, computed } from '@angular/core';
 import {
-  Store,
+  ImmutableStore,
   StoreEvent,
   useDevtools,
   useStoreHistory,
@@ -13,7 +13,7 @@ import {
 import { Book, BookData } from './books.state';
 
 @Injectable({ providedIn: 'root' })
-export class BooksStore extends Store<Book[]> {
+export class BooksStore extends ImmutableStore<Book[]> {
   constructor() {
     super({
       initialState: [],

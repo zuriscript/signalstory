@@ -1,4 +1,6 @@
-import { ImmutableStore } from '../lib/immutable-store';
+import { Store } from '../lib/store';
+import { ImmutableStore } from '../lib/store-immutability/immutable-store';
+import { RedoCommand, UndoCommand } from '../lib/store-plugin-history/history';
 import {
   addToHistory,
   getHistory,
@@ -6,9 +8,7 @@ import {
   registerStateHistory,
   undo,
   useStoreHistory,
-} from '../lib/plugins/store-plugin-history';
-import { Store } from '../lib/store';
-import { RedoCommand, UndoCommand } from '../lib/utility/history';
+} from '../lib/store-plugin-history/plugin-history';
 
 describe('addToHistory', () => {
   describe('with mutable store', () => {

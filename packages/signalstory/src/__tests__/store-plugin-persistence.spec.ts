@@ -2,14 +2,14 @@ import { EnvironmentInjector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { lastValueFrom, take } from 'rxjs';
+import { Store } from '../lib/store'; // Import the necessary types and classes
+import { PersistenceStorage } from '../lib/store-plugin-persistence/persistence';
 import {
   clearStoreStorage,
   loadFromStoreStorage,
   saveToStoreStorage,
   useStorePersistence,
-} from '../lib/plugins/store-plugin-persistence'; // Import the functions to be tested
-import { Store } from '../lib/store'; // Import the necessary types and classes
-import { PersistenceStorage } from '../lib/utility/persistence';
+} from '../lib/store-plugin-persistence/plugin-persistence'; // Import the functions to be tested
 import { Cmp, registerAndGetStore } from './helper';
 
 describe('loadFromStorage', () => {
