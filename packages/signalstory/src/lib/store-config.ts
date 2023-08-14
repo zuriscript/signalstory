@@ -20,12 +20,9 @@ export interface StoreConfig<TState> {
    */
   injector?: Injector | null;
   /**
-   * A logging function to output messages and data. Only in combination with enableLogging. (optional, default: console.log).
-   *
-   * @param {string} message - The message to be logged.
-   * @param {...any[]} data - Additional data to be logged.
+   * Indicates whether logging is enabled. (optional, default: false).
    */
-  logFunc?: (message: string, ...data: any[]) => void;
+  enableLogging?: boolean;
   /**
    * A list of plugins to use
    */

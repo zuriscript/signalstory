@@ -1,20 +1,6 @@
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
 
-export interface DevtoolsPluginOptions {
-  /**
-   * Indicates whether logging is enabled. (optional, default: false).
-   */
-  enableLogging?: boolean;
-  /**
-   * A logging function to output messages and data. Only in combination with enableLogging. (optional, default: console.log).
-   *
-   * @param {string} message - The message to be logged.
-   * @param {...any[]} data - Additional data to be logged.
-   */
-  logFunc?: (message: string, ...data: any[]) => void;
-}
-
 type Action = { type: string };
 
 interface DevtoolsOptions {
@@ -127,21 +113,15 @@ export function removeFromDevtools<TStore extends Store<any>>(store: TStore) {
   sendToDevtools({ type: `[${store.name}] - @Removal` });
 }
 
-export function useDevtools(options: DevtoolsPluginOptions = {}): StorePlugin {
-  const log = options.enableLogging ? options?.logFunc ?? console.log : null;
+export function useDevtools(): StorePlugin {
   return {
     init(store) {
       registerForDevtools(store);
-      log?.(`[${store.config.name}] - Initialized`, store.config);
     },
     postprocessCommand(store, command) {
       sendToDevtools({
         type: `[${store.name}] - ${command ?? 'Command'}`,
       });
-      log?.(
-        `[${store.config.name}] - ${command ?? 'Unspecified Command'}`,
-        store.state()
-      );
     },
   };
 }

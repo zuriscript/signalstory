@@ -20,6 +20,7 @@ import {
 } from './store-plugin';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
+import { log } from './utility/logger';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
@@ -30,6 +31,7 @@ export class Store<TState> {
   private readonly initPostprocessor: InitPostprocessor[] = [];
   private readonly commandPreprocessor: CommandPreprocessor[] = [];
   private readonly commandPostprocessor: CommandPostprocessor[] = [];
+  private log?: (action: string, description?: string, ...data: any[]) => void;
   /**
    * The config of the store as readonly
    */
@@ -44,11 +46,16 @@ export class Store<TState> {
       name: config.name ?? this.constructor.name,
       initialState: config.initialState,
       injector: config.injector ?? getInjectorOrNull(),
-      logFunc: config.logFunc ?? console.log,
+      enableLogging: config.enableLogging ?? false,
       plugins: config.plugins ?? [],
     };
 
     this._state = signal(this.config.initialState);
+
+    if (this.config.enableLogging) {
+      this.log = (a: string, d?: string, ...p: any[]) =>
+        log?.(`[${this.config.name}->${a}] ${d ?? 'Unspecified'}`, ...p);
+    }
 
     this.config.plugins.forEach(plugin => {
       if (plugin.init) {
@@ -90,6 +97,7 @@ export class Store<TState> {
     this._state.set(newState);
 
     this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -106,6 +114,7 @@ export class Store<TState> {
     this._state.update(state => updateFn(state));
 
     this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -122,6 +131,7 @@ export class Store<TState> {
     this._state.mutate(mutator);
 
     this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -134,6 +144,7 @@ export class Store<TState> {
     handler: (store: this, event: StoreEvent<TPayload>) => void
   ) {
     register(rootRegistry, this, event, handler);
+    this.log?.('Event', `Register handler for ${event.name}`);
   }
 
   /**
@@ -147,6 +158,7 @@ export class Store<TState> {
   ): void;
   public unregisterHandler(...events: StoreEvent<any>[]): void {
     unregister(rootRegistry, this, ...events);
+    this.log?.('Event', `Unegister handler for ${events.join(', ')}`);
   }
 
   /**
@@ -163,6 +175,8 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
+    this.log?.('Effect', `Running ${effect.name}`, ...args);
+
     if (effect.withInjectionContext && this.config.injector) {
       return runInInjectionContext(this.config.injector, () => {
         return effect.func(this, ...args);

@@ -26,10 +26,6 @@ export function naiveCloneAndMutateFunc<TState>(
   currentState: TState,
   mutation: (draftState: TState) => void
 ): TState {
-  // This is a naive implementation that clones the state using JSON.stringify
-  // and applies the mutation. It is not optimized for performance and
-  // should be replaced with a library like 'immer.js'.
-
   const clone = naiveDeepClone(currentState) as TState;
   mutation(clone);
   return clone;
