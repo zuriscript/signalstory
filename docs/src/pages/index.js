@@ -11,7 +11,7 @@ function HomepageHeader() {
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
        <div className='hero-caption'>
-        <img id="hero-mobile-logo" src={useBaseUrl('/img/signalstory_no_background_mobile.avif')}/>
+        <img id="hero-mobile-logo" src={useBaseUrl('/img/signalstory_no_background_mobile.png')}/>
             <h1 className="hero__title">
               <span className='big fluid'>signalstory
               </span> <span className='small'>| Empower Your Angular State Management</span></h1>
