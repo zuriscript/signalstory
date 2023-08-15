@@ -26,6 +26,12 @@ const myEventWithNoPayload = createEvent('My Event and nothing more');
 `Event handlers`, on the other hand, are functions that are executed when a specific event is published. They define the behavior or actions to be taken in response to the occurrence of an event. An event handler is always registered in the context of a specific store and hence defines how a certain store reacts to a specific event.
 To register an event handler, you need to specify the event you want to handle and provide the corresponding handler function.
 
+:::info
+
+Event handlers operate synchronously and are intended for specific use cases. Events should capture meaningful incidents that happened (e.g. http calls, user interaction, meaningful state changes) and that stores need to respond to effectively. Keep in mind that infinite circular updates can occur if additional events are pubblished within a handler.
+
+:::
+
 ```typescript
 import { Store } from 'signalstory';
 

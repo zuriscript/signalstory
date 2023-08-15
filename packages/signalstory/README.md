@@ -35,24 +35,6 @@ Install the library using npm:
 npm install signalstory
 ```
 
-## Configuration Options
-
-The Library provides various configuration options that allow you to customize its behaviour. Here are the available configuration options:
-
-| Option                    | Type      | Description                                                                                                                                                                                   |
-| ------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                    | `string`  | (Optional) The name of the store. If not provided, the constructor's name will be used as the default value.                                                                                  |
-| `initialState`            | `any`     | (Required) The initial state of the store                                                                                                                                                     |
-| `enableEffectsAndQueries` | `boolean` | (Optional) Specifies whether to enable effects in the store. When enabled, effects and effect-handler can be registered and executed. Defaults to `false`.                                    |
-| `enableEvents`            | `boolean` | (Optional) Specifies whether to enable events in the store. When enabled, a mediator can be used to pass events from publisher to subscriber using handler registration. Defaults to `false`. |
-| `enableLogging`           | `boolean` | (Optional) Specifies whether to enable logging for store actions. When enabled, actions will be logged to the console. Defaults to `false`.                                                   |
-| `enableStateHistory`      | `boolean` | (Optional) Specifies whether to enable state history tracking. When enabled, the store will keep track of state changes and provide a history. Defaults to `false`.                           |
-| `enableLocalStorageSync`  | `boolean` | (Optional) Specifies whether to enable automatic synchronization of the store state with local storage. Defaults to `false`.                                                                  |
-
-To configure the signalstory, simply pass an object with the desired configuration options to the constructor when creating a new instance of the store.
-
-Here's an improved usage section based on the provided sample app code:
-
 ## Usage
 
 To demonstrate the usage of signalstory, let's create a very simple counter application.
