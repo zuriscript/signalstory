@@ -20,7 +20,7 @@ import {
 } from './store-plugin';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
-import { log } from './utility/logger';
+import { enableLogging, log } from './utility/logger';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
@@ -53,6 +53,7 @@ export class Store<TState> {
     this._state = signal(this.config.initialState);
 
     if (this.config.enableLogging) {
+      enableLogging();
       this.log = (a: string, d?: string, ...p: any[]) =>
         log?.(`[${this.config.name}->${a}] ${d ?? 'Unspecified'}`, ...p);
     }

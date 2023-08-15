@@ -1,19 +1,30 @@
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
 
+/**
+ * Represents a Redux action.
+ */
 type Action = { type: string };
 
+/**
+ * Options for configuring the Redux DevTools extension.
+ */
 interface DevtoolsOptions {
-  maxAge?: number;
-  name?: string;
+  // At the moment, no support for custom Enhancer options for Redux DevTools
 }
 
+/**
+ * Represents a message sent to the Redux DevTools extension.
+ */
 interface DevtoolsMessage {
   type: string;
   payload: { type: string };
   state: string;
 }
 
+/**
+ * Represents the Redux DevTools extension interface.
+ */
 interface Devtools {
   send(
     data: { type: string } & Record<string, any>,
@@ -24,6 +35,9 @@ interface Devtools {
   subscribe(cb: (message: DevtoolsMessage) => void): () => void;
 }
 
+/**
+ * Augments the global Window interface to include Redux DevTools extension functionality.
+ */
 declare global {
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION__: {
@@ -32,19 +46,40 @@ declare global {
   }
 }
 
+/**
+ * Registry for store with attached redux devtools monitoring
+ * It maps the store name to a Weak reference of the store
+ */
 const registry = new Map<string, WeakRef<Store<any>>>();
 
+/**
+ * Retrieves a store from the registry by name.
+ * @param name Name of the store.
+ * @returns The store, if found.
+ */
+function getStore(name: string): Store<any> | undefined {
+  return registry.get(name)?.deref();
+}
+
+/**
+ * The DevTools extension instance.
+ */
 let devtools: Devtools | undefined;
 
+/**
+ * Initializes the Redux DevTools extension.
+ * @param options DevTools options.
+ */
 function initDevtools(options: DevtoolsOptions = {}): void {
   devtools = window.__REDUX_DEVTOOLS_EXTENSION__.connect(options);
   devtools.subscribe(handleDevtoolsMessage);
 }
 
-function getStore(name: string): Store<any> | undefined {
-  return registry.get(name)?.deref();
-}
-
+/**
+ * Scavenges and retrieves a snapshot of registered stores.
+ * @returns Snapshot of registered stores.
+ * @modifies registry - Deletes references to garbage collected stores
+ */
 function scavengeAndGetStoresSnapshot<T extends Record<string, any>>(): T {
   const stores: T = {} as T;
 
@@ -61,10 +96,18 @@ function scavengeAndGetStoresSnapshot<T extends Record<string, any>>(): T {
   return stores;
 }
 
+/**
+ * Sends an action to the Redux DevTools extension.
+ * @param action Action to send.
+ */
 export function sendToDevtools(action: Action): void {
   devtools?.send(action, scavengeAndGetStoresSnapshot());
 }
 
+/**
+ * Handles messages received from the Redux DevTools extension.
+ * @param message DevTools message.
+ */
 function handleDevtoolsMessage(message: DevtoolsMessage): void {
   console.log(message);
   if (devtools) {
@@ -113,6 +156,10 @@ export function removeFromDevtools<TStore extends Store<any>>(store: TStore) {
   sendToDevtools({ type: `[${store.name}] - @Removal` });
 }
 
+/**
+ * Enables Storeplugin that links the store activity with the Redux DevTools extension.
+ * @returns Devtools Storeplugin
+ */
 export function useDevtools(): StorePlugin {
   return {
     init(store) {

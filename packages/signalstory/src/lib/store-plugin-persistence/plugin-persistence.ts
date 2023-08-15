@@ -8,6 +8,9 @@ import {
   saveToStorage,
 } from './persistence';
 
+/**
+ * Options for configuring the Store Persistence Plugin.
+ */
 export interface StorePersistencePluginOptions {
   /**
    * The key to use for the local storage entry. (optional, default: _persisted_state_of_storeName_).
@@ -19,11 +22,19 @@ export interface StorePersistencePluginOptions {
   persistenceStorage?: PersistenceStorage;
 }
 
+/**
+ * Represents the Store Persistence Plugin, enhancing a store with state persistence functionality.
+ */
 type StorePersistencePlugin = StorePlugin & {
   storage: PersistenceStorage;
   getPersistenceKeyFromStore: (store: Store<any>) => string;
 };
 
+/**
+ * typeguard for StorePersistencePlugin.
+ * @param obj - The object to check.
+ * @returns True if the object is a StorePersistencePlugin, otherwise false.
+ */
 function isStorePersistencePlugin(obj: any): obj is StorePersistencePlugin {
   return (
     obj &&
@@ -37,7 +48,7 @@ function isStorePersistencePlugin(obj: any): obj is StorePersistencePlugin {
  * Clears the value associated with the provided key from local storage.
  *
  * @template TState - The type of state to clear from local storage.
- * @param {Store<TState>} store - The store instance.
+ * @param store - The store instance.
  *
  */
 export function clearStoreStorage(store: Store<any>): void {
@@ -51,6 +62,12 @@ export function clearStoreStorage(store: Store<any>): void {
   }
 }
 
+/**
+ * Saves the provided state to the store's storage.
+ * @template TStore - The type of store to save the state for.
+ * @param store - The store instance.
+ * @param state - The state to save.
+ */
 export function saveToStoreStorage<TStore extends Store<any>>(
   store: TStore,
   state: StoreState<TStore>
@@ -65,6 +82,12 @@ export function saveToStoreStorage<TStore extends Store<any>>(
   }
 }
 
+/**
+ * Loads and retrieves the stored state for the store.
+ * @template TStore - The type of store to load the state for.
+ * @param store - The store instance.
+ * @returns The stored state for the store, or undefined if not found.
+ */
 export function loadFromStoreStorage<TStore extends Store<any>>(
   store: TStore
 ): StoreState<TStore> | undefined {
@@ -74,6 +97,12 @@ export function loadFromStoreStorage<TStore extends Store<any>>(
     : undefined;
 }
 
+/**
+ * Enables Storeplugin that persists the store state to a storage (e.g. local storage).
+ * State changes are automatically synced with the storage.
+ * @param options - Options for configuring the StorePersistencePlugin.
+ * @returns A StorePersistencePlugin instance.
+ */
 export function useStorePersistence(
   options: StorePersistencePluginOptions = {}
 ): StorePersistencePlugin {

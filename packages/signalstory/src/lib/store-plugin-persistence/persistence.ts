@@ -11,8 +11,8 @@ export interface PersistenceStorage {
  * Loads a value from storage.
  *
  * @template TState - The type of state to load.
- * @param {Store<TState>} store - The store instance.
- * @returns {TState | undefined} The loaded value if available and successfully parsed, otherwise undefined.
+ * @param store - The store instance.
+ * @returns The loaded value if available and successfully parsed, otherwise undefined.
  */
 export function loadFromStorage<TState>(
   persistenceStorage: PersistenceStorage,
@@ -31,8 +31,8 @@ export function loadFromStorage<TState>(
  * Saves a value to local storage.
  *
  * @template TState - The type of state to save.
- * @param {Store<TState>} store - The store instance.
- * @param {TState} value - The store value to store.
+ * @param store - The store instance.
+ * @param value - The store value to store.
  */
 export function saveToStorage<TState>(
   persistenceStorage: PersistenceStorage,
@@ -46,7 +46,7 @@ export function saveToStorage<TState>(
  * Clears the value associated with the provided key from local storage.
  *
  * @template TState - The type of state to clear from local storage.
- * @param {Store<TState>} store - The store instance.
+ * @param store - The store instance.
  */
 export function clearStorage(
   persistenceStorage: PersistenceStorage,

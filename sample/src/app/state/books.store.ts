@@ -17,8 +17,10 @@ export class BooksStore extends ImmutableStore<Book[]> {
   constructor() {
     super({
       initialState: [],
+      name: 'BookStore',
+      enableLogging: true,
       plugins: [
-        useDevtools({}),
+        useDevtools(),
         useStoreHistory(),
         useStorePersistence({ persistenceKey: 'TempStoreState' }),
       ],

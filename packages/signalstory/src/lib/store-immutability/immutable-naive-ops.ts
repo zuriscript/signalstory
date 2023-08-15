@@ -3,8 +3,8 @@
  * This approach is simple but not optimal for performance.
  *
  * @template TState - The type of the state object.
- * @param {TState} state - The state object to be cloned.
- * @returns {TState} A deep clone of the provided state object.
+ * @param state - The state object to be cloned.
+ * @returns A deep clone of the provided state object.
  */
 export function naiveDeepClone<TState>(state: TState): TState {
   return JSON.parse(JSON.stringify(state)) as TState;
@@ -18,9 +18,9 @@ export function naiveDeepClone<TState>(state: TState): TState {
  * immutable updates to your state.
  *
  * @template TState - The type of the state object.
- * @param {TState} currentState - The current state object to be updated.
- * @param {(draftState: TState) => void} mutation - A function that modifies a draft copy of the state.
- * @returns {TState} The new state object after applying the mutation.
+ * @param currentState - The current state object to be updated.
+ * @param mutation - A function that modifies a draft copy of the state.
+ * @returns The new state object after applying the mutation.
  */
 export function naiveCloneAndMutateFunc<TState>(
   currentState: TState,

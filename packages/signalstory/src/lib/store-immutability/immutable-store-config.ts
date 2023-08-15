@@ -13,7 +13,7 @@ export interface ImmutableStoreConfig<TState>
    * @param currentState - The current state object to be cloned and mutated.
    * @param mutation - A function that modifies a draft copy of the state.
    * @returns The new state object after applying the mutation.
-   * @default Naive implementation using JSON serialize and deserialize.
+   * @default Naive implementation using JSON serialize and deserialize @see naiveCloneAndMutateFunc.
    */
   cloneAndMutateFunc?: (
     currentState: TState,

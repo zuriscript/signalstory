@@ -3,6 +3,11 @@ import { naiveCloneAndMutateFunc } from './immutable-naive-ops';
 import { ImmutableStoreConfig } from './immutable-store-config';
 import { Immutable } from './immutable-type';
 
+/**
+ * Represents a store that holds an immutable state, allowing mutation through controlled operations.
+ *
+ * @typeparam TState The type of the immutable state held by the store.
+ */
 export class ImmutableStore<TState> extends Store<Immutable<TState>> {
   private readonly cloneAndMutateFunc: (
     currentState: TState,
