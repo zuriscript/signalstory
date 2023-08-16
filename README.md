@@ -16,18 +16,13 @@ signalstory is a flexible and powerful TypeScript library designed specifically 
 
 - **Signal-Based State Management:** Utilizes a signal-based approach to state management, as everything, except side effects, is completely signal-based. This eliminates the need for asynchronous observables in components and templates, making the state management process more streamlined.
 - **Tailored for Angular:** Is specifically tailored to Angular applications, ensuring seamless integration and optimal performance within the Angular framework.
-- **Event Handling:** Supports event handling, enabling communication and interaction between different stores. Events can be used for inter-store communication or for triggering side effects.
+- **Event Handling:** Supports event handling, enabling decoupled communication and interaction between different stores as well as providing the possibility to react synchronously to events.
 - **Open Architecture:** Offers an open architecture, allowing you to choose between different store implementations. You can use plain repository-based stores or even Redux-like stores depending on your needs and preferences.
 - **Flexible Side Effect Execution:** Side effects can be implemented in different ways in signalstory. You have the option to include side effects directly as part of the store, use service-based side effects, or execute effects imperatively on the store based on your specific requirements.
 - **Automatic Persistence to Local Storage:** Provides automatic persistence of store state to local storage. Any changes made to the store are automatically synchronized with local storage, ensuring that the state is preserved across page reloads. Initialization of the store can also be directly performed from the persisted state in local storage.
 - **State History:** With signalstory, you can enable store history to track state changes over time and perform undo and redo commands.
-
-> ✨ **Planned Features and Enhancements:**
->
-> - Integration with Redux DevTools: Compatibility with Redux DevTools is in the making, allowing you to leverage the powerful debugging capabilities they provide.
-> - Advanced Middleware Support: signalstory is being enhanced to support more advanced middleware options, enabling you to customize and extend its functionality.
-> - Time-Travel Debugging: It is planned to introduce time-travel debugging capabilities, empowering you to navigate and inspect the state at different points in time.
-> - Many more ideas...
+- **Immutability:**In contrast to native signals, immutability becomes a choice, safeguarding your state against accidental mutations and offering more predictability and simplified debugging.
+- **Redux Devtools:** Dive deep into the history of state changes, visualize the flow of actions, and effortlessly debug your application using the Redux Devtools
 
 ## Installation
 

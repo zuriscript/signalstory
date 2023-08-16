@@ -71,16 +71,12 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Prolog',
-                to: '/docs/prolog',
-              },
-              {
-                label: 'Installation',
-                to: '/docs/installation',
-              },
-              {
                 label: 'Store',
                 to: '/docs/store',
+              },
+              {
+                label: 'Immutable Store',
+                to: '/docs/immutable-store',
               },
               {
                 label: 'Query',
@@ -97,6 +93,10 @@ const config = {
               {
                 label: 'Event',
                 to: '/docs/building-blocks/event',
+              },
+              {
+                label: 'Plugins',
+                to: '/docs/category/plugins',
               }
             ],
           },
@@ -117,28 +117,44 @@ const config = {
                 href: 'https://docusaurus.io/',
               },
               {
-                label: 'Wizard icons created by Freepik - Flaticon',
+                label: 'Wizard by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/wizard',
               },
               {
-                label: 'Carriage icons created by Freepik - Flaticon',
+                label: 'Carriage by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/carriage',
               },
               {
-                label: 'Cultures icons created by Freepik - Flaticon',
+                label: 'Cultures by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/cultures',
               },
               {
-                label: 'Fairy icons created by Freepik - Flaticon',
+                label: 'Fairy by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/fairy',
               },
               {
-                label: 'Spellbook icons created by Freepik - Flaticon',
+                label: 'Spellbook by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/spellbook',
               },
               {
-                label: 'Scroll icons created by Freepik - Flaticon',
+                label: 'Scroll by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/scroll',
+              },
+              {
+                label: 'Excalibur by Freepik - Flaticon',
+                href: 'https://www.flaticon.com/free-icons/excalibur',
+              },
+              {
+                label: 'Hourglass by Freepik - Flaticon',
+                href: 'https://www.flaticon.com/free-icons/time-and-date',
+              },
+              {
+                label: 'Snow by Freepik - Flaticon',
+                href: 'https://www.flaticon.com/free-icons/snow',
+              },
+              {
+                label: 'Trees by Freepik - Flaticon',
+                href: 'https://www.flaticon.com/free-icons/trees',
               },
             ],
           },

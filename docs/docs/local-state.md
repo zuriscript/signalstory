@@ -1,16 +1,22 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Local state
 
 State management becomes even more challenging when dealing with the combination of domain data and UI-related state. This is a common scenario in modern web applications, where data fetched from backend services needs to be presented and interacted with in the user interface.
 
+:::info
+
 Consider an application that displays a list of books fetched from a backend API. Each book has various properties, such as title, author, publication date, and genre. In addition to displaying this technical data, the application may also need to track the UI-related state, such as whether a book is selected, highlighted, or expanded in a collapsible section. Moreover, there might be situations where the application requires presenting the fetched data differently, possibly by augmenting it with additional data from other API resources (hence other stores).
 
-In many cases, it's convenient to keep UI-related code within the component itself. This approach allows us to directly reference both the UI state and the store state separately in the template. Alternatively, we can leverage the `computed` signal API to seamlessly merge the store's data with the UI data.
+:::
 
-However, there are scenarios where integrating the UI state in stores can bring about advantages such as separation of concerns, reusable UI logic, time-travel debugging, and simplified cross-component communication.
+## Component state
+
+In many cases, it's convenient to keep UI-related code within the component itself. This approach allows us to directly reference both the UI state and the store state separately in the template. Additionally, we can leverage the `computed` signal API to seamlessly merge the store's data with the UI data.
+
+It gets more complicated if the component state has to react to state changes in a store. We can sync component and store states using observable subscriptions or signal effects (while considering the points mentioned [here](https://angular.io/guide/signals#effects)). However, integrating UI state into stores can be advantageous as it helps separating concerns, reusing UI logic, enabling time-travel debugging, and simplifying cross-component communication.
 
 ## All in one Store
 
@@ -56,7 +62,7 @@ class BooksStore extends Store<Book[]> {
 
 ## UI Store
 
-Another way to is to use a dedicated Store for the UI state and to interact with one or more data stores. Often, it is not enough to just combine the data and UI store using projections (query object or `computed` signal) as the UI side also has to react to changes in the data store. This can be done using [synchronous events](./building-blocks/event.md) or asychronously using the [effect API](https://angular.io/guide/signals#effects) or signal-transformed observables. Be aware, that especially the asynchronous way of state propagation could come with some potential risks:
+Another way is to use a dedicated store for the UI state and to interact with one or more data stores. Often, it is not enough to just combine the data and UI store using projections (query object or `computed` signal) as the UI side also has to react to changes in the data store. This can be done using [synchronous events](./building-blocks/event.md) or asychronously using the [effect API](https://angular.io/guide/signals#effects) or [signal-transformed observables](https://angular.io/api/core/rxjs-interop/toObservable). Be aware, that especially the asynchronous way of state propagation could come with some potential risks:
 
 > Avoid using effects for propagation of state changes. This can result in ExpressionChangedAfterItHasBeenChecked errors, infinite circular updates, or unnecessary
 > change detection cycles.

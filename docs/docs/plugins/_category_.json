@@ -1,0 +1,8 @@
+{
+  "label": "Plugins",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "Plugins provide specialized capabilities to enhance a single store's functionality. Three built-in plugins enable you to track and navigate state changes, streamline debugging and to persist store date in a storage. But you are also able to create your own unique plugins to customize any store's behaviour."
+  }
+}

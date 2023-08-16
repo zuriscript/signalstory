@@ -1,5 +1,5 @@
-import React from 'react';
 import clsx from 'clsx';
+import React from 'react';
 import styles from './styles.module.css';
 
 const FeatureList = [
@@ -18,8 +18,7 @@ const FeatureList = [
     Svg: require('@site/static/img/pumpkin-carriage.png').default,
     description: (
       <>
-        Supports event handling, enabling communication and interaction between different stores. 
-        Events can be used for inter-store communication or for triggering side effects.
+        Supports event handling, enabling decoupled communication and interaction between different stores as well as providing the possibility to react synchronously to events.
       </>
     ),
   },
@@ -28,8 +27,8 @@ const FeatureList = [
     Svg: require('@site/static/img/castle.png').default,
     description: (
       <>
-      Offers an open architecture, allowing you to choose between different styles of store implementations. 
-      You can use plain repository-based stores or even mimicking Redux-like behavior depending on your needs and preferences.
+      Offers an open architecture: You can stay completely imperative or make use of decoupling features; 
+      you can use plain repository-based stores or mimicking Redux-like behavior depending on your needs and preferences.
       </>
     ),
   },
@@ -44,7 +43,7 @@ const FeatureList = [
     ),
   },
   {
-    title: 'Automatic Persistence to Local Storage',
+    title: 'Automatic Persistence',
     Svg: require('@site/static/img/scroll.png').default,
     description: (
       <>
@@ -59,6 +58,33 @@ const FeatureList = [
     description: (
       <>
       You can enable store history to track state changes over time and perform undo and redo operations.
+      </>
+    ),
+  },
+  {
+    title: 'Support for Redux devtools',
+    Svg: require('@site/static/img/excalibur.png').default,
+    description: (
+      <>
+      Dive deep into the history of state changes, visualize the flow of actions, and effortlessly debug your application using the Redux Devtools
+      </>
+    ),
+  },
+  {
+    title: 'Immutability',
+    Svg: require('@site/static/img/frozen-hourglass.png').default,
+    description: (
+      <>
+      In contrast to native signals, immutability becomes a choice, safeguarding your state against accidental mutations and offering more predictability and simplified debugging.
+      </>
+    ),
+  },
+  {
+    title: 'Tree shakeable',
+    Svg: require('@site/static/img/forest.png').default,
+    description: (
+      <>
+      You bundle only what you use while enjoying native angular and typescript support.
       </>
     ),
   },

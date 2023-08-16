@@ -64,9 +64,7 @@ We can leave it to the consumer, i.e. a component or a service where the data is
 
 ### Using a query object
 
-You can use the provided `createQuery` function to create a query object, which can be passed to any store that has been initialized with an injector context (`enableEffectsAndQueries`). A query object consist of an array of stores involved in the query and a function taking those stores as argument. Note, that you may not use the `computed` function in query objects, as this is done for you by the stores implementation.
-
-It actually doesn't matter which store runs the query object. It can be any store that has `enableEffectsAndQueries` enabled. The other stores are not required to have this setting enabled.
+You can use the provided `createQuery` function to create a query object, which can be passed to any store (except for dynamic stores that were created outside of an [injection context](https://angular.io/guide/dependency-injection-context)). A query object consist of an array of stores involved in the query and a function taking those stores as argument. Note, that you may not use the `computed` function in query objects, as this is done for you by the stores implementation.
 
 The benefit of using this approach is, that we now have an independent query which can be declared and exported centrally and be reused anywhere.
 
@@ -77,7 +75,7 @@ import { Store, createQuery } from 'signalstory';
 @Injectable({ providedIn: 'root' })
 class CounterStore extends Store<number> {
   constructor() {
-    super({ initialState: 7, enableEffectsAndQueries: true });
+    super({ initialState: 7 });
   }
 }
 

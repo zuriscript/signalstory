@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Configuration
 
-The store configuration allows you to customize the behavior of your store. It provides various options to tailor the store's functionality according to your specific requirements. The configuration is applied by passing it to the constructor. Since signalstory is a multi store state management library, each store can have its own configuration.
+The store configuration allows you to customize the behavior of your store. The configuration is applied by passing it to the constructor. Since signalstory is a multi store state management library, each store can have its own configuration.
 
 Here are the available configuration options:
 
