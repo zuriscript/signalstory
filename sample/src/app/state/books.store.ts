@@ -1,31 +1,39 @@
 import { Injectable, computed } from '@angular/core';
-import { Store, StoreEvent, createQuery } from 'signalstory';
+import {
+  ImmutableStore,
+  StoreEvent,
+  useDevtools,
+  useStoreHistory,
+  useStorePersistence,
+} from 'signalstory';
 import {
   googleBooksLoadedFailure,
   googleBooksLoadedSuccess,
 } from './books.effects';
-import { BookData, Book, BookUI } from './books.state';
+import { Book, BookData } from './books.state';
 
 @Injectable({ providedIn: 'root' })
-export class BooksStore extends Store<Book[]> {
+export class BooksStore extends ImmutableStore<Book[]> {
   constructor() {
     super({
       initialState: [],
-      enableEffectsAndQueries: true,
-      enableEvents: true,
+      name: 'BookStore',
       enableLogging: true,
-      enableStateHistory: true,
-      enableLocalStorageSync: true,
+      plugins: [
+        useDevtools(),
+        useStoreHistory(),
+        useStorePersistence({ persistenceKey: 'TempStoreState' }),
+      ],
     });
 
     this.registerHandler(
       googleBooksLoadedSuccess,
-      this.handleGoogleBooksLoadedSuccessfullyEvent.bind(this)
+      this.handleGoogleBooksLoadedSuccessfullyEvent
     );
 
     this.registerHandler(
       googleBooksLoadedFailure,
-      this.handleGoogleBooksLoadedFailureEvent.bind(this)
+      this.handleGoogleBooksLoadedFailureEvent
     );
   }
 
@@ -69,6 +77,7 @@ export class BooksStore extends Store<Book[]> {
   }
 
   private handleGoogleBooksLoadedSuccessfullyEvent(
+    store: this,
     event: StoreEvent<BookData[]>
   ) {
     const books =
@@ -80,10 +89,13 @@ export class BooksStore extends Store<Book[]> {
           }
       ) ?? [];
 
-    this.setBooks(books);
+    store.setBooks(books);
   }
 
-  private handleGoogleBooksLoadedFailureEvent(_: StoreEvent<never>) {
-    this.setBooks([]);
+  private handleGoogleBooksLoadedFailureEvent(
+    store: this,
+    _: StoreEvent<never>
+  ) {
+    store.setBooks([]);
   }
 }

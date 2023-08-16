@@ -3,9 +3,12 @@ import { createEvent, StoreEvent } from '../lib/store-event';
 import {
   createRegistry,
   publish,
+  publishStoreEvent,
   register,
+  rootRegistry,
   unregister,
 } from '../lib/store-mediator';
+import { arrayFromOrUndefined } from './helper';
 
 class DummyStore extends Store<number> {
   constructor() {
@@ -13,24 +16,18 @@ class DummyStore extends Store<number> {
   }
 }
 
-function arrayFromOrUndefined<T>(
-  iterable: Iterable<T> | ArrayLike<T> | undefined
-): T[] | undefined {
-  return iterable ? Array.from(iterable) : undefined;
-}
-
 describe('register', () => {
   it('should register an event handler in the MediatorRegistry', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event1');
     const store = new DummyStore();
     const handler = jest.fn();
 
-    // Act
+    // act
     register(registry, store, storeEvent, handler);
 
-    // Assert
+    // assert
     const handlers = arrayFromOrUndefined(registry.get(storeEvent));
     expect(handlers).toHaveLength(1);
     expect(handlers?.map(x => x.store.deref())).toContain(store);
@@ -38,7 +35,7 @@ describe('register', () => {
   });
 
   it('should register multiple event handlers for different events', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent1 = createEvent<number>('event1');
     const storeEvent2 = createEvent<string>('event2');
@@ -50,12 +47,12 @@ describe('register', () => {
     const handler2 = jest.fn();
     const handler3 = jest.fn();
 
-    // Act
+    // act
     register(registry, store1, storeEvent1, handler1);
     register(registry, store2, storeEvent2, handler2);
     register(registry, store3, storeEvent3, handler3);
 
-    // Assert
+    // assert
     const assertForEvent = (
       event: StoreEvent<any>,
       store: any,
@@ -73,7 +70,7 @@ describe('register', () => {
   });
 
   it('should register multiple event handlers for the same event', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
     const handler1 = jest.fn();
@@ -81,11 +78,11 @@ describe('register', () => {
     const store1 = new DummyStore();
     const store2 = new DummyStore();
 
-    // Act
+    // act
     register(registry, store1, storeEvent, handler1);
     register(registry, store2, storeEvent, handler2);
 
-    // Assert
+    // assert
     const handlers = arrayFromOrUndefined(registry.get(storeEvent));
     expect(handlers).toHaveLength(2);
     expect(handlers?.map(x => x.store.deref())).toContain(store1);
@@ -97,7 +94,7 @@ describe('register', () => {
 
 describe('publish', () => {
   it('should execute the associated event handlers for a single event', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
     const paylaod = 42;
@@ -112,10 +109,10 @@ describe('publish', () => {
     register(registry, store2, storeEvent, handler2);
     register(registry, store3, storeEvent, handler3);
 
-    // Act
+    // act
     publish(registry, storeEvent, paylaod);
 
-    // Assert
+    // assert
     storeEvent.payload = paylaod;
     expect(handler1).toHaveBeenCalledTimes(1);
     expect(handler1).toHaveBeenCalledWith(store1, storeEvent);
@@ -126,11 +123,65 @@ describe('publish', () => {
     expect(handler3).toHaveBeenCalledTimes(1);
     expect(handler3).toHaveBeenCalledWith(store3, storeEvent);
   });
+  it('should execute the associated event handlers for a single event and store', () => {
+    // arrange
+    const registry = createRegistry();
+    const storeEvent = createEvent<number>('event');
+    const paylaod = 42;
+    const handler1 = jest.fn();
+    const handler2 = jest.fn();
+    const store = new DummyStore();
+
+    register(registry, store, storeEvent, handler1);
+    register(registry, store, storeEvent, handler2);
+
+    // act
+    publish(registry, storeEvent, paylaod);
+
+    // assert
+    storeEvent.payload = paylaod;
+    expect(handler1).toHaveBeenCalledTimes(1);
+    expect(handler1).toHaveBeenCalledWith(store, storeEvent);
+
+    expect(handler2).toHaveBeenCalledTimes(1);
+    expect(handler2).toHaveBeenCalledWith(store, storeEvent);
+  });
+});
+
+describe('publishStoreEvent', () => {
+  it('should execute the associated event handlers for a single event', () => {
+    // arrange
+    const storeEvent = createEvent<number>('event');
+    const paylaod = 42;
+    const handler1 = jest.fn();
+    const handler2 = jest.fn();
+    const handler3 = jest.fn();
+    const store1 = new DummyStore();
+    const store2 = new DummyStore();
+
+    register(rootRegistry, store1, storeEvent, handler1);
+    register(rootRegistry, store1, storeEvent, handler2);
+    register(rootRegistry, store2, storeEvent, handler3);
+
+    // act
+    publishStoreEvent(storeEvent, paylaod);
+
+    // assert
+    storeEvent.payload = paylaod;
+    expect(handler1).toHaveBeenCalledTimes(1);
+    expect(handler1).toHaveBeenCalledWith(store1, storeEvent);
+
+    expect(handler2).toHaveBeenCalledTimes(1);
+    expect(handler2).toHaveBeenCalledWith(store1, storeEvent);
+
+    expect(handler3).toHaveBeenCalledTimes(1);
+    expect(handler3).toHaveBeenCalledWith(store2, storeEvent);
+  });
 });
 
 describe('unregister', () => {
   it('should remove the associated event handlers for a single store and not chaning anything for other stores', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
     const handler1 = jest.fn();
@@ -141,10 +192,10 @@ describe('unregister', () => {
     register(registry, store1, storeEvent, handler1);
     register(registry, store2, storeEvent, handler2);
 
-    // Act
+    // act
     unregister(registry, store1, storeEvent);
 
-    // Assert
+    // assert
     const handlers = arrayFromOrUndefined(registry.get(storeEvent));
     expect(handlers).toHaveLength(1);
     expect(handlers?.map(x => x.store.deref())).not.toContain(store1);
@@ -154,7 +205,7 @@ describe('unregister', () => {
   });
 
   it('should remove the associated event handlers for a single store for multiple events', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent1 = createEvent<number>('event1');
     const storeEvent2 = createEvent<string>('event2');
@@ -165,16 +216,16 @@ describe('unregister', () => {
     register(registry, store1, storeEvent1, handler1);
     register(registry, store1, storeEvent2, handler2);
 
-    // Act
+    // act
     unregister(registry, store1, storeEvent1, storeEvent2);
 
-    // Assert
+    // assert
     expect(registry.get(storeEvent1)).toBeUndefined();
     expect(registry.get(storeEvent2)).toBeUndefined();
   });
 
   it('should not throw if the store has not attached any handler to the event', () => {
-    // Arrange
+    // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event1');
     const handler2 = jest.fn();
@@ -183,10 +234,10 @@ describe('unregister', () => {
 
     register(registry, store2, storeEvent, handler2);
 
-    // Act
+    // act
     const act = () => unregister(registry, store1, storeEvent);
 
-    // Assert
+    // assert
     expect(act).not.toThrow();
   });
 });

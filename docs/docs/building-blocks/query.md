@@ -64,9 +64,7 @@ We can leave it to the consumer, i.e. a component or a service where the data is
 
 ### Using a query object
 
-You can use the provided `createQuery` function to create a query object, which can be passed to any store that has been initialized with an injector context (`enableEffectsAndQueries`). A query object consist of an array of stores involved in the query and a function taking those stores as argument. Note, that you may not use the `computed` function in query objects, as this is done for you by the stores implementation.
-
-It actually doesn't matter which store runs the query object. It can be any store that has `enableEffectsAndQueries` enabled. The other stores are not required to have this setting enabled.
+You can use the provided `createQuery` function to create a query object, which can be passed to any store (except for dynamic stores that were created outside of an [injection context](https://angular.io/guide/dependency-injection-context)). A query object consist of an array of stores involved in the query and a function taking those stores as argument. Note, that you may not use the `computed` function in query objects, as this is done for you by the stores implementation.
 
 The benefit of using this approach is, that we now have an independent query which can be declared and exported centrally and be reused anywhere.
 
@@ -77,7 +75,7 @@ import { Store, createQuery } from 'signalstory';
 @Injectable({ providedIn: 'root' })
 class CounterStore extends Store<number> {
   constructor() {
-    super({ initialState: 7, enableEffectsAndQueries: true });
+    super({ initialState: 7 });
   }
 }
 
@@ -112,14 +110,19 @@ export const counterAndWordWithParamQuery = createQuery(
 export class AppComponent {
   constructor(counterStore: CounterStore) {
     // highlight-start
-    console.log(counterStore.runQuery(counterAndWordQuery)); // prints Magnificent7
-    console.log(counterStore.runQuery(counterAndWordWithParamQuery, '-movie')); // prints Magnificent7-movie
+    console.log(counterStore.runQuery(counterAndWordQuery)()); // prints Magnificent7
+    console.log(
+      counterStore.runQuery(counterAndWordWithParamQuery, '-movie')()
+    ); // prints Magnificent7-movie
     // highlight-end
   }
 }
 ```
 
-:::tip
+:::info
+Note that creating the query does not directly produce the signal itself but rather serves as a "recipe" for building it. The actual signal is generated once the query object is provided to the `runQuery` function of any store. Hence, to take advantage of memoization, it is advisable to store the resulting signal in a variable and reuse it as much as possible, rather than invoking `runQuery` repeatedly.
+:::
 
+:::tip
 Read about [computed signals](https://angular.io/guide/signals#computed-signals) in the official docs to unlock the full power of multi store queries. You may even specify to use the state value of a certain store without tracking, hence, a change of that stores value would **not** force the computed query to be reevaluated. [Read more](https://angular.io/guide/signals#reading-without-tracking-dependencies)
 :::

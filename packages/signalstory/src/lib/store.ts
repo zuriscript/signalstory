@@ -3,7 +3,8 @@ import {
   ProviderToken,
   Signal,
   WritableSignal,
-  effect,
+  assertInInjectionContext,
+  computed,
   inject,
   runInInjectionContext,
   signal,
@@ -11,14 +12,15 @@ import {
 import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
-import { HistoryItem, StoreHistory } from './store-history';
-import { publish, register, rootRegistry, unregister } from './store-mediator';
+import { register, rootRegistry, unregister } from './store-mediator';
 import {
-  clearLocalStorage,
-  loadFromStorage,
-  saveToStorage,
-} from './store-persistence';
+  CommandPostprocessor,
+  CommandPreprocessor,
+  InitPostprocessor,
+} from './store-plugin';
 import { StoreQuery } from './store-query';
+import { getInjectorOrNull } from './utility/injector-helper';
+import { enableLogging, log } from './utility/logger';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
@@ -26,9 +28,14 @@ import { StoreQuery } from './store-query';
  */
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
-  private readonly config: Required<StoreConfig<TState>>;
-  private readonly history: StoreHistory<TState> | undefined;
-  private readonly injector: Injector | undefined;
+  private readonly initPostprocessor: InitPostprocessor[] = [];
+  private readonly commandPreprocessor: CommandPreprocessor[] = [];
+  private readonly commandPostprocessor: CommandPostprocessor[] = [];
+  private log?: (action: string, description?: string, ...data: any[]) => void;
+  /**
+   * The config of the store as readonly
+   */
+  public readonly config: Readonly<Required<StoreConfig<TState>>>;
 
   /**
    * Creates a new instance of the store class.
@@ -38,38 +45,32 @@ export class Store<TState> {
     this.config = {
       name: config.name ?? this.constructor.name,
       initialState: config.initialState,
-      enableEffectsAndQueries: config.enableEffectsAndQueries ?? false,
+      injector: config.injector ?? getInjectorOrNull(),
       enableLogging: config.enableLogging ?? false,
-      enableStateHistory: config.enableStateHistory ?? false,
-      enableLocalStorageSync: config.enableLocalStorageSync ?? false,
+      plugins: config.plugins ?? [],
     };
 
-    if (config.enableStateHistory) {
-      this.history = new StoreHistory<TState>();
+    this._state = signal(this.config.initialState);
+
+    if (this.config.enableLogging) {
+      enableLogging();
+      this.log = (a: string, d?: string, ...p: any[]) =>
+        log?.(`[${this.config.name}->${a}] ${d ?? 'Unspecified'}`, ...p);
     }
 
-    if (config.enableEffectsAndQueries) {
-      this.injector = inject(Injector);
-    }
+    this.config.plugins.forEach(plugin => {
+      if (plugin.init) {
+        this.initPostprocessor.push(plugin.init);
+      }
+      if (plugin.preprocessCommand) {
+        this.commandPreprocessor.push(plugin.preprocessCommand);
+      }
+      if (plugin.postprocessCommand) {
+        this.commandPostprocessor.push(plugin.postprocessCommand);
+      }
+    });
 
-    if (config.enableLocalStorageSync) {
-      const persistedState = loadFromStorage<TState>(this.config.name);
-      this._state = signal(persistedState ?? config.initialState);
-      effect(() => {
-        saveToStorage(this.config.name, this._state());
-      });
-      this.log(
-        'Init',
-        persistedState
-          ? 'Store initialized from local storage'
-          : 'local storage is empty; store initialized using configured initial state',
-        config,
-        this._state()
-      );
-    } else {
-      this._state = signal(config.initialState);
-      this.log('Init', 'Store initialized', config);
-    }
+    this.initPostprocessor.forEach(p => p(this));
   }
 
   /**
@@ -87,33 +88,17 @@ export class Store<TState> {
   }
 
   /**
-   * Gets the history of this store from creation until before current state
-   */
-  public getHistory(): HistoryItem<TState>[] {
-    return this.history?.entries ?? [];
-  }
-
-  /**
-   * Clears the persisted state from local storage.
-   * Does not affect the current state of the store
-   */
-  public clearPersistence() {
-    clearLocalStorage(this.config.name);
-  }
-
-  /**
    * Sets the store's state to the provided state, with an optional command name.
    * @param newState The new state of the store.
    * @param commandName The name of the command associated with the state change.
    */
   public set(newState: TState, commandName?: string): void {
-    this.addToHistory(commandName);
+    this.commandPreprocessor.forEach(p => p(this, commandName));
 
     this._state.set(newState);
 
-    this.log('Command', commandName ?? 'unspecified command', {
-      newState: this.state(),
-    });
+    this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -125,13 +110,12 @@ export class Store<TState> {
     updateFn: (currentState: TState) => TState,
     commandName?: string
   ): void {
-    this.addToHistory(commandName);
+    this.commandPreprocessor.forEach(p => p(this, commandName));
 
     this._state.update(state => updateFn(state));
 
-    this.log('Command', commandName ?? 'unspecified command', {
-      newState: this.state(),
-    });
+    this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -139,14 +123,16 @@ export class Store<TState> {
    * @param mutator A function that mutates the current state.
    * @param commandName The name of the command associated with the state mutation.
    */
-  public mutate(mutator: (currentState: TState) => void, commandName?: string) {
-    this.addToHistory(commandName);
+  public mutate(
+    mutator: (currentState: TState) => void,
+    commandName?: string
+  ): void {
+    this.commandPreprocessor.forEach(p => p(this, commandName));
 
     this._state.mutate(mutator);
 
-    this.log('Command', commandName ?? 'unspecified command', {
-      newState: this.state(),
-    });
+    this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -159,7 +145,7 @@ export class Store<TState> {
     handler: (store: this, event: StoreEvent<TPayload>) => void
   ) {
     register(rootRegistry, this, event, handler);
-    this.log('Init', `Register handler for event ${event.name}`);
+    this.log?.('Event', `Register handler for ${event.name}`);
   }
 
   /**
@@ -173,29 +159,7 @@ export class Store<TState> {
   ): void;
   public unregisterHandler(...events: StoreEvent<any>[]): void {
     unregister(rootRegistry, this, ...events);
-    this.log('Init', `Unregister handler for events: [${events.join(', ')}]`);
-  }
-
-  /**
-   * Publishes an event to the mediator, executing all associated event handlers.
-   * @param event The event to publish.
-   * @param payload The payload to pass to the event handlers.
-   */
-  public publish(event: StoreEvent<never>, payload?: undefined): void;
-  public publish<T>(event: StoreEvent<T>, payload: T): void;
-  public publish<T>(event: StoreEvent<T>, payload?: T): void {
-    if (this.config.enableLogging) {
-      this.log('Event', `Publish event ${event.name}`);
-    }
-
-    const executedHandlerSources = publish(rootRegistry, event, payload);
-
-    for (const handlerSource of executedHandlerSources) {
-      this.logWithGeneralStore(handlerSource, 'Handler', `Handled Event`, {
-        name: event.name,
-        payload: payload,
-      });
-    }
+    this.log?.('Event', `Unegister handler for ${events.join(', ')}`);
   }
 
   /**
@@ -212,10 +176,10 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
-    this.log('Effect', `Running ${effect.name}`, effect, ...args);
+    this.log?.('Effect', `Running ${effect.name}`, ...args);
 
-    if (effect.withInjectionContext && this.injector) {
-      return runInInjectionContext(this.injector, () => {
+    if (effect.withInjectionContext && this.config.injector) {
+      return runInInjectionContext(this.config.injector, () => {
         return effect.func(this, ...args);
       });
     } else {
@@ -223,6 +187,15 @@ export class Store<TState> {
     }
   }
 
+  /**
+   * Runs a store query potentially targeting many differnt stores with the provided arguments and returns the result.
+   * @typeparam TResult The type of the query's result.
+   * @typeparam TStores The types of the stores used in the query.
+   * @typeparam TArgs The type of the query's arguments.
+   * @param storeQuery The store query to run.
+   * @param args The arguments to pass to the query.
+   * @returns The result of the query as computed signal.
+   */
   public runQuery<
     TResult,
     TStores extends ProviderToken<any>[],
@@ -230,110 +203,27 @@ export class Store<TState> {
   >(
     storeQuery: StoreQuery<TResult, TStores, TArgs>,
     ...args: TArgs extends undefined ? [] : [TArgs]
-  ) {
-    return runInInjectionContext(this.injector!, () => {
-      const queryArgs = [
-        ...(storeQuery.stores.map(x => inject(x)) as {
-          [K in keyof TStores]: TStores[K] extends ProviderToken<infer U>
-            ? U
-            : never;
-        }),
-        ...(args as any[]),
-      ];
-
-      return storeQuery.query(...(queryArgs as any));
-    });
-  }
-
-  /**
-   * Performs an undo action by reverting the state to the previous state in the history.
-   */
-  public undo() {
-    if (!this.history) {
-      this.log(
-        'Undo',
-        'Attempted to perform an undo action, but enableStateHistory is not active',
-        this.config
-      );
-    } else {
-      const newState = this.history.undo(this.state());
-      if (newState) {
-        this.log('Undo', 'Performed an undo action');
-        this._state.set(newState);
-      } else {
-        this.log(
-          'Undo',
-          'Attempted to perform an undo action but the state history is empty'
-        );
-      }
+  ): Signal<TResult> {
+    if (!this.config.injector) {
+      assertInInjectionContext(this.runQuery);
     }
-  }
 
-  /**
-   * Performs a redo action by applying the last state in the history before the prior undo action.
-   */
-  public redo() {
-    if (!this.history) {
-      this.log(
-        'Redo',
-        'Attempted to perform a redo action, but enableStateHistory is not active',
-        this.config
-      );
-    } else {
-      const newState = this.history.redo(this.state());
-      if (newState) {
-        this._state.set(newState);
-        this.log('Redo', 'Performed a redo action', this.state());
-      } else {
-        this.log(
-          'Redo',
-          'Attempted to perform a redo action, but the prior action was not an undo action',
-          this.state()
-        );
+    return runInInjectionContext(
+      this.config.injector ?? inject(Injector),
+      () => {
+        const queryArgs = [
+          ...(storeQuery.stores.map(x =>
+            x === this.constructor ? this : inject(x)
+          ) as {
+            [K in keyof TStores]: TStores[K] extends ProviderToken<infer U>
+              ? U
+              : never;
+          }),
+          ...(args as any[]),
+        ];
+
+        return computed(() => storeQuery.query(...(queryArgs as any)));
       }
-    }
-  }
-
-  /**
-   * Logs a message with the store's context and action.
-   * @param context The context of the log message (e.g., 'Init', 'Command', 'Event').
-   * @param action The action being logged.
-   * @param optionalParams Optional additional parameters to log.
-   */
-  private log(context: string, action: string, ...optionalParams: any[]) {
-    this.logWithGeneralStore(
-      this.config.name,
-      context,
-      action,
-      ...optionalParams
     );
-  }
-
-  /**
-   * Logs a message with the store's context and action, including a general store name.
-   * @param store The name of the store.
-   * @param context The context of the log message (e.g., 'Init', 'Command', 'Event').
-   * @param action The action being logged.
-   * @param optionalParams Optional additional parameters to log.
-   */
-  private logWithGeneralStore(
-    store: string,
-    context: string,
-    action: string,
-    ...optionalParams: any[]
-  ) {
-    if (this.config.enableLogging) {
-      console.log(`[${store}->${context}] ${action}`, ...optionalParams);
-    }
-  }
-
-  /**
-   * Adds the current state to the history with the specified command name.
-   * @param currentCommandName The name of the current command associated with the state change.
-   */
-  private addToHistory(currentCommandName: string | undefined) {
-    if (this.history) {
-      this.history.add(this.state(), currentCommandName ?? 'Unspecified');
-    }
   }
 }

@@ -168,7 +168,12 @@ Decoupled effects allow for a flexible and decoupled approach to handle side eff
 
 ```typescript
 import { HttpClient } from '@angular/common/http';
-import { Store, createEffect, createEvent } from 'signalstory';
+import {
+  Store,
+  createEffect,
+  createEvent,
+  publishStoreEvent,
+} from 'signalstory';
 
 // Create events
 export const userLoadedSuccess = createEvent<User>('User loaded successfully');
@@ -183,12 +188,12 @@ export const fetchUser = createEffect(
       .pipe(
         tap(user => {
           // highlight-start
-          store.publish(userLoadedSuccess, user);
+          publishStoreEvent(userLoadedSuccess, user);
           // highlight-end
         }),
         catchError(error => {
           // highlight-start
-          store.publish(userLoadedFailure, error);
+          publishStoreEvent(userLoadedFailure, error);
           // highlight-end
           return of(error);
         })
