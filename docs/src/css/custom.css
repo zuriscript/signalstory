@@ -30,7 +30,12 @@
 }
 
 /* base */
+
 .hero {
+  background-image: url('/img/signalstory_full_page.png');
+  background-repeat: no-repeat;
+  background-position: top 280px left;
+  min-height: 1200px;
   background-color: #fcf2c1;
   padding: 0;
   display: block;
@@ -83,7 +88,7 @@
 
 .big {
   line-height: normal;
-  font-size: 11vw;
+  font-size: 14vw;
 }
 
 .fluid {
@@ -110,17 +115,20 @@
   }
 }
 
-@media (max-width: 649px) {
-.hero-caption .small {
+@media (max-width: 620px) {
+  .hero__subtitle {
     display: none;
   }
 }
 
+
 /* Larger than tablet */
-@media (min-width: 650px) and (max-width: 996px) {
-  .hero {
-    display:flex;
+@media (min-width: 448px) and (max-width: 996px) {
+  .hero {    
+    background-position: top 290px left;
     justify-content: center;
+    display: flex;
+    align-items: start;
   }
 
   .hero-caption {

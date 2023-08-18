@@ -9,3 +9,10 @@
   height: 150px;
   width: 150px;
 }
+
+@media (max-width: 620px) {
+  .featureSvg {
+    height: 120px;
+    width: 120px;
+  }
+}
