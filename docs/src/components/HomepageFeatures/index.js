@@ -37,7 +37,7 @@ const FeatureList = [
     Svg: require('@site/static/img/magic-wand.png').default,
     description: (
       <>
-      Side effects can be implemented in different ways in signalstory. You have the option to include side effects directly as part 
+      Side effects can be implemented in different ways: You have the option to include side effects directly as part 
       of the store, use service-based side effects, or execute effects imperatively on the store based on your specific requirements.
       </>
     ),
@@ -84,7 +84,7 @@ const FeatureList = [
     Svg: require('@site/static/img/forest.png').default,
     description: (
       <>
-      You bundle only what you use while enjoying native angular and typescript support.
+      Leveraging a plugin architecture, optional features are only then part of your bundle if you choose to use them. Custom plugins are possible as well.
       </>
     ),
   },

@@ -6,10 +6,6 @@
 
 signalstory is a flexible and powerful TypeScript library designed specifically for Angular applications. By leveraging signals, signalstory simplifies state management and greatly reduces the reliance on asynchronous observables in components and templates.It offers a range of architectural options, from simple repository-based state management to decoupled commands, side effects, and inter-store communication using an event-based approach. With signalstory, you have the freedom to choose the store implementation that best suits your needs.
 
-> 🚧 **Heads Up: signalstory is Evolving!**
->
-> signalstory is designed and developed alongside real-world projects. Hence, api and functionality are subject to change.
-
 ## Features
 
 - **Signal-Based State Management:** Utilizes a signal-based approach to state management, as everything, except side effects, is completely signal-based. This eliminates the need for asynchronous observables in components and templates, making the state management process more streamlined.
@@ -19,7 +15,7 @@ signalstory is a flexible and powerful TypeScript library designed specifically 
 - **Flexible Side Effect Execution:** Side effects can be implemented in different ways in signalstory. You have the option to include side effects directly as part of the store, use service-based side effects, or execute effects imperatively on the store based on your specific requirements.
 - **Automatic Persistence to Local Storage:** Provides automatic persistence of store state to local storage. Any changes made to the store are automatically synchronized with local storage, ensuring that the state is preserved across page reloads. Initialization of the store can also be directly performed from the persisted state in local storage.
 - **State History:** With signalstory, you can enable store history to track state changes over time and perform undo and redo commands.
-- **Immutability:**In contrast to native signals, immutability becomes a choice, safeguarding your state against accidental mutations and offering more predictability and simplified debugging.
+- **Immutability:** In contrast to native signals, immutability becomes a choice, safeguarding your state against accidental mutations and offering more predictability and simplified debugging.
 - **Redux Devtools:** Dive deep into the history of state changes, visualize the flow of actions, and effortlessly debug your application using the Redux Devtools
 
 ## Installation
