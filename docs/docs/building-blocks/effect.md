@@ -107,8 +107,7 @@ export class AppComponent {
 }
 ```
 
-Using `Covariance`, we can aim for a higher degree of flexibility and reusability by working with stores that share a common structure.
-Covariance is a type system property that enables a more generic type to be used in place of a more specific type. In the context of store coupled effects, it means that an effect can accept a store whose state type is compatible with a more specific state type. This allows the effect to work with multiple stores that have similar structures, increasing code reuse.
+Utilizing `structural subtyping` and `covariance`, we can achieve a higher level of flexibility and reusability when working with structures that exhibit shared characteristics. This trait of TypeScript's type system permits the substitution of a more general type for a more specific one, provided their structural composition aligns. In the context of `effects`, this property implies that an effect can accept a store argument whose state type conforms to a more specific state type. This empowers the effect to operate with various stores that possess similar structures, enhancing the reuse of code and promoting a modular approach to development, see:
 
 ```typescript
 interface User {
