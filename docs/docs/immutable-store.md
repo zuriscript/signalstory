@@ -54,12 +54,19 @@ console.log(counterStore.state()); // prints "{ val: 6 }"
 
 ## Immutable type
 
-The Immutable store wraps the state object inside a generic `Immutable<T>` type which provides compile time deep immutability for any object type. Notice however, that the state object is not deep freezed at runtime, hence, one could use type assertions to trick the compiler. It is in the responsebility of the developer to use or not to use this bypass.
+The Immutable store wraps the state object inside a generic `Immutable<T>` type which provides compile time deep immutability for any object type.
+
+Be aware, that typeScript's type system doesn't always prevent violations of `readonly`, and therefore `Immutable<T>` constraints. Scenarios like type assertions, structural typing compatibility, and passing readonly objects to functions that expect mutable ones, can all bypass these immutability checks. For a stronger guarantee of immutability, consider utilizing the [deep freeze store plugin](./plugins/deep-freeze.md).
+
+:::tip
+
+The default implementation for producing immutable state is a naive json stringify/parse algorithm. The user is expected to pass a more sophisticated implementation from libraries like [immer.js](https://immerjs.github.io/immer/) or [structura.js](https://giusepperaso.github.io/structura.js/).
+
+:::
 
 ## Immer.js
 
-The default implementation for producing immutable state is a naive json stringify/parse algorithm. The user is expected to pass a more sophisticated implementation from libraries like [immer.js](https://immerjs.github.io/immer/) or [structura.js](https://giusepperaso.github.io/structura.js/).
-Here is an example using immer:
+Basic example using [immer.js](https://immerjs.github.io/immer/):
 
 ```typescript
 // highlight-start
@@ -73,6 +80,30 @@ class MyImmerStore extends ImmutableStore<MyState> {
         name: 'My Immmer Store',
         // highlight-start
         cloneAndMutateFunc: produce,
+        // highlight-end
+    });
+  }
+}
+```
+
+## Structura.js
+
+At the moment, the [structura.js](https://giusepperaso.github.io/structura.js/) `produce` type does not match directly with the expected function type: `(currentState: TState, mutation: (draftState: TState) => void) => TState`. A possible workaround, among other strategies, involves utilizing double assertions:
+
+```typescript
+// highlight-start
+import { produce } from "structurajs"
+// highlight-end
+
+type MutationFn<T> = (currentState: T, mutation: (draftState: T) => void) => T;
+
+class MyStructuraStore extends ImmutableStore<MyState> {
+  constructor() {
+    super({
+        initialState: { ... },
+        name: 'My Structura Store',
+        // highlight-start
+        cloneAndMutateFunc: produce  as unknown as MutationFn<MyState>,
         // highlight-end
     });
   }

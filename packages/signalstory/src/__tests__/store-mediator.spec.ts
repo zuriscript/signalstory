@@ -1,3 +1,4 @@
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Store } from '../lib/store';
 import { createEvent, StoreEvent } from '../lib/store-event';
 import {

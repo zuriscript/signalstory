@@ -1,15 +1,16 @@
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { EnvironmentInjector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { lastValueFrom, take } from 'rxjs';
-import { Store } from '../lib/store'; // Import the necessary types and classes
+import { Store } from '../lib/store';
 import { PersistenceStorage } from '../lib/store-plugin-persistence/persistence';
 import {
   clearStoreStorage,
   loadFromStoreStorage,
   saveToStoreStorage,
   useStorePersistence,
-} from '../lib/store-plugin-persistence/plugin-persistence'; // Import the functions to be tested
+} from '../lib/store-plugin-persistence/plugin-persistence';
 import { Cmp, registerAndGetStore } from './helper';
 
 describe('loadFromStorage', () => {
