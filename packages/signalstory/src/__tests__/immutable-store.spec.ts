@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { rootRegistry } from '../lib/store-mediator';
 import { createEffect, createEvent, createQuery } from '../public-api';

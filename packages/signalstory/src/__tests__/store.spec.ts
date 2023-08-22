@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { inject } from '@angular/core';
 import { Store } from '../lib/store';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
