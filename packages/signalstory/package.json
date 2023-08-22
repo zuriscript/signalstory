@@ -1,6 +1,6 @@
 {
   "name": "signalstory",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Signal-based state management for Angular applications",
   "publishConfig": {
     "access": "public"
@@ -25,7 +25,7 @@
   ],
   "author": {
     "name": "Zur Vonarburg-Shmaria",
-    "url": "https://zuriscript.ch"
+    "url": "https://zurshmaria.ch"
   },
   "license": "MIT",
   "peerDependencies": {
