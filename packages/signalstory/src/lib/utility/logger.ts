@@ -3,7 +3,7 @@
  * @param message - The message to be logged.
  * @param optionalParams - Optional parameters to include in the log.
  */
-export type Logger = (message?: any, ...optionalParams: any[]) => void;
+export type Logger = (message?: unknown, ...optionalParams: unknown[]) => void;
 
 let defaultLogger = console.log;
 

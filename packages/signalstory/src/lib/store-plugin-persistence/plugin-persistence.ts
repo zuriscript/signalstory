@@ -27,7 +27,7 @@ export interface StorePersistencePluginOptions {
  */
 type StorePersistencePlugin = StorePlugin & {
   storage: PersistenceStorage;
-  getPersistenceKeyFromStore: (store: Store<any>) => string;
+  getPersistenceKeyFromStore: (store: Store<unknown>) => string;
 };
 
 /**
@@ -35,7 +35,9 @@ type StorePersistencePlugin = StorePlugin & {
  * @param obj - The object to check.
  * @returns True if the object is a StorePersistencePlugin, otherwise false.
  */
-function isStorePersistencePlugin(obj: any): obj is StorePersistencePlugin {
+function isStorePersistencePlugin(
+  obj: StorePlugin
+): obj is StorePersistencePlugin {
   return (
     obj &&
     typeof obj === 'object' &&
@@ -51,7 +53,7 @@ function isStorePersistencePlugin(obj: any): obj is StorePersistencePlugin {
  * @param store - The store instance.
  *
  */
-export function clearStoreStorage(store: Store<any>): void {
+export function clearStoreStorage(store: Store<unknown>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
     clearStorage(plugin.storage, plugin.getPersistenceKeyFromStore(store));
@@ -68,7 +70,7 @@ export function clearStoreStorage(store: Store<any>): void {
  * @param store - The store instance.
  * @param state - The state to save.
  */
-export function saveToStoreStorage<TStore extends Store<any>>(
+export function saveToStoreStorage<TStore extends Store<unknown>>(
   store: TStore,
   state: StoreState<TStore>
 ): void {
@@ -88,7 +90,7 @@ export function saveToStoreStorage<TStore extends Store<any>>(
  * @param store - The store instance.
  * @returns The stored state for the store, or undefined if not found.
  */
-export function loadFromStoreStorage<TStore extends Store<any>>(
+export function loadFromStoreStorage<TStore extends Store<unknown>>(
   store: TStore
 ): StoreState<TStore> | undefined {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);

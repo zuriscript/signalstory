@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /**
  * Define a union type of built-in immutable primitives.
  */
@@ -31,6 +32,6 @@ export type Immutable<T> = T extends ImmutablePrimitive
   ? ReadonlyArray<Immutable<Values>>
   : T extends ReadonlyArray<infer Values>
   ? ReadonlyArray<Immutable<Values>>
-  : T extends {}
+  : T extends object
   ? { readonly [Key in keyof T]: Immutable<T[Key]> } // Recursively transform object properties.
   : Readonly<T>; // For other types, return them as Readonly to make them immutable.

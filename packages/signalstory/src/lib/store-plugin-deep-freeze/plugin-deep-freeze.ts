@@ -9,7 +9,7 @@ import { deepFreeze } from './deep-freeze';
  */
 export function useDeepFreeze(): StorePlugin {
   return {
-    postprocessCommand(store, _) {
+    postprocessCommand(store) {
       deepFreeze(store.state());
     },
   };
