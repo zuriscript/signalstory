@@ -9,6 +9,7 @@ type Action = { type: string };
 /**
  * Options for configuring the Redux DevTools extension.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DevtoolsOptions {
   // At the moment, no support for custom Enhancer options for Redux DevTools
 }
@@ -27,10 +28,10 @@ interface DevtoolsMessage {
  */
 interface Devtools {
   send(
-    data: { type: string } & Record<string, any>,
-    state: Record<string, any>
+    data: { type: string } & Record<string, unknown>,
+    state: Record<string, never>
   ): void;
-  init(state: Record<string, any>): void;
+  init(state: Record<string, never>): void;
   unsubscribe(): void;
   subscribe(cb: (message: DevtoolsMessage) => void): () => void;
 }
@@ -50,14 +51,14 @@ declare global {
  * Registry for store with attached redux devtools monitoring
  * It maps the store name to a Weak reference of the store
  */
-const registry = new Map<string, WeakRef<Store<any>>>();
+const registry = new Map<string, WeakRef<Store<unknown>>>();
 
 /**
  * Retrieves a store from the registry by name.
  * @param name Name of the store.
  * @returns The store, if found.
  */
-function getStore(name: string): Store<any> | undefined {
+function getStore(name: string): Store<unknown> | undefined {
   return registry.get(name)?.deref();
 }
 
@@ -71,8 +72,14 @@ let devtools: Devtools | undefined;
  * @param options DevTools options.
  */
 function initDevtools(options: DevtoolsOptions = {}): void {
-  devtools = window.__REDUX_DEVTOOLS_EXTENSION__.connect(options);
-  devtools.subscribe(handleDevtoolsMessage);
+  if (window && '__REDUX_DEVTOOLS_EXTENSION__' in window) {
+    devtools = window.__REDUX_DEVTOOLS_EXTENSION__.connect(options);
+    devtools.subscribe(handleDevtoolsMessage);
+  } else {
+    console.warn(
+      'ATTENTION: Attempted to initialize redux devtools, but no browser extension was found!'
+    );
+  }
 }
 
 /**
@@ -80,13 +87,13 @@ function initDevtools(options: DevtoolsOptions = {}): void {
  * @returns Snapshot of registered stores.
  * @modifies registry - Deletes references to garbage collected stores
  */
-function scavengeAndGetStoresSnapshot<T extends Record<string, any>>(): T {
+function scavengeAndGetStoresSnapshot<T extends Record<string, unknown>>(): T {
   const stores: T = {} as T;
 
   registry.forEach((storeRef, name) => {
     const store = storeRef.deref();
     if (store) {
-      stores[store.name as keyof T] = store.state();
+      stores[store.name as keyof T] = store.state() as T[keyof T];
     } else {
       registry.delete(name);
       sendToDevtools({ type: `[${name}] - @Removal` });
@@ -138,9 +145,11 @@ function handleDevtoolsMessage(message: DevtoolsMessage): void {
  *
  * @param store - Store to be registered.
  */
-export function registerForDevtools<TStore extends Store<any>>(store: TStore) {
+export function registerForDevtools<TStore extends Store<unknown>>(
+  store: TStore
+) {
   if (!devtools) {
-    initDevtools();
+    initDevtools({});
   }
   registry.set(store.name, new WeakRef(store));
   sendToDevtools({ type: `[${store.name}] - @Init` });
@@ -151,7 +160,9 @@ export function registerForDevtools<TStore extends Store<any>>(store: TStore) {
  *
  * @param store - Store to be removed.
  */
-export function removeFromDevtools<TStore extends Store<any>>(store: TStore) {
+export function removeFromDevtools<TStore extends Store<unknown>>(
+  store: TStore
+) {
   registry.delete(store.name);
   sendToDevtools({ type: `[${store.name}] - @Removal` });
 }
