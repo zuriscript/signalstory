@@ -58,17 +58,19 @@ export class Store<TState> {
         log?.(`[${this.config.name}->${a}] ${d ?? 'Unspecified'}`, ...p);
     }
 
-    this.config.plugins.forEach(plugin => {
-      if (plugin.init) {
-        this.initPostprocessor.push(plugin.init);
-      }
-      if (plugin.preprocessCommand) {
-        this.commandPreprocessor.push(plugin.preprocessCommand);
-      }
-      if (plugin.postprocessCommand) {
-        this.commandPostprocessor.push(plugin.postprocessCommand);
-      }
-    });
+    this.config.plugins
+      .sort((a, b) => (b.precedence ?? 0) - (a.precedence ?? 0))
+      .forEach(plugin => {
+        if (plugin.init) {
+          this.initPostprocessor.push(plugin.init);
+        }
+        if (plugin.preprocessCommand) {
+          this.commandPreprocessor.push(plugin.preprocessCommand);
+        }
+        if (plugin.postprocessCommand) {
+          this.commandPostprocessor.push(plugin.postprocessCommand);
+        }
+      });
 
     this.initPostprocessor.forEach(p => p(this));
   }
