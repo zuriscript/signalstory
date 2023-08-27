@@ -121,6 +121,7 @@ export function redo<TStore extends Store<any>>(store: TStore): void {
  */
 export function useStoreHistory(): StorePlugin {
   return {
+    precedence: 10, // should come early in initialization
     init(store) {
       registerStateHistory(store);
     },

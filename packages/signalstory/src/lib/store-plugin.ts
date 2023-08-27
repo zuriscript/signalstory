@@ -19,7 +19,7 @@ export type StoreState<TStore> = TStore extends Store<infer TState>
  *
  * @param store - The store being initialized.
  */
-export type InitPostprocessor = (store: Store<any>) => void;
+export type InitPostprocessor = (store: Store<unknown>) => void;
 
 /**
  * Represents a function that preprocesses a command before execution.
@@ -30,7 +30,7 @@ export type InitPostprocessor = (store: Store<any>) => void;
  * @param command - The command being executed, if applicable.
  */
 export type CommandPreprocessor = (
-  store: Store<any>,
+  store: Store<unknown>,
   command: string | undefined
 ) => void;
 
@@ -43,7 +43,7 @@ export type CommandPreprocessor = (
  * @param command - The command that was executed, if applicable.
  */
 export type CommandPostprocessor = (
-  store: Store<any>,
+  store: Store<unknown>,
   command: string | undefined
 ) => void;
 
@@ -53,14 +53,16 @@ export type CommandPostprocessor = (
  * This type defines the structure of a store plugin, which can include various
  * functions for initialization, command preprocessing, and command postprocessing.
  *
+ * @property [precedence] - Influcences the ordering of the plugin, high precendence indicates early usage
  * @property [init] - A function for initializing the store.
  * @property [preprocessCommand] - A function for preprocessing commands.
  * @property postprocessCommand] - A function for postprocessing commands.
  * @property [others] - Additional properties may be added for plugin-specific functionality.
  */
 export type StorePlugin = {
+  precedence?: number;
   init?: InitPostprocessor;
   preprocessCommand?: CommandPreprocessor;
   postprocessCommand?: CommandPostprocessor;
-  [others: string]: any;
+  [others: string]: unknown;
 };

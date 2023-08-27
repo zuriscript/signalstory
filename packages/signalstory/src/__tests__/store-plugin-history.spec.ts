@@ -1,6 +1,7 @@
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Store } from '../lib/store';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
+import { useDeepFreeze } from '../lib/store-plugin-deep-freeze/plugin-deep-freeze';
 import { RedoCommand, UndoCommand } from '../lib/store-plugin-history/history';
 import {
   addToHistory,
@@ -10,6 +11,8 @@ import {
   undo,
   useStoreHistory,
 } from '../lib/store-plugin-history/plugin-history';
+import { useStorePersistence } from '../lib/store-plugin-persistence/plugin-persistence';
+import { registerAndGetStore } from './helper';
 
 describe('addToHistory', () => {
   describe('with mutable store', () => {
@@ -404,5 +407,24 @@ describe('redo', () => {
         before: newState1,
       },
     ]);
+  });
+});
+
+describe('registration', () => {
+  it('should come first in ordering', () => {
+    // arrange
+    const historyPlugin = useStoreHistory();
+
+    // act
+    const store = registerAndGetStore({
+      initialState: { value: 10 },
+      plugins: [useDeepFreeze(), useStorePersistence(), historyPlugin],
+    });
+
+    // assert
+    expect(store['initPostprocessor'][0]).toBe(historyPlugin.init);
+    expect(store['commandPreprocessor'][0]).toBe(
+      historyPlugin.preprocessCommand
+    );
   });
 });
