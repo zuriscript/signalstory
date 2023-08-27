@@ -13,13 +13,13 @@ import {
 /**
  * Registry to associate a store with its history.
  */
-const storeHistoryRegistry = new WeakMap<Store<any>, History<any>>();
+const storeHistoryRegistry = new WeakMap<Store<unknown>, History<unknown>>();
 
 /**
  * Registers the history for a store.
  * @param store The store to register history for.
  */
-export function registerStateHistory<TStore extends Store<any>>(
+export function registerStateHistory<TStore extends Store<unknown>>(
   store: TStore
 ): void {
   storeHistoryRegistry.set(store, []);
@@ -29,7 +29,7 @@ export function registerStateHistory<TStore extends Store<any>>(
  * Clears the history for a store.
  * @param store The store to clear history for.
  */
-export function clearStateHistory<TStore extends Store<any>>(
+export function clearStateHistory<TStore extends Store<unknown>>(
   store: TStore
 ): void {
   storeHistoryRegistry.delete(store);
@@ -40,11 +40,13 @@ export function clearStateHistory<TStore extends Store<any>>(
  * @param store The store to get history for.
  * @returns An array of history items as readonly
  */
-export function getHistory<TStore extends Store<any>>(
+export function getHistory<TStore extends Store<unknown>>(
   store: TStore
 ): ReadonlyArray<HistoryItem<StoreState<TStore>>> {
   const history = storeHistoryRegistry.get(store);
-  return history ? history : [];
+  return history
+    ? (history as ReadonlyArray<HistoryItem<StoreState<TStore>>>)
+    : [];
 }
 
 /**
@@ -52,7 +54,7 @@ export function getHistory<TStore extends Store<any>>(
  * @param store The store to add history for.
  * @param command The name of the command to add.
  */
-export function addToHistory<TStore extends Store<any>>(
+export function addToHistory<TStore extends Store<unknown>>(
   store: TStore,
   command: string
 ): void {
@@ -74,7 +76,7 @@ export function addToHistory<TStore extends Store<any>>(
  * Undoes the last command for a store.
  * @param store The store to perform the undo operation on.
  */
-export function undo<TStore extends Store<any>>(store: TStore): void {
+export function undo<TStore extends Store<unknown>>(store: TStore): void {
   const history = storeHistoryRegistry.get(store) as History<
     StoreState<TStore>
   >;
@@ -94,7 +96,7 @@ export function undo<TStore extends Store<any>>(store: TStore): void {
  * Redoes the last undone command for a store.
  * @param store The store to perform the redo operation on.
  */
-export function redo<TStore extends Store<any>>(store: TStore): void {
+export function redo<TStore extends Store<unknown>>(store: TStore): void {
   const history = storeHistoryRegistry.get(store) as History<
     StoreState<TStore>
   >;

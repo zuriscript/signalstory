@@ -116,7 +116,6 @@ export function sendToDevtools(action: Action): void {
  * @param message DevTools message.
  */
 function handleDevtoolsMessage(message: DevtoolsMessage): void {
-  console.log(message);
   if (devtools) {
     if (message.type === 'DISPATCH') {
       const payloadType = message.payload.type;

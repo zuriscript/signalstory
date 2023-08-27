@@ -69,7 +69,7 @@ describe('update', () => {
     const newState = 10;
 
     // act
-    store.update(_ => newState);
+    store.update(() => newState);
 
     // assert
     expect(store.state()).toBe(newState);
@@ -81,7 +81,7 @@ describe('update', () => {
     const newState = { value: 10 };
 
     // act
-    store.update(_ => newState);
+    store.update(() => newState);
 
     // assert
     expect(store.state()).toBe(newState);

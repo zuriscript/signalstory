@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Injector,
   ProviderToken,
@@ -31,7 +32,11 @@ export class Store<TState> {
   private readonly initPostprocessor: InitPostprocessor[] = [];
   private readonly commandPreprocessor: CommandPreprocessor[] = [];
   private readonly commandPostprocessor: CommandPostprocessor[] = [];
-  private log?: (action: string, description?: string, ...data: any[]) => void;
+  private log?: (
+    action: string,
+    description?: string,
+    ...data: unknown[]
+  ) => void;
   /**
    * The config of the store as readonly
    */
@@ -54,7 +59,7 @@ export class Store<TState> {
 
     if (this.config.enableLogging) {
       enableLogging();
-      this.log = (a: string, d?: string, ...p: any[]) =>
+      this.log = (a: string, d?: string, ...p: unknown[]) =>
         log?.(`[${this.config.name}->${a}] ${d ?? 'Unspecified'}`, ...p);
     }
 

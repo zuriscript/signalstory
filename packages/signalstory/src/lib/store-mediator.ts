@@ -2,21 +2,24 @@ import { Store } from './store';
 import { StoreEvent } from './store-event';
 import { log } from './utility/logger';
 
-type EventHandler<TStore extends Store<any>, TPayload> = {
+type EventHandler<TStore extends Store<unknown>, TPayload> = {
   store: WeakRef<TStore>;
   handler: (store: TStore, event: StoreEvent<TPayload>) => void;
 };
 
 type MediatorRegistry = WeakMap<
-  StoreEvent<any>,
-  Set<EventHandler<Store<any>, any>>
+  StoreEvent<unknown>,
+  Set<EventHandler<Store<unknown>, unknown>>
 >;
 
 /**
  * Creates an empty Mediator registry.
  */
 export function createRegistry(): MediatorRegistry {
-  return new WeakMap<StoreEvent<any>, Set<EventHandler<Store<any>, any>>>();
+  return new WeakMap<
+    StoreEvent<unknown>,
+    Set<EventHandler<Store<unknown>, unknown>>
+  >();
 }
 
 /**
@@ -33,18 +36,18 @@ export const rootRegistry: MediatorRegistry = createRegistry();
  * @param {(store: TStore, event: StoreEvent<TPayload>) => void} handler - The handler function to be executed when the event occurs.
  * @throws {Error} if the event name is invalid.
  */
-export function register<TStore extends Store<any>, TPayload>(
+export function register<TStore extends Store<unknown>, TPayload>(
   registry: MediatorRegistry,
   store: TStore,
   event: StoreEvent<TPayload>,
   handler: (store: TStore, event: StoreEvent<TPayload>) => void
 ) {
   const existingHandlers =
-    registry.get(event) || new Set<EventHandler<Store<any>, any>>();
+    registry.get(event) || new Set<EventHandler<Store<unknown>, unknown>>();
   existingHandlers.add({
     store: new WeakRef(store),
     handler,
-  } as any);
+  } as unknown as EventHandler<Store<unknown>, unknown>);
   registry.set(event, existingHandlers);
 }
 
@@ -55,10 +58,10 @@ export function register<TStore extends Store<any>, TPayload>(
  * @param {TStore} store - The store instance to remove event handlers from.
  * @param {...StoreEvent<any>[]} events - The events to remove handlers for.
  */
-export function unregister<TStore extends Store<any>>(
+export function unregister<TStore extends Store<unknown>>(
   registry: MediatorRegistry,
   store: TStore,
-  ...events: StoreEvent<any>[]
+  ...events: StoreEvent<unknown>[]
 ) {
   for (const event of events) {
     const handlers = registry.get(event);

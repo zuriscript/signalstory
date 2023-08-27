@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ProviderToken } from '@angular/core';
 import { Store } from './store';
 
