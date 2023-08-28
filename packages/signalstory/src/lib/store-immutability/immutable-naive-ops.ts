@@ -11,6 +11,20 @@ export function naiveDeepClone<TState>(state: TState): TState {
 }
 
 /**
+ * Creates a deep clone of a given value object using either the `structuredClone` method if available,
+ * or a naive approach using JSON.parse and JSON.stringify if `structuredClone` is not supported.
+ * The naive approach is simple but may have shortcomings and is not optimal for performance.
+ *
+ * @template T - The type of the value object.
+ * @param {T} value - The value object to be cloned.
+ * @returns {T} A deep clone of the provided value object.
+ */
+const deepClone = <TState>(state: TState) =>
+  window && 'structuredClone' in window
+    ? structuredClone(state)
+    : naiveDeepClone(state);
+
+/**
  * Naive implementation of an immutable update function using a clone-and-mutate approach.
  * This function serves as a placeholder that you can swap with a more optimized
  * solution like the one provided by the 'immer.js' library (https://immerjs.github.io/immer/).
@@ -26,7 +40,7 @@ export function naiveCloneAndMutateFunc<TState>(
   currentState: TState,
   mutation: (draftState: TState) => void
 ): TState {
-  const clone = naiveDeepClone(currentState) as TState;
+  const clone = deepClone(currentState) as TState;
   mutation(clone);
   return clone;
 }
