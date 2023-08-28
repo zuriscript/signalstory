@@ -1,4 +1,4 @@
-import { Injector } from '@angular/core';
+import { Injector, ValueEqualityFn } from '@angular/core';
 import { StorePlugin } from './store-plugin';
 
 /**
@@ -19,6 +19,15 @@ export interface StoreConfig<TState> {
    * Optional Di injector can be passed for effects and query objects. Only useful for dynamic stores, that are not registered in DI (optional, default: false)
    */
   injector?: Injector | null;
+  /**
+   * The equality function to compare previous and new states, determining whether
+   * a change notification should be published.
+   * If not provided, the default equality function from Angular signals is used,
+   * or strict equality is used for an ImmutableStore.
+   * It is recommended that users do not modify the equality function except
+   * in exceptional and specialized use cases.
+   */
+  stateEqualityFn?: ValueEqualityFn<TState> | null;
   /**
    * Indicates whether logging is enabled. (optional, default: false).
    */
