@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from './store';
 
 /**
@@ -19,7 +20,7 @@ export type StoreState<TStore> = TStore extends Store<infer TState>
  *
  * @param store - The store being initialized.
  */
-export type InitPostprocessor = (store: Store<unknown>) => void;
+export type InitPostprocessor = (store: Store<any>) => void;
 
 /**
  * Represents a function that preprocesses a command before execution.
@@ -30,7 +31,7 @@ export type InitPostprocessor = (store: Store<unknown>) => void;
  * @param command - The command being executed, if applicable.
  */
 export type CommandPreprocessor = (
-  store: Store<unknown>,
+  store: Store<any>,
   command: string | undefined
 ) => void;
 
@@ -43,7 +44,7 @@ export type CommandPreprocessor = (
  * @param command - The command that was executed, if applicable.
  */
 export type CommandPostprocessor = (
-  store: Store<unknown>,
+  store: Store<any>,
   command: string | undefined
 ) => void;
 
@@ -64,5 +65,5 @@ export type StorePlugin = {
   init?: InitPostprocessor;
   preprocessCommand?: CommandPreprocessor;
   postprocessCommand?: CommandPostprocessor;
-  [others: string]: unknown;
+  [others: string]: any;
 };
