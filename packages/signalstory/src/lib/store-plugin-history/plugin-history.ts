@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
 import { naiveDeepClone } from '../store-immutability/immutable-naive-ops';
 import { ImmutableStore } from '../store-immutability/immutable-store';
@@ -40,7 +41,7 @@ export function clearStateHistory<TStore extends Store<unknown>>(
  * @param store The store to get history for.
  * @returns An array of history items as readonly
  */
-export function getHistory<TStore extends Store<unknown>>(
+export function getHistory<TStore extends Store<any>>(
   store: TStore
 ): ReadonlyArray<HistoryItem<StoreState<TStore>>> {
   const history = storeHistoryRegistry.get(store);
@@ -76,7 +77,7 @@ export function addToHistory<TStore extends Store<unknown>>(
  * Undoes the last command for a store.
  * @param store The store to perform the undo operation on.
  */
-export function undo<TStore extends Store<unknown>>(store: TStore): void {
+export function undo<TStore extends Store<any>>(store: TStore): void {
   const history = storeHistoryRegistry.get(store) as History<
     StoreState<TStore>
   >;
@@ -96,7 +97,7 @@ export function undo<TStore extends Store<unknown>>(store: TStore): void {
  * Redoes the last undone command for a store.
  * @param store The store to perform the redo operation on.
  */
-export function redo<TStore extends Store<unknown>>(store: TStore): void {
+export function redo<TStore extends Store<any>>(store: TStore): void {
   const history = storeHistoryRegistry.get(store) as History<
     StoreState<TStore>
   >;

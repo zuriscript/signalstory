@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from './store';
 import { StoreEvent } from './store-event';
 import { log } from './utility/logger';
@@ -36,7 +37,7 @@ export const rootRegistry: MediatorRegistry = createRegistry();
  * @param {(store: TStore, event: StoreEvent<TPayload>) => void} handler - The handler function to be executed when the event occurs.
  * @throws {Error} if the event name is invalid.
  */
-export function register<TStore extends Store<unknown>, TPayload>(
+export function register<TStore extends Store<any>, TPayload>(
   registry: MediatorRegistry,
   store: TStore,
   event: StoreEvent<TPayload>,
@@ -58,7 +59,7 @@ export function register<TStore extends Store<unknown>, TPayload>(
  * @param {TStore} store - The store instance to remove event handlers from.
  * @param {...StoreEvent<any>[]} events - The events to remove handlers for.
  */
-export function unregister<TStore extends Store<unknown>>(
+export function unregister<TStore extends Store<any>>(
   registry: MediatorRegistry,
   store: TStore,
   ...events: StoreEvent<unknown>[]

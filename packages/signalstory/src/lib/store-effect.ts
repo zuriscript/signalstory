@@ -5,7 +5,7 @@ import { Store } from './store';
  * Represents an effect that can be executed on a store.
  */
 export interface StoreEffect<
-  TStore extends Store<unknown>,
+  TStore extends Store<any>,
   TArgs extends unknown[],
   TResult
 > {
@@ -22,7 +22,7 @@ export interface StoreEffect<
  * @returns A store effect object.
  */
 export function createEffect<
-  TStore extends Store<unknown>,
+  TStore extends Store<any>,
   TArgs extends any[],
   TResult
 >(

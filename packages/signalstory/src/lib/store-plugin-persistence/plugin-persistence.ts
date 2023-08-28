@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { assertInInjectionContext, effect } from '@angular/core';
 import { Store } from '../store';
 import { StorePlugin, StoreState } from '../store-plugin';
@@ -53,7 +54,7 @@ function isStorePersistencePlugin(
  * @param store - The store instance.
  *
  */
-export function clearStoreStorage(store: Store<unknown>): void {
+export function clearStoreStorage(store: Store<any>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
     clearStorage(plugin.storage, plugin.getPersistenceKeyFromStore(store));
