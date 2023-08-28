@@ -29,7 +29,9 @@ export class ImmutableStore<TState> extends Store<Immutable<TState>> {
     });
 
     this.cloneAndMutateFunc =
-      config.cloneAndMutateFunc ?? naiveCloneAndMutateFunc;
+      config.mutationProducerFn ??
+      config.cloneAndMutateFunc ??
+      naiveCloneAndMutateFunc;
   }
 
   /**
