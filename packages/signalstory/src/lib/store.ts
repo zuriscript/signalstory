@@ -51,11 +51,14 @@ export class Store<TState> {
       name: config.name ?? this.constructor.name,
       initialState: config.initialState,
       injector: config.injector ?? getInjectorOrNull(),
+      stateEqualityFn: config.stateEqualityFn ?? null,
       enableLogging: config.enableLogging ?? false,
       plugins: config.plugins ?? [],
     };
 
-    this._state = signal(this.config.initialState);
+    this._state = signal(this.config.initialState, {
+      equal: this.config.stateEqualityFn ?? undefined,
+    });
 
     if (this.config.enableLogging) {
       enableLogging();
