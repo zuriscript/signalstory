@@ -60,7 +60,7 @@ Be aware, that typeScript's type system doesn't always prevent violations of `re
 
 :::tip
 
-The default implementation for producing immutable state is a naive json stringify/parse algorithm. The user is expected to pass a more sophisticated implementation from libraries like [immer.js](https://immerjs.github.io/immer/) or [structura.js](https://giusepperaso.github.io/structura.js/).
+The default implementation for producing immutable state is a basic Clone-and-Mutate approach, leveraging [structuredClone](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone) - or JSON Parse/Stringify as alternative if structuredClone is unsupported. While this method might be acceptable for various scenarios, The user is expected to pass a more sophisticated implementation from libraries like [immer.js](https://immerjs.github.io/immer/) or [structura.js](https://giusepperaso.github.io/structura.js/) for more robustness and speed.
 
 :::
 
@@ -79,7 +79,7 @@ class MyImmerStore extends ImmutableStore<MyState> {
         initialState: { ... },
         name: 'My Immmer Store',
         // highlight-start
-        cloneAndMutateFunc: produce,
+        mutationProducerFn: produce,
         // highlight-end
     });
   }
@@ -103,7 +103,7 @@ class MyStructuraStore extends ImmutableStore<MyState> {
         initialState: { ... },
         name: 'My Structura Store',
         // highlight-start
-        cloneAndMutateFunc: produce  as unknown as MutationFn<MyState>,
+        mutationProducerFn: produce as unknown as MutationFn<MyState>,
         // highlight-end
     });
   }
