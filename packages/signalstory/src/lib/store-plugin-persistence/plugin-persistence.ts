@@ -71,7 +71,7 @@ export function clearStoreStorage(store: Store<any>): void {
  * @param store - The store instance.
  * @param state - The state to save.
  */
-export function saveToStoreStorage<TStore extends Store<unknown>>(
+export function saveToStoreStorage<TStore extends Store<any>>(
   store: TStore,
   state: StoreState<TStore>
 ): void {
@@ -91,7 +91,7 @@ export function saveToStoreStorage<TStore extends Store<unknown>>(
  * @param store - The store instance.
  * @returns The stored state for the store, or undefined if not found.
  */
-export function loadFromStoreStorage<TStore extends Store<unknown>>(
+export function loadFromStoreStorage<TStore extends Store<any>>(
   store: TStore
 ): StoreState<TStore> | undefined {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);

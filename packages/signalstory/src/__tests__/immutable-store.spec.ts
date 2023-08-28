@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
