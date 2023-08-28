@@ -1,10 +1,12 @@
 # signalstory
 
-**Simplify State Management, Embrace the Signal-way-of-doing**
+### Check out the [sample 🚀 ](https://stackblitz.com/edit/stackblitz-starters-bjnmnr?file=src%2Fapp%2Fstate%2Fbooks.store.ts)
 
-> [Visit the docs 🚀](https://zuriscript.github.io/signalstory/)
+### Visit the [docs 📚 ](https://zuriscript.github.io/signalstory/)
 
-signalstory is a flexible and powerful TypeScript library designed specifically for Angular applications. By leveraging signals, signalstory simplifies state management and greatly reduces the reliance on asynchronous observables in components and templates.It offers a range of architectural options, from simple repository-based state management to decoupled commands, side effects, and inter-store communication using an event-based approach. With signalstory, you have the freedom to choose the store implementation that best suits your needs.
+**Empower your angular state management with signals**
+
+signalstory is a flexible and powerful TypeScript library designed specifically for Angular applications. Based on signals, it offers a range of architectural options, from simple repository-based state management to decoupled commands, side effects, and inter-store communication using an event-based approach. With signalstory, you have the freedom to choose the store implementation that suits your needs.
 
 ## Features
 
