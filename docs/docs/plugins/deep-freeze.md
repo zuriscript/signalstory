@@ -12,11 +12,11 @@ TypeScript's type system cannot prevent violations of `readonly` -and hence `Imm
 
 3. **Function Arguments:** If you pass a `readonly` or `Immutable<T>` object to a function that accepts the non-readonly version of the type, the immutability constraints are not enforced within the function's scope.
 
-By deep freezing the state, you can attain runtime immutability assurance against direct modifications to the state. However, it's important to acknowledge that this introduces some performance overhead. Consequently, it's particularly well-suited for use during development and debugging stages, [read more](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze).
+By deep freezing the state, you can attain runtime immutability assurance against direct modifications. However, it's important to acknowledge that this introduces some performance overhead. Consequently, it's particularly well-suited for use during development and debugging stages, [read more](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze).
 
 ## Enabling Deep Freeze
 
-To activate the DeepFreeze plugin, simply include it in your store's configuration. This automatically deep freezes the state after each change (set, update, mutate);
+To activate the DeepFreeze plugin, simply include it in your store's configuration. This automatically deep freezes the state after each change (`set`, `update`, `mutate`);
 
 ```typescript
 class StoreWithDeepFfreezing extends Store<MyState> {

@@ -4,9 +4,22 @@
 
 # signalstory
 
-**Simplify State Management, Embrace the Signal-way-of-doing**
+<p align="center">
 
-signalstory is a flexible and powerful TypeScript library designed specifically for Angular applications. By leveraging signals, signalstory simplifies state management and greatly reduces the reliance on asynchronous observables in components and templates.It offers a range of architectural options, from simple repository-based state management to decoupled commands, side effects, and inter-store communication using an event-based approach. With signalstory, you have the freedom to choose the store implementation that best suits your needs.
+[![npm version](https://badge.fury.io/js/signalstory.svg)](https://badge.fury.io/js/signalstory)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)]()
+[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+
+</p>
+
+### Check out the [sample 🚀 ](https://stackblitz.com/edit/stackblitz-starters-bjnmnr?file=src%2Fapp%2Fstate%2Fbooks.store.ts)
+
+### Visit the [docs 📚 ](https://zuriscript.github.io/signalstory/)
+
+**Empower your angular state management with signals**
+
+signalstory is a flexible and powerful TypeScript library designed specifically for Angular applications. Based on signals, it offers a range of architectural options, from simple repository-based state management to decoupled commands, side effects, and inter-store communication using an event-based approach. With signalstory, you have the freedom to choose the store implementation that suits your needs.
 
 ## Features
 
@@ -83,7 +96,7 @@ Feel free to customize the example and explore other features and functionalitie
 
 ## Sample Application
 
-To set up and run the sample app, follow the steps below:
+To set up and run the sample app locally, follow the steps below:
 
 1. Clone the repository: Clone the repository containing the signalstory library and the sample app.
 

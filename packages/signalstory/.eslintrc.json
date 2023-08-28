@@ -24,7 +24,8 @@
             "prefix": "lib",
             "style": "kebab-case"
           }
-        ]
+        ],
+        "tree-shaking/no-side-effects-in-initialization": 2
       }
     },
     {
