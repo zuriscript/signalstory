@@ -20,7 +20,7 @@ const storeHistoryRegistry = new WeakMap<Store<unknown>, History<unknown>>();
  * Registers the history for a store.
  * @param store The store to register history for.
  */
-export function registerStateHistory<TStore extends Store<unknown>>(
+export function registerStateHistory<TStore extends Store<any>>(
   store: TStore
 ): void {
   storeHistoryRegistry.set(store, []);
@@ -30,7 +30,7 @@ export function registerStateHistory<TStore extends Store<unknown>>(
  * Clears the history for a store.
  * @param store The store to clear history for.
  */
-export function clearStateHistory<TStore extends Store<unknown>>(
+export function clearStateHistory<TStore extends Store<any>>(
   store: TStore
 ): void {
   storeHistoryRegistry.delete(store);
@@ -55,7 +55,7 @@ export function getHistory<TStore extends Store<any>>(
  * @param store The store to add history for.
  * @param command The name of the command to add.
  */
-export function addToHistory<TStore extends Store<unknown>>(
+export function addToHistory<TStore extends Store<any>>(
   store: TStore,
   command: string
 ): void {
