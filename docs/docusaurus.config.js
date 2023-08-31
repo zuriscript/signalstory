@@ -9,7 +9,7 @@ const config = {
   title: 'signalstory | Empower Your Angular State Management',
   tagline: 'Signal-based state management for Angular applications',
   favicon: 'img/favicon.ico',
-  url: 'https://zuriscript.github.io/',  
+  url: 'https://zuriscript.github.io/',
   baseUrl: '/signalstory/',
   organizationName: 'zuriscript',
   projectName: 'signalstory',
@@ -26,8 +26,8 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js'),         
-          sidebarCollapsed: false, 
+          sidebarPath: require.resolve('./sidebars.js'),
+          sidebarCollapsed: false,
           editUrl:
             'https://github.com/zuriscript/signalstory/tree/master/docs/',
         },
@@ -44,6 +44,43 @@ const config = {
       // Replace with your project's social card
       image: 'img/social-card.jpg',
       hideOnScroll: 'false',
+      metadata: [
+        {
+          name: 'google-site-verification',
+          content: 'fcVH_TULsxQvp2rtZCKZBxXtJJsTx1nUEd_Vn6iGCZQ',
+        },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { property: 'twitter:domain', content: 'zuriscript.github.io' },
+        {
+          property: 'twitter:url',
+          content: 'https://zuriscript.github.io/signalstory/',
+        },
+        { name: 'twitter:title', content: 'Signalstory 🧙‍♀️' },
+        {
+          name: 'twitter:description',
+          content: 'Signal-based state management for Angular applications',
+        },
+        {
+          name: 'twitter:image',
+          content:
+            'https://zuriscript.github.io/signalstory/img/social-card.jpg',
+        },
+        {
+          property: 'og:url',
+          content: 'https://zuriscript.github.io/signalstory/',
+        },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: 'Signalstory 🧙‍♀️' },
+        {
+          property: 'og:description',
+          content: 'Signal-based state management for Angular applications',
+        },
+        {
+          property: 'og:image',
+          content:
+            'https://zuriscript.github.io/signalstory/img/social-card.jpg',
+        },
+      ],
       navbar: {
         title: 'signalstory',
         logo: {
@@ -97,7 +134,7 @@ const config = {
               {
                 label: 'Plugins',
                 to: '/docs/category/plugins',
-              }
+              },
             ],
           },
           {
