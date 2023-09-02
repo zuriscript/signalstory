@@ -1,16 +1,14 @@
 import { Injectable, computed } from '@angular/core';
 import {
   ImmutableStore,
-  StoreEvent,
+  clearStoreStorage,
+  useDeepFreeze,
   useDevtools,
   useStoreHistory,
   useStorePersistence,
 } from 'signalstory';
-import {
-  googleBooksLoadedFailure,
-  googleBooksLoadedSuccess,
-} from './books.effects';
 import { Book, BookData } from './books.state';
+import { storeResetRequestEvent } from './events';
 
 @Injectable({ providedIn: 'root' })
 export class BooksStore extends ImmutableStore<Book[]> {
@@ -22,19 +20,15 @@ export class BooksStore extends ImmutableStore<Book[]> {
       plugins: [
         useDevtools(),
         useStoreHistory(),
-        useStorePersistence({ persistenceKey: 'TempStoreState' }),
+        useDeepFreeze(),
+        useStorePersistence(),
       ],
     });
 
-    this.registerHandler(
-      googleBooksLoadedSuccess,
-      this.handleGoogleBooksLoadedSuccessfullyEvent
-    );
-
-    this.registerHandler(
-      googleBooksLoadedFailure,
-      this.handleGoogleBooksLoadedFailureEvent
-    );
+    this.registerHandler(storeResetRequestEvent, store => {
+      store.set(this.getBooksInSearchscope(), 'Reset');
+      clearStoreStorage(store);
+    });
   }
 
   public get getBooksInCollection() {
@@ -52,6 +46,18 @@ export class BooksStore extends ImmutableStore<Book[]> {
     );
 
     this.set(collection.concat(booksInSearchscope), 'Set Books');
+  }
+
+  public setBookData(books: BookData[]) {
+    this.setBooks(
+      books.map(
+        b =>
+          <Book>{
+            ...b,
+            isInCollection: false,
+          }
+      )
+    );
   }
 
   public addToCollection(bookId: string) {
@@ -74,28 +80,5 @@ export class BooksStore extends ImmutableStore<Book[]> {
         book.isInCollection = false;
       }
     }, 'Remove Book From Collection');
-  }
-
-  private handleGoogleBooksLoadedSuccessfullyEvent(
-    store: this,
-    event: StoreEvent<BookData[]>
-  ) {
-    const books =
-      event.payload?.map(
-        book =>
-          <Book>{
-            ...book,
-            isInCollection: false,
-          }
-      ) ?? [];
-
-    store.setBooks(books);
-  }
-
-  private handleGoogleBooksLoadedFailureEvent(
-    store: this,
-    _: StoreEvent<never>
-  ) {
-    store.setBooks([]);
   }
 }

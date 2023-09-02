@@ -1,11 +1,12 @@
 /* eslint-disable @angular-eslint/component-selector */
 import { Component, effect } from '@angular/core';
-import { getHistory, redo, undo } from 'signalstory';
+import { getHistory, publishStoreEvent, redo, undo } from 'signalstory';
 import {
   getGoogleBooksBySearchArgument,
   postCollection,
 } from './state/books.effects';
 import { BooksStore } from './state/books.store';
+import { storeResetRequestEvent } from './state/events';
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,7 @@ import { BooksStore } from './state/books.store';
 
     <div>
       <h2>My Collection</h2>
-      <button (click)="onPostCollection()">Post Collection</button>
+      <button (click)="onPostCollection()">Post and Reset Collection</button>
       <app-book-collection
         [books]="store.getBooksInCollection()"
         (remove)="store.removeFromCollection($event)">
@@ -96,5 +97,6 @@ export class AppComponent {
 
   onPostCollection() {
     this.store.runEffect(postCollection);
+    publishStoreEvent(storeResetRequestEvent);
   }
 }
