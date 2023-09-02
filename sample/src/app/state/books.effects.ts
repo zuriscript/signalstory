@@ -1,30 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
-import {
-  Store,
-  createEffect,
-  createEvent,
-  publishStoreEvent,
-} from 'signalstory';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { createEffect } from 'signalstory';
 import { FakeService } from '../services/fake.service';
 import { BookData } from './books.state';
 import { BooksStore } from './books.store';
 
-export const googleBooksLoadedSuccess = createEvent<BookData[]>(
-  'Google books loaded successfully'
-);
-
-export const googleBooksLoadedFailure = createEvent(
-  'Google books could not be loaded'
-);
-
 export const getGoogleBooksBySearchArgument = createEffect(
   'Get Books from Google',
-  (_: Store<any>, searchArgument: string) => {
+  (store: BooksStore, searchArgument: string): Observable<unknown> => {
     if (!searchArgument || searchArgument.trim() === '') {
-      publishStoreEvent(googleBooksLoadedSuccess, []);
+      store.setBooks([]);
       return of([]);
     }
 
@@ -33,15 +20,7 @@ export const getGoogleBooksBySearchArgument = createEffect(
       .get<{ items: BookData[] }>(
         `https://www.googleapis.com/books/v1/volumes?maxResults=6&orderBy=relevance&q=${searchArgument}`
       )
-      .pipe(
-        tap(books => {
-          publishStoreEvent(googleBooksLoadedSuccess, books.items);
-        }),
-        catchError(error => {
-          publishStoreEvent(googleBooksLoadedFailure, error);
-          return of(error);
-        })
-      );
+      .pipe(tap(books => store.setBookData(books.items)));
   }
 );
 
