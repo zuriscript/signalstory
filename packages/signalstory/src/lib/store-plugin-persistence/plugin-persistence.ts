@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { assertInInjectionContext, effect } from '@angular/core';
 import { Store } from '../store';
 import { StorePlugin, StoreState } from '../store-plugin';
 import {
@@ -118,17 +117,9 @@ export function useStorePersistence(
       if (persistedState) {
         store.set(persistedState, 'Load state from storage');
       }
-
-      if (!store.config.injector) {
-        assertInInjectionContext(useStorePersistence);
-      }
-
-      effect(
-        () => {
-          saveToStoreStorage(store, store.state());
-        },
-        { injector: store.config.injector ?? undefined }
-      );
+    },
+    postprocessCommand(store) {
+      saveToStoreStorage(store, store.state());
     },
   };
 
