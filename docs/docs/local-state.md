@@ -8,13 +8,13 @@ State management becomes even more challenging when dealing with the combination
 
 :::info
 
-Consider an application that displays a list of books fetched from a backend API. Each book has various properties, such as title, author, publication date, and genre. In addition to displaying this technical data, the application may also need to track the UI-related state, such as whether a book is selected, highlighted, or expanded in a collapsible section. Moreover, there might be situations where the application requires presenting the fetched data differently, possibly by augmenting it with additional data from other API resources (hence other stores).
+Consider an application that displays a list of books fetched from a backend API. Each book has various properties, such as title, author, publication date, and genre. In addition to displaying this technical data, the application may also need to track the UI-related state, such as whether a book is selected, highlighted, or expanded in a collapsible section. Moreover, there might be situations where the application requires presenting the fetched data differently, possibly by augmenting it with additional data from other API resources and other stores.
 
 :::
 
 ## Component state
 
-In many cases, it's convenient to keep UI-related code within the component itself. This approach allows us to directly reference both the UI state and the store state separately in the template. Additionally, we can leverage the `computed` signal API to seamlessly merge the store's data with the UI data.
+In many cases, it's convenient to keep UI-related code within the component itself. This approach allows us to directly reference both the UI state and the store state separately in the template. Additionally, we can leverage the `computed` signal API to merge the store's data with the UI data.
 
 It gets more complicated if the component state has to react to state changes in a store. We can sync component and store states using observable subscriptions or signal effects (while considering the points mentioned [here](https://angular.io/guide/signals#effects)). However, integrating UI state into stores can be advantageous as it helps separating concerns, reusing UI logic, enabling time-travel debugging, and simplifying cross-component communication.
 

@@ -12,7 +12,7 @@ By utilizing events and event handlers, you can establish communication between 
 
 ## Event Blueprint
 
-An `event` is represented by the `StoreEvent` interface, which typically includes a name and an optional payload. The name serves as a unique identifier for the event, while the payload contains any additional data associated with the event. You can use the `createEvent` function provided by signalstory to create `event blueprints` with the desired name and payload type. Those blueprint can then be published alongside a payload parameter:
+An `event` is represented by the `StoreEvent` interface, which typically includes a name and an optional payload. The name serves as a unique identifier for the event, while the payload contains any additional data associated with the event. You can use the `createEvent` function provided by signalstory to create `event blueprints` with a name and payload type. Those blueprint can then be published alongside a payload parameter:
 
 ```typescript
 import { createEvent } from 'signalstory';
@@ -28,7 +28,7 @@ To register an event handler, you need to specify the event you want to handle a
 
 :::info
 
-Event handlers are invoked **synchronously** and are intended for specific use cases. Events should capture meaningful incidents that happened (e.g. http calls, user interaction, cross cutting state changes) and that stores need to respond to effectively. Keep in mind that infinite circular updates can occur if further events are pubblished within a handler which transitively invokes the handler again.
+Event handlers are invoked **synchronously** and are intended for specific use cases. Events should capture meaningful incidents that happened (e.g. http calls, user interaction, cross cutting state changes) and that stores need to respond to effectively. Keep in mind that infinite circular updates can occur if further events are pubblished within a handler which transitively invokes the same handler again.
 
 :::
 

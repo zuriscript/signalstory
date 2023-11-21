@@ -4,9 +4,9 @@ sidebar_position: 2
 
 # Command
 
-Commands are the only actions that may modify the state of a store. They are exposed via functions `set`, `update`, and `mutate` to perform state modifications. All of those are based on the [native signal modification functions](https://angular.io/guide/signals#writable-signals).
+Commands are the only actions that should modify the state of a store. The store base class offers the functions `set`, `update`, and `mutate` to perform state modifications. They are based on the [native signal modification functions](https://angular.io/guide/signals#writable-signals).
 
-All modification methods take an optional `commandName` parameter, which is used for logging and history utilities.
+All modification functions take an optional `commandName` parameter, which is used for logging, historization and other plugins.
 
 :::tip
 
