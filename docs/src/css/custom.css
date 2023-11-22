@@ -81,6 +81,10 @@
   background-color: #fcf2c1;
 }
 
+body:not(.scrolling) .landing-page-nav-sibling+.navbar {
+  box-shadow: none;
+}
+
 .landing-page-nav-sibling+.navbar>:not(.navbar-sidebar),
 .landing-page-nav-sibling+.navbar>:not(.navbar-sidebar) a {
   color: black;
