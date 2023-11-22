@@ -1,6 +1,7 @@
 import Navbar from '@theme-original/Navbar';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { clearRafInterval, setRafInterval } from './rafInterval';
 
 export default function NavbarWrapper(props) {
   const location = useLocation();
@@ -12,8 +13,8 @@ export default function NavbarWrapper(props) {
       const checkScrollPosition = () => {
         document.body.classList.toggle('scrolling', window.scrollY > 0);
       };
-      const timerId = setInterval(checkScrollPosition, 250);
-      return () => clearInterval(timerId);
+      const timerId = setRafInterval(checkScrollPosition, 250);
+      return () => clearRafInterval(timerId);
     }
   }, []);
 

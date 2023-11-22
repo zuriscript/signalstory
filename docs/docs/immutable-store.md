@@ -4,8 +4,7 @@ sidebar_position: 5
 
 # Immutable Store
 
-Immutability means that every modification of an object creates a new one while leaving the original untouched. In the angular community, it has gained attention, particularly when combined with the [OnPush change detection strategy](https://angular.io/guide/change-detection-skipping-subtrees). With this strategy, the change detection algorithm doesn't need to inspect the entire object and its properties for changes; instead, it can focus on checking if the reference has changed, meaning that a new object has been created and passed to the component
-. This clearly boosts application performance, considering the recurring and resource-intensive nature of the change detection process.
+Immutability means that every modification of an object creates a new one while leaving the original untouched. In the angular community, it has gained attention, particularly when combined with the [OnPush change detection strategy](https://angular.io/guide/change-detection-skipping-subtrees). With this strategy, the change detection algorithm doesn't need to inspect the entire object and its properties for changes; instead, it can focus on checking if the reference has changed, meaning that a new object has been created and passed to the component. This clearly boosts application performance, considering the recurring and resource-intensive nature of the change detection process.
 
 At the moment, there is no real immutability support for signals out-of-the-box, eventhough there had been [experiments](https://github.com/angular/angular/pull/49644) in the past. This is unsurprising, given the broad spectrum of applications that signals are intended for:
 

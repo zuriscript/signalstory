@@ -32,7 +32,7 @@
 /* base */
 
 .hero {
-  background-image: url('/img/signalstory_full_page.png');
+  background-image: url('/img/signalstory_small_page.png');
   background-repeat: no-repeat;
   background-position: top 280px left;
   min-height: 1200px;
@@ -129,6 +129,7 @@ body:not(.scrolling) .landing-page-nav-sibling+.navbar {
 /* Larger than tablet */
 @media (min-width: 448px) and (max-width: 996px) {
   .hero {    
+    background-image: url('/img/signalstory_medium_page.png');
     background-position: top 290px left;
     justify-content: center;
     display: flex;
