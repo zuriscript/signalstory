@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Immutable Store
 
-Immutability has gained significant attention for its capacity to streamline state management, heighten predictability, and refine debugging processes. Particularly noteworthy is its conventional integration with the [OnPush change detection strategy](https://angular.io/guide/change-detection-skipping-subtrees) where immutable input objects have proved to accelerate performance in complex angular applications. Furthermore, immutability is a core principle in redux and the defining fundament of unidirectional data flow.
+Immutability means that every modification of an object creates a new one while leaving the original untouched. In the angular community, it has gained attention, particularly when combined with the [OnPush change detection strategy](https://angular.io/guide/change-detection-skipping-subtrees). With this strategy, the change detection algorithm doesn't need to inspect the entire object and its properties for changes; instead, it can focus on checking if the reference has changed, meaning that a new object has been created and passed to the component. This clearly boosts application performance, considering the recurring and resource-intensive nature of the change detection process.
 
 At the moment, there is no real immutability support for signals out-of-the-box, eventhough there had been [experiments](https://github.com/angular/angular/pull/49644) in the past. This is unsurprising, given the broad spectrum of applications that signals are intended for:
 
@@ -27,9 +27,15 @@ Some other reasons for using `ImmutableStore` over `Store`:
 
 - Improved interoperability with rxjs observables, which may relay on a stream of immutable values (see `buffer`, `shareReplay`, etc.)
 - Allows for accumulation of singal emmited values over time
+- Signal consumers operate on their individual copies, effectively eliminating various potential concurrent pitfalls
 - Helps following unidirectional dataflow principle
 - More closely adheres to the principles of the functional programming paradigm, enhancing predictability in state modification (matter of taste)
-- Improved signal state change detection, since modification of a signal only then fires a changed event notification if the new value is an actual new object
+
+:::info
+
+The only donwside to immutability is its impact on performance since every mutation leads to the creation of a new object value, deep cloning all properties recursively. However, the extra overhead is typically negligible, especially outside of computationally intensive scenarios. In fact, the slight additional cost might be outweighed by the performance gains associated with change detection.
+
+:::
 
 ## The store
 

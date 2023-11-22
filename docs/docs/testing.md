@@ -4,7 +4,7 @@ sidebar_position: 8
 
 # Testing
 
-Stores are injectable services and can be unit-tested in isolation, much like any other service. You have the option to directly instantiate a store class or use [TestBed](https://angular.io/api/core/testing/TestBed) if your store class has dependencies and you prefer managing them within an injection context during tests. While services can often be tested unmocked as part of the component, it's highly beneficial to conduct unit tests on the store in isolation, as it typically houses your frontend-related business logic.
+Stores are injectable services and can be unit-tested in isolation, much like any other service. You can directly instantiate a store class or use [TestBed](https://angular.io/api/core/testing/TestBed) if your store class has dependencies and you prefer managing them within an injection context during tests. While services can often be tested unmocked as part of the component, it's highly beneficial to conduct unit tests on the store in isolation.
 
 For testing effect and query objects, signalstory provides utility methods under `signalstory/testing`, offering a more readable and targeted syntax than using `TestBed` as-is.
 

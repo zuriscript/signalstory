@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # History
 
-`signalstory` provides a convenient way for consumers to access and navigate the state history of a store. By enabling the `StoreHistoryPlugin`, you can unlock powerful features such as undo and redo functionality and gain insights into the sequence of actions that have occurred within your application.
+`signalstory` provides a convenient way for consumers to access and navigate the state history of a store. By enabling the `StoreHistoryPlugin`, you can use undo and redo functionality and gain insights into the sequence of actions that have occurred within your application.
 
 ## Enabling State History
 

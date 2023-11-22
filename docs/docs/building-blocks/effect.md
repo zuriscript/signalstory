@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Effect
 
-Effects are basically side effects involving other entities and systems outside the regular flow that may affect the store. They are typically used for handling asynchronous operations, like making HTTP calls, that have an impact on the store's state.
+While commands and queries focus exclusively on the store without involving other services or components, effects are intended to enable store interaction with services from outside. Typically, effects come into play when dealing with asynchronous operations, such as executing HTTP calls, that either modify or retrieve information from the store's state.
 
 There are multiple ways to implement effects in `signalstory`:
 

@@ -136,6 +136,10 @@ const config = {
                 label: 'Plugins',
                 to: '/docs/category/plugins',
               },
+              {
+                label: 'Testing',
+                to: '/docs/testing',
+              },
             ],
           },
           {

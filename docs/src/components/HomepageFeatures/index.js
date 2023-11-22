@@ -9,9 +9,8 @@ const FeatureList = [
     description: (
       <>
         Utilizes a signal-based approach to state management. This eliminates
-        the need for asynchronous observables in components and templates
-        (except for side effects), making the state management process more
-        streamlined.
+        the need for asynchronous observables in components and templates for
+        the most part.
       </>
     ),
   },
@@ -32,8 +31,9 @@ const FeatureList = [
     description: (
       <>
         Offers an open architecture: You can stay completely imperative or make
-        use of decoupling features; you can use plain repository-based stores or
-        mimicking Redux-like behavior depending on your needs and preferences.
+        use of declerative decoupling features; you can use plain
+        repository-based stores or mimicking Redux-like behavior depending on
+        your needs and preferences.
       </>
     ),
   },
@@ -42,10 +42,9 @@ const FeatureList = [
     Svg: require('@site/static/img/magic-wand.png').default,
     description: (
       <>
-        Side effects can be implemented in different ways: You have the option
-        to include side effects directly as part of the store, use service-based
-        side effects, or execute effects imperatively on the store based on your
-        specific requirements.
+        Apart from embedded store methods and companion services, side effects
+        can be managed using encapsulated effect objects, ensuring modular,
+        cleaner and more testable code.
       </>
     ),
   },
@@ -65,8 +64,9 @@ const FeatureList = [
     Svg: require('@site/static/img/spellbook.png').default,
     description: (
       <>
-        You can enable store history to track state changes over time and
-        perform undo and redo operations.
+        You can activate store history to trace state changes over time and
+        execute undo and redo operations. Keep your backend informed about the
+        sequence of events in the case of an error.
       </>
     ),
   },
@@ -98,8 +98,8 @@ const FeatureList = [
     description: (
       <>
         Leveraging a plugin architecture, optional features are only then part
-        of your bundle if you choose to use them. Custom plugins are possible as
-        well.
+        of your bundle if you choose to use them. Custom plugins are a few lines
+        of code away.
       </>
     ),
   },

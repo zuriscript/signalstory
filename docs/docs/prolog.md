@@ -4,12 +4,30 @@ sidebar_position: 1
 
 # Prolog
 
-Meet `signalstory`, a new protagonist entering the realm of state management. In this dynamic environment filled with a myriad of established libraries like [observable-store](https://github.com/DanWahlin/Observable-Store), [ngxs](https://www.ngxs.io/), [ngrx](https://ngrx.io/), [akita](https://opensource.salesforce.com/akita/), [elf](https://ngneat.github.io/elf/) and many more, you may wonder why you should consider exploring a new library. Here's why:
+Every frontend application has state. Therefore, state management is the process of organizing data, be it strictly UI-related or business/domain-related, and connecting it with the view. Apart from sharing state between components and services, there are many other different patterns and architectural styles. However, what matters most is choosing the right architecture for your requirements and being consistent with it. Architectures should bring readability and predictability to your code, making it easy to maintain and scale.
 
-- signalstory harnesses the power of [Angular Signals](https://angular.io/guide/signals), offering signals as native unit for state. It is one of the first libraries to embrace this brand new Angular feature.
-- Similar to other libraries, a multi-store approach is adopted, empowering you to divide and conquer the state domain within your Angular application. Addtionally, it provides means to combine all those scattered store instances using joint queries and effects in a reusable and testable fashion
-- No two projects are the same; hence signalstory aims to put as few restrictions as possible, while providing you a toolbox of utilities and concepts to unleash your creativity. Build the state management assisted solution that perfectly aligns with your unique needs:
-  - You can opt for a fully imperative setup, where you're in control of every twist and turn in your state management journey. Just straightforward, imperative code that gets the job done.
-  - When the need arises, you can seamlessly apply decoupling features, allowing your application to communicate through events and enabling loose coupling between different parts of your state management ecosystem.
+### Why a new state management library?
 
-Embrace the next chapter of your state management adventure with `signalstory`.
+State management is hard and the right approach is highly dependent on your project and, especially, your team. There's no one-size-fits-all solution, and that's why many established libraries exist.
+
+What sets signalstory apart from many other solutions is its use of [Angular signals](https://angular.io/guide/signals) as native unit for state. Therefore, there is no intention for signalstory to be employed outside of the Angular framework, which facilitates the integration of the implementation with the Angular ecosystem from the ground up. Signalstory adopts an object-oriented approach and is built around an imperative setup. However, when the need arises, it is possible to leverage decoupling features, enabling the application to communicate through events and therefore enabling loose coupling between different parts.
+
+> Having used multiple libraries and architectures in the past, I envisioned signalstory to be very simple to use. It should provide an enjoyable user experience for developers of all levels, whether junior or senior, while incorporating enough features to handle most practical use cases. At its core, signalstory imposes as few restrictions as possible, providing a toolbox of utilities and concepts to spark creativity.
+
+### How does it scale?
+
+Start by establishing a `store` dedicated to a domain entity, a component, or both. In signalstory, think of a `store` as a `signal-in-a-service`. Hence, state is distributed across multiple stores but can also be partially kept at the component level.  
+And then:
+
+- Use class methods to provide controlled access and mutations to shared state.
+- If your store becomes unwieldy, slice it into multiple stores.
+- Join and aggregate your state at the component level using signal mechanics.
+- Need to sync states between stores? - Use events.
+- Need to decouple actors and consumers as you do in redux? - Use events.
+- Craving Immutability? - Just activate it.
+- Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
+- Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
+- Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
+- Want to sync your state with local storage? - Enable the persistence plugin.
+- If something's missing? - Write a custom plugin.
+- Read the docs for more features and concepts

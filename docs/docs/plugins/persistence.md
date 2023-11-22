@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Persistence
 
-`signalstory` provides a convenient mechanism for persisting the state of your store, allowing you to save and load the state across different sessions or browser refreshes. By enabling the `StorePersistencePlugin`, you can ensure that your store's state remains persistent and readily available.
+`signalstory` provides a mechanism for persisting the state of your store, allowing you to save and load the state across different sessions or browser refreshes. By enabling the `StorePersistencePlugin`, you can ensure that your store's state remains persistent and readily available.
 
 ## Enabling Local Storage Persistence
 

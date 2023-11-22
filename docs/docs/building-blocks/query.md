@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Query
 
-Queries are used to retrieve data from the store's state. They represent read-only operations that fetch specific information from the state and make it available for consumption in other parts of the application.
+Queries are used to retrieve data from the store. They represent read-only operations that fetch specific information from the state and make it available for consumption in other parts of the application.
 
 Since `signalstory` uses [signals](https://angular.io/guide/signals#computed-signals) as native state implementation, queries based on the `computed` function are both **lazily evaluated and memoized**.
 
@@ -42,7 +42,7 @@ console.log(counterStore.plus100()); // prints 100
 console.log(counterStore.plusN(200)()); // prints 300
 ```
 
-The `plus100` signal depends on the state. Whenever the state updates, anything, which depends on either `plus100` or state, will be notified of the update as well.
+The created signals `plus100` and `plusN` depend on the state signal and are notified and whenever it changes.
 
 ## Queries Targeting Multiple Stores
 
@@ -64,7 +64,7 @@ We can leave it to the consumer, i.e. a component or a service where the data is
 
 ### Using a query object
 
-You can use the provided `createQuery` function to create a query object, which can be passed to any store (except for dynamic stores that were created outside of an [injection context](https://angular.io/guide/dependency-injection-context)). A query object consist of an array of stores involved in the query and a function taking those stores as argument. Note, that you may not use the `computed` function in query objects, as this is done for you by the stores implementation.
+You can use the provided `createQuery` function to create a query object, which can be passed to any store. A query object consist of an array of stores involved in the query and a function taking those stores as argument. Note, that you may not use the `computed` function in query objects, as this is done for you by the stores implementation.
 
 The benefit of using this approach is, that we now have an independent query which can be declared and exported centrally and be reused anywhere.
 
