@@ -101,7 +101,7 @@ describe('mutate', () => {
     });
 
     // assert
-    expect(store.state()).toBe(initialState);
+    expect(store.state()).not.toBe(initialState);
     expect(store.state().value).toBe(newStateValue);
   });
 });

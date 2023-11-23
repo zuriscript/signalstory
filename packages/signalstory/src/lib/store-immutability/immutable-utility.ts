@@ -19,10 +19,29 @@ export function naiveDeepClone<TState>(state: TState): TState {
  * @param {T} value - The value object to be cloned.
  * @returns {T} A deep clone of the provided value object.
  */
-const deepClone = <TState>(state: TState) =>
+export const deepClone = <TState>(state: TState) =>
   window && 'structuredClone' in window
     ? structuredClone(state)
     : naiveDeepClone(state);
+
+/**
+ * Creates a shallow clone of a given value object
+ * @param state - The state to be cloned.
+ * @returns Shallow cloned state.
+ */
+export function shallowClone<TState>(state: TState): TState {
+  if (!state || typeof state !== 'object') {
+    return state;
+  }
+
+  if (Array.isArray(state)) return [...state] as TState;
+  if (state instanceof Date) return new Date(state) as TState;
+  if (state instanceof RegExp) return new RegExp(state) as TState;
+  if (state instanceof Set) return new Set(state) as TState;
+  if (state instanceof Map) return new Map(state) as TState;
+
+  return { ...state } as TState;
+}
 
 /**
  * Naive implementation of an immutable update function using a clone-and-mutate approach.

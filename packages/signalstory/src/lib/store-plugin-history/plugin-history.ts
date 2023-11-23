@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
-import { naiveDeepClone } from '../store-immutability/immutable-naive-ops';
 import { ImmutableStore } from '../store-immutability/immutable-store';
+import { deepClone } from '../store-immutability/immutable-utility';
 import { StorePlugin, StoreState } from '../store-plugin';
 import {
   History,
@@ -64,7 +64,7 @@ export function addToHistory<TStore extends Store<any>>(
     const stateBeforeCommand =
       store instanceof ImmutableStore
         ? store.state()
-        : naiveDeepClone(store.state());
+        : deepClone(store.state());
     addToHistoryUtil(history, command, stateBeforeCommand);
   } else {
     throw new Error(

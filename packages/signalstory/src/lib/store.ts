@@ -13,6 +13,7 @@ import {
 import { StoreConfig } from './store-config';
 import { StoreEffect } from './store-effect';
 import { StoreEvent } from './store-event';
+import { shallowClone } from './store-immutability/immutable-utility';
 import { register, rootRegistry, unregister } from './store-mediator';
 import {
   CommandPostprocessor,
@@ -139,7 +140,11 @@ export class Store<TState> {
   ): void {
     this.commandPreprocessor.forEach(p => p(this, commandName));
 
-    this._state.mutate(mutator);
+    this._state.update(state => {
+      const cloned = shallowClone(state);
+      mutator(cloned);
+      return cloned;
+    });
 
     this.commandPostprocessor.forEach(p => p(this, commandName));
     this.log?.('Command', commandName, this.state());

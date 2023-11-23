@@ -1,7 +1,7 @@
 import { Store } from '../store';
-import { naiveCloneAndMutateFunc } from './immutable-naive-ops';
 import { ImmutableStoreConfig } from './immutable-store-config';
 import { Immutable } from './immutable-type';
+import { naiveCloneAndMutateFunc } from './immutable-utility';
 
 /**
  * Compares two values for strict equality.
