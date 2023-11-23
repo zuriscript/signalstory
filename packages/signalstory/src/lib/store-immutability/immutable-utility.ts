@@ -40,7 +40,7 @@ export function shallowClone<TState>(state: TState): TState {
   if (state instanceof Set) return new Set(state) as TState;
   if (state instanceof Map) return new Map(state) as TState;
 
-  return { ...state } as TState;
+  return Object.assign({}, state) as TState;
 }
 
 /**

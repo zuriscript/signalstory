@@ -113,7 +113,7 @@ describe('naiveCloneAndMutate', () => {
 });
 
 describe('shallowClone', () => {
-  const testCases = [
+  const truthyObjectsTestCases = [
     { name: 'Date object', original: new Date() },
     { name: 'Empty object', original: {} },
     { name: 'Object with values', original: { val: 10 } },
@@ -128,22 +128,54 @@ describe('shallowClone', () => {
         ['key2', 'value2'],
       ]),
     },
+    {
+      name: 'Nested object',
+      original: { a: { b: { c: 'value' } } },
+    },
+    {
+      name: 'Nested array',
+      original: [[1, 2, 3], [4, 5, 6], [{ val: 1 }]],
+    },
+    {
+      name: 'Mixed Data Types',
+      original: { a: 1, b: 'two', c: [3, 4, { d: 'five' }], e: new Date() },
+    },
   ];
 
-  test.each(testCases)('should shallow clone %s', ({ original }) => {
-    // Act
-    const cloned = shallowClone(original);
+  test.each(truthyObjectsTestCases)(
+    'should shallow clone %s',
+    ({ original }) => {
+      // Act
+      const cloned = shallowClone(original);
 
-    // Assert
-    expect(cloned).toEqual(original);
-    expect(cloned).not.toBe(original);
-  });
+      // Assert
+      expect(cloned).toEqual(original);
+      expect(cloned).not.toBe(original);
+    }
+  );
 
-  it('should handle primitives and strings', () => {
+  it('should handle regular primitives and strings', () => {
     // Arrange
     const numberValue = 42;
     const booleanValue = true;
     const stringValue = 'hello';
+
+    // Act
+    const resultNumber = shallowClone(numberValue);
+    const resultBoolean = shallowClone(booleanValue);
+    const resultString = shallowClone(stringValue);
+
+    // Assert
+    expect(resultNumber).toBe(numberValue);
+    expect(resultBoolean).toBe(booleanValue);
+    expect(resultString).toBe(stringValue);
+  });
+
+  it('should handle falsy primitives and strings', () => {
+    // Arrange
+    const numberValue = 0;
+    const booleanValue = false;
+    const stringValue = '';
 
     // Act
     const resultNumber = shallowClone(numberValue);
