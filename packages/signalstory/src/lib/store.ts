@@ -214,7 +214,7 @@ export class Store<TState> {
   public runQuery<
     TResult,
     TStores extends ProviderToken<any>[],
-    TArgs = undefined
+    TArgs = undefined,
   >(
     storeQuery: StoreQuery<TResult, TStores, TArgs>,
     ...args: TArgs extends undefined ? [] : [TArgs]

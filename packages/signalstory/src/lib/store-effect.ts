@@ -7,7 +7,7 @@ import { Store } from './store';
 export interface StoreEffect<
   TStore extends Store<any>,
   TArgs extends unknown[],
-  TResult
+  TResult,
 > {
   name: string; // The name of the effect.
   func: (store: TStore, ...args: TArgs) => TResult; // The function representing the effect.
@@ -24,7 +24,7 @@ export interface StoreEffect<
 export function createEffect<
   TStore extends Store<any>,
   TArgs extends any[],
-  TResult
+  TResult,
 >(
   name: string,
   func: (store: TStore, ...args: TArgs) => TResult,
