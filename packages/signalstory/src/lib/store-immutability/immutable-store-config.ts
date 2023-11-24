@@ -8,13 +8,6 @@ import { Immutable } from './immutable-type';
 export interface ImmutableStoreConfig<TState>
   extends StoreConfig<Immutable<TState>> {
   /**
-   * @deprecated Has been renamed and will be droped in the next minor release. Use mutationProducerFn instead (has same semantics)
-   */
-  cloneAndMutateFunc?: (
-    currentState: TState,
-    mutation: (draftState: TState) => void
-  ) => TState;
-  /**
    * Custom mutation strategy function that returns a new state object instead of operating on the currentState directly.
    * @remarks You can provide your own cloning and mutation strategy function similar to libraries like 'immer.js'.
    * @param currentState - The current state object to be cloned and mutated.
