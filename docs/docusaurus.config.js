@@ -104,8 +104,7 @@ const config = {
       },
       announcementBar: {
         id: 'support_us',
-        content:
-          '<b>signalstory 17.0.0</b> is coming soon! Testing utility section is available as preview in the docs.',
+        content: '<b>signalstory 17.0.0</b> has been released! 🚀',
         backgroundColor: '#e35e75',
         textColor: '#091E42',
         isCloseable: true,
