@@ -8,15 +8,15 @@ Every frontend application has state. Therefore, state management is the process
 
 ### Why a new state management library?
 
-State management is hard and the right approach is highly dependent on your project and, especially, your team. There's no one-size-fits-all solution, and that's why many established libraries exist.
+State management is hard and the right approach is highly dependent on your project and your team. There's no one-size-fits-all solution, and that's why many established libraries exist.
 
-What sets signalstory apart from many other solutions is its use of [Angular signals](https://angular.io/guide/signals) as native unit for state. Therefore, there is no intention for signalstory to be employed outside of the Angular framework, which facilitates the integration of the implementation with the Angular ecosystem from the ground up. Signalstory adopts an object-oriented approach and is built around an imperative setup. However, when the need arises, it is possible to leverage decoupling features, enabling the application to communicate through events and therefore enabling loose coupling between different parts.
+What sets signalstory apart from many other solutions is its use of [Angular signals](https://angular.io/guide/signals) as native unit for state. Therefore, there is no intention for signalstory to be employed outside of the Angular framework. Signalstory adopts an object-oriented approach and is built around an imperative setup. However, when the need arises, it is possible to leverage decoupling features, enabling the application to communicate through events and therefore enabling loose coupling between different parts.
 
-> Having used multiple libraries and architectures in the past, I envisioned signalstory to be very simple to use. It should provide an enjoyable user experience for developers of all levels, whether junior or senior, while incorporating enough features to handle most practical use cases. At its core, signalstory imposes as few restrictions as possible, providing a toolbox of utilities and concepts to spark creativity.
+> Having used multiple libraries and architectures in the past, I envisioned signalstory to be very simple to use. It should provide an enjoyable user experience for developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements. At its core, signalstory imposes as few restrictions as possible, providing a toolbox of utilities and concepts to spark creativity.
 
 ### How does it scale?
 
-Start by establishing a `store` dedicated to a domain entity, a component, or both. In signalstory, think of a `store` as a `signal-in-a-service`. Hence, state is distributed across multiple stores but can also be partially kept at the component level.  
+In signalstory, think of a `store` as a `signal-in-a-service`. Start by establishing a store dedicated to a domain entity, a component, or both. Hence, state is distributed across multiple stores but can also be partially kept at the component level.  
 And then:
 
 - Use class methods to provide controlled access and mutations to shared state.
@@ -25,9 +25,11 @@ And then:
 - Need to sync states between stores? - Use events.
 - Need to decouple actors and consumers as you do in redux? - Use events.
 - Craving Immutability? - Just activate it.
+- Don't want full immutability because your store has to be super fast? - Don't activate it.
 - Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
 - Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
+- Tired of debugging state changes in the console? - Enable redux devtools.
 - Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
 - Want to sync your state with local storage? - Enable the persistence plugin.
-- If something's missing? - Write a custom plugin.
+- Something's missing? - Write a custom plugin.
 - Read the docs for more features and concepts

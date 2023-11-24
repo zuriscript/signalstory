@@ -6,7 +6,25 @@ sidebar_position: 5
 
 Immutability means that every modification of an object creates a new one while leaving the original untouched. In the angular community, it has gained attention, particularly when combined with the [OnPush change detection strategy](https://angular.io/guide/change-detection-skipping-subtrees). With this strategy, the change detection algorithm doesn't need to inspect the entire object and its properties for changes; instead, it can focus on checking if the reference has changed, meaning that a new object has been created and passed to the component. This clearly boosts application performance, considering the recurring and resource-intensive nature of the change detection process.
 
-At the moment, there is no real immutability support for signals out-of-the-box, eventhough there had been [experiments](https://github.com/angular/angular/pull/49644) in the past. This is unsurprising, given the broad spectrum of applications that signals are intended for:
+As of Angular version 17, signals updates are required to be **shallowly immutable**. For primitive valued signals (number, boolean, string) that does not change anything. For objects and arrays, this means, that each update should create a new object. Therefore, the `mutate` method has been dropped from the signal API, but you still have to be careful when using `update`, as returning the same object in an update function fails to notify consumers about the change:
+
+```typescript
+// Following would not notify consumers about the change
+store.update(state => {
+  state.numeberValue = 10;
+  return state;
+});
+```
+
+:::info
+
+We've chosen to maintain the status quo for both `Store` and `ImmutableStore`,retaining their pre-Version 17 public API. The reason behind it: We want `Store` to mimic the behavior of a regular signal while retaining the convenience of the `mutate` function as syntactic sugar. Note, however, that `mutate` will create a shallow copy of the state prior to applying the mutation function.
+
+:::
+
+## Immutable Store vs regular Store
+
+At the moment, there is no full immutability support for signals out-of-the-box, eventhough there had been [experiments](https://github.com/angular/angular/pull/49644) in the past. This is unsurprising, given the broad spectrum of applications that signals were initially intended for:
 
 > We specifically didn’t want to "pick sides" in the mutable / immutable
 > data discussion and designed the signal library (and other Angular APIs)
@@ -23,17 +41,13 @@ console.log(sig()); // prints "{ property: 'new' }"
 
 Hence, we can update the signal from everywhere without using `set`, `update`, `mutate` and even without holding the reference to the actual `WritableSignal`.
 
-Some other reasons for using `ImmutableStore` over `Store`:
+There are many advantages to immutability, and deep or full immutability provides even greater benefits than shallow immutability. This is because nested objects and arrays are also protected. This approach helps eliminate potential concurrent pitfalls, as state consumers work with their individual deep copies. Moreover, it aligns more closely with the principles of the functional programming paradigm and brings predictability to state modification.
 
-- Improved interoperability with rxjs observables, which may relay on a stream of immutable values (see `buffer`, `shareReplay`, etc.)
-- Allows for accumulation of singal emmited values over time
-- Signal consumers operate on their individual copies, effectively eliminating various potential concurrent pitfalls
-- Helps following unidirectional dataflow principle
-- More closely adheres to the principles of the functional programming paradigm, enhancing predictability in state modification (matter of taste)
+:::tip
+`ImmutableStore` comes with full immutability, compile-time immutability check support and the possibility to plugin `immer.js` and the like.
 
-:::info
-
-The only donwside to immutability is its impact on performance since every mutation leads to the creation of a new object value, deep cloning all properties recursively. However, the extra overhead is typically negligible, especially outside of computationally intensive scenarios. In fact, the slight additional cost might be outweighed by the performance gains associated with change detection.
+- Choose `ImmutableStore` for securitiy and peace of mind.
+- Choose `Store` if you really need peak performance or if you just don't like the syntax and type constraints that `ImmutableStore` brings.
 
 :::
 

@@ -15,7 +15,9 @@
 
 ### Check out the [sample 🚀 ](https://stackblitz.com/edit/stackblitz-starters-bjnmnr?file=src%2Fapp%2Fstate%2Fbooks.store.ts)
 
-### Visit the [docs 📚 ](https://zuriscript.github.io/signalstory/)
+### Visit the [docs 📚 ](https://zuriscript.github.io/signalstory/docs/prolog)
+
+### For a full feature overview, visit the [Website ✨ ](https://zuriscript.github.io/signalstory/)
 
 **Empower your angular state management with signals**
 
@@ -52,7 +54,7 @@ npm install signalstory
 ```typescript
 import { produce } from 'immer';
 
-// Fully immutable store class with immer for boosting mutation performance
+// Fully immutable store class with immer.js for boosting immutable mutation performance
 class BookStore extends ImmutableStore<Book[]> {
   constructor() {
     super({
@@ -63,8 +65,7 @@ class BookStore extends ImmutableStore<Book[]> {
         plugins: [
           useDevtools(),
           useStoreHistory(),
-          useStorePersistence(),
-          useDeepFreeze(),
+          useStorePersistence()
         ],
     });
 

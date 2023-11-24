@@ -45,6 +45,11 @@ increment() {
 }
 ```
 
+:::caution
+For non-primitive stores (number, boolean, string), make sure to create and return a new object. Otherwise the consumers will not be notified about the change.
+
+:::
+
 ## `Mutate`
 
 The `mutate` method is used to directly mutate the store's state using the provided `mutator` function. The `mutator` function receives the current state as a parameter and performs in-place mutations on it.
@@ -58,3 +63,10 @@ increment() {
     }, 'Increment');
 }
 ```
+
+:::info
+
+- `Store` creates a [shalow copy](https://developer.mozilla.org/en-US/docs/Glossary/Shallow_copy) before applying the mutation
+- `ImmutableStore` creates a [deep copy](https://developer.mozilla.org/en-US/docs/Glossary/Deep_copy) before applying the mutation
+
+:::
