@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { Store } from '../lib/store';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { rootRegistry } from '../lib/store-mediator';
@@ -89,10 +89,11 @@ describe('update', () => {
 });
 
 describe('mutate', () => {
-  it('should update store with the provided mutation function', () => {
+  it('should update store with the provided mutation function and trigger changed event notification', () => {
     // arrange
     const initialState = { value: 5 };
     const store = new Store({ initialState: initialState });
+    const derived = computed(() => store.state());
     const newStateValue = 10;
 
     // act
@@ -103,6 +104,7 @@ describe('mutate', () => {
     // assert
     expect(store.state()).not.toBe(initialState);
     expect(store.state().value).toBe(newStateValue);
+    expect(derived()).toBe(store.state());
   });
 });
 

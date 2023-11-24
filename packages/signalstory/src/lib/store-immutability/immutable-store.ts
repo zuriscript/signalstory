@@ -4,14 +4,6 @@ import { Immutable } from './immutable-type';
 import { naiveCloneAndMutateFunc } from './immutable-utility';
 
 /**
- * Compares two values for strict equality.
- * @param a - The first value to compare.
- * @param b - The second value to compate.
- * @returns  Returns `true` if the values are strictly equal, `false` otherwise.
- */
-const strictEqual = <T>(a: T, b: T) => a === b;
-
-/**
  * Represents a store that holds an immutable state, allowing mutation through controlled operations.
  *
  * @typeparam TState The type of the immutable state held by the store.
@@ -23,10 +15,7 @@ export class ImmutableStore<TState> extends Store<Immutable<TState>> {
   ) => TState;
 
   public constructor(config: ImmutableStoreConfig<TState>) {
-    super({
-      ...config,
-      stateEqualityFn: config.stateEqualityFn ?? strictEqual,
-    });
+    super(config);
 
     this.cloneAndMutateFunc =
       config.mutationProducerFn ??

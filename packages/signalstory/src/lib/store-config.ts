@@ -22,8 +22,7 @@ export interface StoreConfig<TState> {
   /**
    * The equality function to compare previous and new states, determining whether
    * a change notification should be published.
-   * If not provided, the default equality function from Angular signals is used,
-   * or strict equality is used for an ImmutableStore.
+   * If not provided, the default equality function from Angular signals is used.
    * It is recommended that users do not modify the equality function except
    * in exceptional and specialized use cases.
    */
