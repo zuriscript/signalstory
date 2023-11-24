@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
+import { computed } from '@angular/core';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { rootRegistry } from '../lib/store-mediator';
 import { createEffect, createEvent, createQuery } from '../public-api';
@@ -24,34 +25,74 @@ describe('constructor', () => {
 });
 
 describe('set', () => {
-  it('should update object store with the provided new state', () => {
+  it('should update object store with the provided new state and notify consumers', () => {
     // arrange
     const store = new ImmutableStore<{ value: number }>({
       initialState: { value: 5 },
     });
     const newState = { value: 10 };
+    const derived = computed(() => store.state());
 
     // act
     store.set(newState);
 
     // assert
     expect(store.state()).toBe(newState);
+    expect(derived()).toBe(newState);
+  });
+
+  it('should not trigger changed Notification if same object', () => {
+    // arrange
+    const store = new ImmutableStore<{ value: number }>({
+      initialState: { value: 5 },
+    });
+    let computeCount = 0;
+    const derived = computed(() => `${typeof store.state()}:${++computeCount}`);
+    expect(derived()).toEqual('object:1'); // sanity check
+
+    // act
+    store.set(store.state());
+
+    // assert
+    expect(derived()).toEqual('object:1');
   });
 });
 
 describe('update', () => {
-  it('should update object store with the provided new state', () => {
+  it('should update object store with the provided new state and notify consumers', () => {
     // arrange
     const store = new ImmutableStore<{ value: number }>({
       initialState: { value: 5 },
     });
     const newState = { value: 10 };
+    const derived = computed(() => store.state());
 
     // act
     store.update(_ => newState);
 
     // assert
     expect(store.state()).toBe(newState);
+    expect(derived()).toBe(newState);
+  });
+
+  it('should not trigger changed Notification if same object reference returned', () => {
+    // arrange
+    const store = new ImmutableStore<{ value: number }>({
+      initialState: { value: 5 },
+    });
+    let computeCount = 0;
+    const derived = computed(() => `${typeof store.state()}:${++computeCount}`);
+    expect(derived()).toEqual('object:1'); // sanity check
+
+    // act
+    // even forcefully overriding state object prooperty should not trigger changed notification
+    store.update(state => {
+      (state.value as number) = 10;
+      return state;
+    });
+
+    // assert
+    expect(derived()).toEqual('object:1');
   });
 });
 
@@ -73,6 +114,24 @@ describe('mutate', () => {
     expect(store.state()).not.toBe(initialState);
     expect(store.state().value1).toBe(newStateValue);
     expect(store.state().value2).toBe(initialState.value2);
+  });
+  it('should create new state object and trigger changed Notification if mutation function empty', () => {
+    // arrange
+    const initialState = { value: 'test' };
+    const store = new ImmutableStore<{ value: string }>({
+      initialState,
+    });
+    let computeCount = 0;
+    const derived = computed(() => `${typeof store.state()}:${++computeCount}`);
+    expect(derived()).toEqual('object:1'); // sanity check
+
+    // act
+    store.mutate(_ => {});
+
+    // assert
+    expect(store.state()).not.toBe(initialState);
+    expect(store.state()).toStrictEqual(initialState);
+    expect(derived()).toEqual('object:2');
   });
 });
 

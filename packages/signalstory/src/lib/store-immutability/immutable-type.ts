@@ -21,17 +21,17 @@ type ImmutablePrimitive =
 export type Immutable<T> = T extends ImmutablePrimitive
   ? T // If the type is an immutable primitive, return it as is.
   : T extends Map<infer Keys, infer Values>
-  ? ReadonlyMap<Immutable<Keys>, Immutable<Values>>
-  : T extends ReadonlyMap<infer Keys, infer Values>
-  ? ReadonlyMap<Immutable<Keys>, Immutable<Values>>
-  : T extends Set<infer Values>
-  ? ReadonlySet<Immutable<Values>>
-  : T extends ReadonlySet<infer Values>
-  ? ReadonlySet<Immutable<Values>>
-  : T extends Array<infer Values>
-  ? ReadonlyArray<Immutable<Values>>
-  : T extends ReadonlyArray<infer Values>
-  ? ReadonlyArray<Immutable<Values>>
-  : T extends object
-  ? { readonly [Key in keyof T]: Immutable<T[Key]> } // Recursively transform object properties.
-  : Readonly<T>; // For other types, return them as Readonly to make them immutable.
+    ? ReadonlyMap<Immutable<Keys>, Immutable<Values>>
+    : T extends ReadonlyMap<infer Keys, infer Values>
+      ? ReadonlyMap<Immutable<Keys>, Immutable<Values>>
+      : T extends Set<infer Values>
+        ? ReadonlySet<Immutable<Values>>
+        : T extends ReadonlySet<infer Values>
+          ? ReadonlySet<Immutable<Values>>
+          : T extends Array<infer Values>
+            ? ReadonlyArray<Immutable<Values>>
+            : T extends ReadonlyArray<infer Values>
+              ? ReadonlyArray<Immutable<Values>>
+              : T extends object
+                ? { readonly [Key in keyof T]: Immutable<T[Key]> } // Recursively transform object properties.
+                : Readonly<T>; // For other types, return them as Readonly to make them immutable.
