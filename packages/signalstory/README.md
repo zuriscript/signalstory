@@ -36,7 +36,7 @@ Install the library using npm:
 npm install signalstory
 ```
 
-## Sneak peak
+## Sneak peek
 
 ```typescript
 import { produce } from 'immer';
