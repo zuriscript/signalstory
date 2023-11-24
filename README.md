@@ -19,6 +19,8 @@
 
 ### For a full feature overview, visit the [Website ✨ ](https://zuriscript.github.io/signalstory/)
 
+### For Release notes and Changelog, visit [Gtihub Releases 🧙‍♂️](https://github.com/zuriscript/signalstory/releases)
+
 **Empower your angular state management with signals**
 
 signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to decoupled commands, managed side effect objects, and inter-store communication using an event-based approach. The goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
