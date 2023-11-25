@@ -93,18 +93,20 @@ class BookStore extends ImmutableStore<Book[]> {
 
 
 // Encapsulated multi store query object
-export const BooksAndVendorsByAuthorInSwitzerlandQuery = createQuery(
-  [BookStore, VendorStore],
-  (books, vendors, authorId: string) => {
+export const BooksAndPublishersByAuthorInSwitzerlandQuery = createQuery(
+  [BookStore, PublisherStore],
+  (books, publishers, authorId: string) => {
     const booksFromAuthor = books.state().filter(x => x.author === authorId);
-    const vendorsInSwitzerland = vendors.state().filter(x => x.country === 'CH');
+    const publishersInSwitzerland = publishers.state().filter(x => x.country === 'CH');
 
     return booksFromAuthor.map(book => ({
       book,
-      vendors: vendorsInSwitzerland.find(vendor => vendor.id === book.vendorId),
+      publisher: publishersInSwitzerland.find(p => p.id === book.mainPublisherId),
     }));
   }
 );
+// And then run it
+const query = myBookStore.runQuery(BooksAndPublishersByAuthorInSwitzerlandQuery, 'sapowski');
 
 // Encapsulated effect object
 export const fetchBooksEffect = createEffect(
@@ -122,6 +124,8 @@ export const fetchBooksEffect = createEffect(
     );
   }
 );
+// And then run it
+myBookStore.runEffect(fetchBooksEffect).subscribe();
 ```
 
 ## Sample Application
