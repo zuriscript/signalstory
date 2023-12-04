@@ -18,6 +18,8 @@ import { register, rootRegistry, unregister } from './store-mediator';
 import {
   CommandPostprocessor,
   CommandPreprocessor,
+  EffectPostprocessor,
+  EffectPreprocessor,
   InitPostprocessor,
 } from './store-plugin';
 import { StoreQuery } from './store-query';
@@ -33,6 +35,8 @@ export class Store<TState> {
   private readonly initPostprocessor: InitPostprocessor[] = [];
   private readonly commandPreprocessor: CommandPreprocessor[] = [];
   private readonly commandPostprocessor: CommandPostprocessor[] = [];
+  private readonly effectPreprocessor: EffectPreprocessor[] = [];
+  private readonly effectPostprocessor: EffectPostprocessor<unknown>[] = [];
   private log?: (
     action: string,
     description?: string,
@@ -78,6 +82,12 @@ export class Store<TState> {
         }
         if (plugin.postprocessCommand) {
           this.commandPostprocessor.push(plugin.postprocessCommand);
+        }
+        if (plugin.preprocessEffect) {
+          this.effectPreprocessor.push(plugin.preprocessEffect);
+        }
+        if (plugin.postprocessEffect) {
+          this.effectPostprocessor.push(plugin.postprocessEffect);
         }
       });
 
@@ -192,13 +202,20 @@ export class Store<TState> {
     ...args: TArgs
   ): TResult {
     this.log?.('Effect', `Running ${effect.name}`, ...args);
+    this.effectPreprocessor.forEach(p => p(this, effect));
 
     if (effect.withInjectionContext && this.config.injector) {
       return runInInjectionContext(this.config.injector, () => {
-        return effect.func(this, ...args);
+        return this.effectPostprocessor.reduce(
+          (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
+          effect.func(this, ...args)
+        );
       });
     } else {
-      return effect.func(this, ...args);
+      return this.effectPostprocessor.reduce(
+        (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
+        effect.func(this, ...args)
+      );
     }
   }
 
