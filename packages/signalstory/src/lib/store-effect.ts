@@ -18,7 +18,7 @@ export interface StoreEffect<
 > {
   name: string; // The name of the effect.
   func: (store: TStore, ...args: TArgs) => TResult; // The function representing the effect.
-  config: Readonly<Required<StoreEffectConfig>>; // Indicates whether the effect requires an injection context.
+  config: Readonly<Required<StoreEffectConfig>>; // effect configuration
 }
 
 /**
