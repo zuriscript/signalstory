@@ -7,7 +7,7 @@ import { StorePlugin } from '../lib/store-plugin';
 import { withSideEffect } from '../lib/utility/sideeffect';
 
 describe('StorePlugin', () => {
-  test('should not add processors to store if not used', () => {
+  it('should not add processors to store if not used', () => {
     // act
     const store = new Store<{ val: number }>({
       initialState: { val: 5 },
@@ -21,7 +21,7 @@ describe('StorePlugin', () => {
     expect(store['effectPostprocessor']).toEqual([]);
   });
 
-  test('should add processors to store successfully', () => {
+  it('should add processors to store successfully', () => {
     // arrange
     const init = jest.fn();
     const preprocessCommand = jest.fn();
@@ -73,31 +73,34 @@ describe('StorePlugin', () => {
       });
     });
 
-    test('should preprocess command on set successfully', () => {
+    it('should preprocess command on set successfully', () => {
       // act
       store.set({ value: 42 }, commandName);
 
       // assert
+      expect(commandPreprocessorMock).toHaveBeenCalledTimes(1);
       expect(commandPreprocessorMock).toHaveBeenCalledWith(store, commandName);
       expect(processedStoreValue).toBe(initialValue);
     });
 
-    test('should preprocess command on update successfully', () => {
+    it('should preprocess command on update successfully', () => {
       // act
       store.update(() => ({ value: 42 }), commandName);
 
       // assert
+      expect(commandPreprocessorMock).toHaveBeenCalledTimes(1);
       expect(commandPreprocessorMock).toHaveBeenCalledWith(store, commandName);
       expect(processedStoreValue).toBe(initialValue);
     });
 
-    test('should preprocess command on mutate successfully', () => {
+    it('should preprocess command on mutate successfully', () => {
       // act
       store.mutate(state => {
         state.value = 42;
       }, commandName);
 
       // assert
+      expect(commandPreprocessorMock).toHaveBeenCalledTimes(1);
       expect(commandPreprocessorMock).toHaveBeenCalledWith(store, commandName);
       expect(processedStoreValue).toBe(initialValue);
     });
@@ -126,31 +129,34 @@ describe('StorePlugin', () => {
       });
     });
 
-    test('should post-process command on set successfully', () => {
+    it('should post-process command on set successfully', () => {
       // act
       store.set({ value: newValue }, commandName);
 
       // assert
+      expect(commandPostprocessorMock).toHaveBeenCalledTimes(1);
       expect(commandPostprocessorMock).toHaveBeenCalledWith(store, commandName);
       expect(processedStoreValue).toBe(newValue);
     });
 
-    test('should post-process command on update successfully', () => {
+    it('should post-process command on update successfully', () => {
       // act
       store.update(() => ({ value: newValue }), commandName);
 
       // assert
+      expect(commandPostprocessorMock).toHaveBeenCalledTimes(1);
       expect(commandPostprocessorMock).toHaveBeenCalledWith(store, commandName);
       expect(processedStoreValue).toBe(newValue);
     });
 
-    test('should post-process command on mutate successfully', () => {
+    it('should post-process command on mutate successfully', () => {
       // act
       store.mutate(state => {
         state.value = newValue;
       }, commandName);
 
       // assert
+      expect(commandPostprocessorMock).toHaveBeenCalledTimes(1);
       expect(commandPostprocessorMock).toHaveBeenCalledWith(store, commandName);
       expect(processedStoreValue).toBe(newValue);
     });
@@ -178,7 +184,7 @@ describe('StorePlugin', () => {
       });
     });
 
-    test('should preprocess effect successfully', () => {
+    it('should preprocess effect successfully', () => {
       // arrange
       const effect = createEffect(
         'dummyEffect',
@@ -193,8 +199,32 @@ describe('StorePlugin', () => {
       store.runEffect(effect);
 
       // assert
+      expect(effectPreprocessorMock).toHaveBeenCalledTimes(1);
       expect(effectPreprocessorMock).toHaveBeenCalledWith(store, effect);
       expect(processedStoreValue).toBe(initialValue);
+    });
+
+    it('should preprocess effect successfully using multiple preprocessors', () => {
+      // arrange
+      const effectPreprocessorMock2 = jest.fn();
+      const effect = createEffect(
+        'dummyEffect',
+        (store: Store<{ value: number }>) => {
+          store.mutate(x => {
+            x.value = newValue;
+          });
+        }
+      );
+      store['effectPreprocessor'].push(effectPreprocessorMock2);
+
+      // act
+      store.runEffect(effect);
+
+      // assert
+      expect(effectPreprocessorMock).toHaveBeenCalledTimes(1);
+      expect(effectPreprocessorMock).toHaveBeenCalledWith(store, effect);
+      expect(effectPreprocessorMock2).toHaveBeenCalledTimes(1);
+      expect(effectPreprocessorMock2).toHaveBeenCalledWith(store, effect);
     });
   });
 
@@ -222,7 +252,7 @@ describe('StorePlugin', () => {
       });
     });
 
-    test('should postprocess normal effect successfully', () => {
+    it('should postprocess normal effect successfully', () => {
       // arrange
       const effect = createEffect(
         'dummyEffect',
@@ -246,7 +276,7 @@ describe('StorePlugin', () => {
       expect(processedStoreValue).toBe(newValue);
     });
 
-    test('should postprocess observable effect successfully', async () => {
+    it('should postprocess observable effect successfully', async () => {
       // arrange
       const effect = createEffect(
         'dummyEffect',
@@ -273,7 +303,7 @@ describe('StorePlugin', () => {
       expect(processedStoreValue).toBe(newValue);
     });
 
-    test('should postprocess throwing observable effect successfully', async () => {
+    it('should postprocess throwing observable effect successfully', async () => {
       // arrange
       const effect = createEffect('dummyEffect', () =>
         throwError(() => new Error('Error'))
@@ -296,7 +326,7 @@ describe('StorePlugin', () => {
       expect(processedStoreValue).toBe(initialValue);
     });
 
-    test('should postprocess filtered observable effect', () => {
+    it('should postprocess filtered observable effect', () => {
       // arrange
       const effect = createEffect(
         'dummyEffect',
@@ -326,7 +356,7 @@ describe('StorePlugin', () => {
       expect(processedStoreValue).toBe(initialValue);
     });
 
-    test('should postprocess hot observable effect successfully ater hot observable has completed', () => {
+    it('should postprocess hot observable effect successfully ater hot observable has completed', () => {
       // arrange
       const subject = new Subject<number>();
       const effect = createEffect(
@@ -355,7 +385,7 @@ describe('StorePlugin', () => {
       expect(processedStoreValue).toBe(newValue);
     });
 
-    test('should postprocess effect with resolved promise successfully', async () => {
+    it('should postprocess effect with resolved promise successfully', async () => {
       // arrange
       const effect = createEffect(
         'dummyEffect',
@@ -380,7 +410,7 @@ describe('StorePlugin', () => {
       expect(processedStoreValue).toBe(newValue);
     });
 
-    test('should postprocess effect with rejected promise successfully', async () => {
+    it('should postprocess effect with rejected promise successfully', async () => {
       // arrange
       const error = new Error('Promise rejection error');
       const effect = createEffect('dummyEffect', async () => {
