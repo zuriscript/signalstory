@@ -91,6 +91,8 @@ export type EffectPostprocessor<TResult> = (
  * @property [init] - A function for initializing the store.
  * @property [preprocessCommand] - A function for preprocessing commands.
  * @property [postprocessCommand] - A function for postprocessing commands.
+ * @property [preprocessEffect] - A function for preprocessing effects.
+ * @property [postprocessEffect] - A function for postprocessing effects.
  * @property [others] - Additional properties may be added for plugin-specific functionality.
  */
 export type StorePlugin = {

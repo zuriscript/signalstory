@@ -26,7 +26,7 @@ function isPromise<T>(obj: T | PromiseLike<T>): obj is PromiseLike<T> {
 }
 
 /**
- * Executes a side effect when the provided source
+ * Executes a side effect based on the nature of the source object
  * @param source - The source object
  * @param sideEffect - The side effect function to be executed.
  * @returns The source object with the side effect applied.
