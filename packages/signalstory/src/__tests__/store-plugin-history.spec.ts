@@ -422,8 +422,8 @@ describe('registration', () => {
     });
 
     // assert
-    expect(store['initPostprocessor'][0]).toBe(historyPlugin.init);
-    expect(store['commandPreprocessor'][0]).toBe(
+    expect(store['initPostprocessor']![0]).toBe(historyPlugin.init);
+    expect(store['commandPreprocessor']![0]).toBe(
       historyPlugin.preprocessCommand
     );
   });

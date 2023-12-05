@@ -14,11 +14,11 @@ describe('StorePlugin', () => {
     });
 
     // assert
-    expect(store['initPostprocessor']).toEqual([]);
-    expect(store['commandPreprocessor']).toEqual([]);
-    expect(store['commandPostprocessor']).toEqual([]);
-    expect(store['effectPreprocessor']).toEqual([]);
-    expect(store['effectPostprocessor']).toEqual([]);
+    expect(store['initPostprocessor']).toBeUndefined();
+    expect(store['commandPreprocessor']).toBeUndefined();
+    expect(store['commandPostprocessor']).toBeUndefined();
+    expect(store['effectPreprocessor']).toBeUndefined();
+    expect(store['effectPostprocessor']).toBeUndefined();
   });
 
   it('should add processors to store successfully', () => {
@@ -44,11 +44,11 @@ describe('StorePlugin', () => {
     });
 
     // assert
-    expect(store['initPostprocessor'][0]).toBe(init);
-    expect(store['commandPreprocessor'][0]).toBe(preprocessCommand);
-    expect(store['commandPostprocessor'][0]).toBe(postprocessCommand);
-    expect(store['effectPreprocessor'][0]).toBe(preprocessEffect);
-    expect(store['effectPostprocessor'][0]).toBe(postprocessEffect);
+    expect(store['initPostprocessor']![0]).toBe(init);
+    expect(store['commandPreprocessor']![0]).toBe(preprocessCommand);
+    expect(store['commandPostprocessor']![0]).toBe(postprocessCommand);
+    expect(store['effectPreprocessor']![0]).toBe(preprocessEffect);
+    expect(store['effectPostprocessor']![0]).toBe(postprocessEffect);
   });
 
   describe('CommandPreprocessor', () => {
@@ -215,7 +215,7 @@ describe('StorePlugin', () => {
           });
         }
       );
-      store['effectPreprocessor'].push(effectPreprocessorMock2);
+      store['effectPreprocessor']!.push(effectPreprocessorMock2);
 
       // act
       store.runEffect(effect);

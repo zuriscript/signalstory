@@ -32,11 +32,11 @@ import { enableLogging, log } from './utility/logger';
  */
 export class Store<TState> {
   private readonly _state: WritableSignal<TState>;
-  private readonly initPostprocessor: InitPostprocessor[] = [];
-  private readonly commandPreprocessor: CommandPreprocessor[] = [];
-  private readonly commandPostprocessor: CommandPostprocessor[] = [];
-  private readonly effectPreprocessor: EffectPreprocessor[] = [];
-  private readonly effectPostprocessor: EffectPostprocessor<unknown>[] = [];
+  private readonly initPostprocessor?: InitPostprocessor[];
+  private readonly commandPreprocessor?: CommandPreprocessor[];
+  private readonly commandPostprocessor?: CommandPostprocessor[];
+  private readonly effectPreprocessor?: EffectPreprocessor[];
+  private readonly effectPostprocessor?: EffectPostprocessor<unknown>[];
   private log?: (
     action: string,
     description?: string,
@@ -75,23 +75,28 @@ export class Store<TState> {
       .sort((a, b) => (b.precedence ?? 0) - (a.precedence ?? 0))
       .forEach(plugin => {
         if (plugin.init) {
-          this.initPostprocessor.push(plugin.init);
+          (this.initPostprocessor as any) ??= [];
+          this.initPostprocessor!.push(plugin.init);
         }
         if (plugin.preprocessCommand) {
-          this.commandPreprocessor.push(plugin.preprocessCommand);
+          (this.commandPreprocessor as any) ??= [];
+          this.commandPreprocessor!.push(plugin.preprocessCommand);
         }
         if (plugin.postprocessCommand) {
-          this.commandPostprocessor.push(plugin.postprocessCommand);
+          (this.commandPostprocessor as any) ??= [];
+          this.commandPostprocessor!.push(plugin.postprocessCommand);
         }
         if (plugin.preprocessEffect) {
-          this.effectPreprocessor.push(plugin.preprocessEffect);
+          (this.effectPreprocessor as any) ??= [];
+          this.effectPreprocessor!.push(plugin.preprocessEffect);
         }
         if (plugin.postprocessEffect) {
-          this.effectPostprocessor.push(plugin.postprocessEffect);
+          (this.effectPostprocessor as any) ??= [];
+          this.effectPostprocessor!.push(plugin.postprocessEffect);
         }
       });
 
-    this.initPostprocessor.forEach(p => p(this));
+    this.initPostprocessor?.forEach(p => p(this));
   }
 
   /**
@@ -114,11 +119,11 @@ export class Store<TState> {
    * @param commandName The name of the command associated with the state change.
    */
   public set(newState: TState, commandName?: string): void {
-    this.commandPreprocessor.forEach(p => p(this, commandName));
+    this.commandPreprocessor?.forEach(p => p(this, commandName));
 
     this._state.set(newState);
 
-    this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.commandPostprocessor?.forEach(p => p(this, commandName));
     this.log?.('Command', commandName, this.state());
   }
 
@@ -131,11 +136,11 @@ export class Store<TState> {
     updateFn: (currentState: TState) => TState,
     commandName?: string
   ): void {
-    this.commandPreprocessor.forEach(p => p(this, commandName));
+    this.commandPreprocessor?.forEach(p => p(this, commandName));
 
     this._state.update(state => updateFn(state));
 
-    this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.commandPostprocessor?.forEach(p => p(this, commandName));
     this.log?.('Command', commandName, this.state());
   }
 
@@ -148,7 +153,7 @@ export class Store<TState> {
     mutator: (currentState: TState) => void,
     commandName?: string
   ): void {
-    this.commandPreprocessor.forEach(p => p(this, commandName));
+    this.commandPreprocessor?.forEach(p => p(this, commandName));
 
     this._state.update(state => {
       const cloned = shallowClone(state);
@@ -156,7 +161,7 @@ export class Store<TState> {
       return cloned;
     });
 
-    this.commandPostprocessor.forEach(p => p(this, commandName));
+    this.commandPostprocessor?.forEach(p => p(this, commandName));
     this.log?.('Command', commandName, this.state());
   }
 
@@ -202,7 +207,7 @@ export class Store<TState> {
     ...args: TArgs
   ): TResult {
     this.log?.('Effect', `Running ${effect.name}`, ...args);
-    this.effectPreprocessor.forEach(p => p(this, effect));
+    this.effectPreprocessor?.forEach(p => p(this, effect));
 
     const effectResult =
       effect.config.withInjectionContext && this.config.injector
@@ -211,9 +216,11 @@ export class Store<TState> {
           )
         : effect.func(this, ...args);
 
-    return this.effectPostprocessor.reduce(
-      (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
-      effectResult
+    return (
+      this.effectPostprocessor?.reduce(
+        (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
+        effectResult
+      ) ?? effectResult
     );
   }
 
