@@ -202,10 +202,12 @@ describe('runEffect', () => {
     });
   });
 
-  it('should runEffect', () => {
+  it('should runEffect without injection context', () => {
     // arrange
     const func = jest.fn();
-    const effect = createEffect('effect', func);
+    const effect = createEffect('effect', func, {
+      withInjectionContext: false,
+    });
     const argument = 42;
 
     // act
@@ -216,13 +218,49 @@ describe('runEffect', () => {
     expect(func).toHaveBeenCalledWith(store, argument);
   });
 
-  it('should runEffect in injection context', () => {
+  it('should runEffect without injection context using deprecated method', () => {
+    // arrange
+    const func = jest.fn();
+    const effect = createEffect('effect', func, false);
+    const argument = 42;
+
+    // act
+    store.runEffect(effect, argument);
+
+    // assert
+    expect(func).toHaveBeenCalledTimes(1);
+    expect(func).toHaveBeenCalledWith(store, argument);
+  });
+
+  it('should runEffect in injection context by default', () => {
     // arrange
     const argumentFunc = jest.fn();
     const effect = createEffect('effect', (_, arg) => {
       const store2 = inject(ImmutableTestStore);
       arg(store2);
     });
+
+    // act
+    store.runEffect(effect, argumentFunc);
+
+    // assert
+    expect(argumentFunc).toHaveBeenCalledTimes(1);
+    expect(argumentFunc).toHaveBeenCalledWith(supportingStore);
+  });
+
+  it('should runEffect in injection context configured by config object', () => {
+    // arrange
+    const argumentFunc = jest.fn();
+    const effect = createEffect(
+      'effect',
+      (_, arg) => {
+        const store2 = inject(ImmutableTestStore);
+        arg(store2);
+      },
+      {
+        withInjectionContext: true,
+      }
+    );
 
     // act
     store.runEffect(effect, argumentFunc);
