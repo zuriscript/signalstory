@@ -204,19 +204,17 @@ export class Store<TState> {
     this.log?.('Effect', `Running ${effect.name}`, ...args);
     this.effectPreprocessor.forEach(p => p(this, effect));
 
-    if (effect.withInjectionContext && this.config.injector) {
-      return runInInjectionContext(this.config.injector, () => {
-        return this.effectPostprocessor.reduce(
-          (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
-          effect.func(this, ...args)
-        );
-      });
-    } else {
-      return this.effectPostprocessor.reduce(
-        (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
-        effect.func(this, ...args)
-      );
-    }
+    const effectResult =
+      effect.config.withInjectionContext && this.config.injector
+        ? runInInjectionContext(this.config.injector, () =>
+            effect.func(this, ...args)
+          )
+        : effect.func(this, ...args);
+
+    return this.effectPostprocessor.reduce(
+      (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
+      effectResult
+    );
   }
 
   /**
