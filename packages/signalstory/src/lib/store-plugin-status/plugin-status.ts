@@ -142,7 +142,7 @@ export function isEffectRunning(
  * Enables StorePlugin that tracks the loading and modification status of a store.
  * @returns A StorePlugin instance for loading and modification status tracking.
  */
-export function useStatus(): StorePlugin {
+export function useStoreStatus(): StorePlugin {
   return {
     init(store) {
       isStoreModifiedMap.set(store, signal(false));

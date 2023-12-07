@@ -30,6 +30,6 @@ export {
   isModified,
   markAsHavingNoRunningEffects,
   markAsUnmodified,
-  useStatus,
+  useStoreStatus,
 } from './lib/store-plugin-status/plugin-status';
 export { StoreQuery, createQuery } from './lib/store-query';

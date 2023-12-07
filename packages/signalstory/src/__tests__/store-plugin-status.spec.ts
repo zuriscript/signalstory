@@ -10,7 +10,7 @@ import {
   markAsHavingNoRunningEffects,
   markAsUnmodified,
   runningEffects,
-  useStatus,
+  useStoreStatus,
 } from '../lib/store-plugin-status/plugin-status';
 
 describe('StoreStatusPlugin', () => {
@@ -18,7 +18,7 @@ describe('StoreStatusPlugin', () => {
     // act
     const store = new Store<{ val: number }>({
       initialState: { val: 5 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
 
     // assert
@@ -36,7 +36,7 @@ describe('StoreStatusPlugin', () => {
     beforeEach(() => {
       store = new Store<{ value: number }>({
         initialState: { value: initialValue },
-        plugins: [useStatus()],
+        plugins: [useStoreStatus()],
       });
       runningEffects.set([]);
     });
@@ -158,7 +158,7 @@ describe('isLoading', () => {
     runningEffects.set([]);
     store = new Store<{ value: number }>({
       initialState: { value: 10 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
   });
 
@@ -209,7 +209,7 @@ describe('isAnyEffectRunning', () => {
     runningEffects.set([]);
     store = new Store<{ value: number }>({
       initialState: { value: 10 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
   });
 
@@ -260,7 +260,7 @@ describe('isEffectRunning', () => {
     runningEffects.set([]);
     store = new Store<{ value: number }>({
       initialState: { value: 10 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
   });
 
@@ -314,7 +314,7 @@ describe('isModified', () => {
   beforeEach(() => {
     store = new Store<{ value: number }>({
       initialState: { value: 10 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
   });
 
@@ -381,7 +381,7 @@ describe('markAsUnmodified', () => {
   beforeEach(() => {
     store = new Store<{ value: number }>({
       initialState: { value: 10 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
   });
 
@@ -405,7 +405,7 @@ describe('markAsHavingNoRunningEffects', () => {
   beforeEach(() => {
     store = new Store<{ value: number }>({
       initialState: { value: 10 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
     runningEffects.set([]);
   });
@@ -425,7 +425,7 @@ describe('markAsHavingNoRunningEffects', () => {
     // arrange
     const otherStore = new Store<{ value: number }>({
       initialState: { value: 20 },
-      plugins: [useStatus()],
+      plugins: [useStoreStatus()],
     });
     runningEffects.set([
       [new WeakRef(store), effect],
