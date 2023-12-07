@@ -5,7 +5,9 @@ import { Store } from './store';
  * Configuration for a store effect.
  */
 export interface StoreEffectConfig {
-  withInjectionContext?: boolean; // Indicates whether the effect requires an injection context.
+  withInjectionContext?: boolean; // Indicates whether the effect requires an injection context. Defaults to true.
+  setLoadingStatus?: boolean; // Indicates whether the effect sets loading status. Defaults to false.
+  setUnmodifiedStatus?: boolean; // Indicates whether the effect sets unmodified status. Defaults to false.
 }
 
 /**
@@ -73,7 +75,10 @@ export function createEffect<
     func,
     config: {
       withInjectionContext:
-        !arg || arg === true || (arg.withInjectionContext ?? false),
+        !arg || arg === true || (arg.withInjectionContext ?? true),
+      setLoadingStatus: (arg as StoreEffectConfig)?.setLoadingStatus ?? false,
+      setUnmodifiedStatus:
+        (arg as StoreEffectConfig)?.setUnmodifiedStatus ?? false,
     },
   };
 }
