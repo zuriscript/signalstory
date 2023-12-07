@@ -28,6 +28,7 @@ export {
   isEffectRunning,
   isLoading,
   isModified,
+  markAsHavingNoRunningEffects,
   markAsUnmodified,
   useStatus,
 } from './lib/store-plugin-status/plugin-status';

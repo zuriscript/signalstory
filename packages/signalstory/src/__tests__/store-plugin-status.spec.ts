@@ -7,6 +7,8 @@ import {
   isEffectRunning,
   isLoading,
   isModified,
+  markAsHavingNoRunningEffects,
+  markAsUnmodified,
   runningEffects,
   useStatus,
 } from '../lib/store-plugin-status/plugin-status';
@@ -36,25 +38,18 @@ describe('StoreStatusPlugin', () => {
         initialState: { value: initialValue },
         plugins: [useStatus()],
       });
+      runningEffects.set([]);
     });
 
     it('should register observable efffect while it runs', async () => {
       // arrange
-      const newValue = 22;
-      const effect = createEffect(
-        'dummyEffect',
-        (store: Store<{ value: number }>) =>
-          of(newValue).pipe(
-            tap(val =>
-              store.mutate(x => {
-                x.value = val;
-              })
-            ),
-            tap(() => {
-              expect(runningEffects()).toHaveLength(1);
-              expect(runningEffects()[0][1]).toBe(effect);
-            })
-          )
+      const effect = createEffect('dummyEffect', () =>
+        of(0).pipe(
+          tap(() => {
+            expect(runningEffects()).toHaveLength(1);
+            expect(runningEffects()[0][1]).toBe(effect);
+          })
+        )
       );
 
       // act & assert
@@ -63,13 +58,12 @@ describe('StoreStatusPlugin', () => {
       await lastValueFrom(store.runEffect(effect));
 
       expect(runningEffects()).toHaveLength(0);
-      expect(store.state().value).toBe(newValue);
     });
 
     it('should register throwing observable efffect while it runs', async () => {
       // arrange
       const effect = createEffect('dummyEffect', () =>
-        of().pipe(
+        of(0).pipe(
           tap(() => {
             expect(runningEffects()).toHaveLength(1);
             expect(runningEffects()[0][1]).toBe(effect);
@@ -92,28 +86,20 @@ describe('StoreStatusPlugin', () => {
 
     it('should handle multiple effects running concurrently', async () => {
       // arrange
-      const effect1 = createEffect(
-        'effect1',
-        (store: Store<{ value: number }>) =>
-          of(30).pipe(
-            delay(100),
-            tap(val =>
-              store.mutate(x => {
-                x.value = val;
-              })
-            )
-          )
+      const effect1 = createEffect('effect1', () =>
+        of(0).pipe(
+          delay(100),
+          tap(() => {
+            expect(runningEffects().length).toBeGreaterThanOrEqual(1);
+          })
+        )
       );
-      const effect2 = createEffect(
-        'effect2',
-        (store: Store<{ value: number }>) =>
-          of(40).pipe(
-            tap(val =>
-              store.mutate(x => {
-                x.value = val;
-              })
-            )
-          )
+      const effect2 = createEffect('effect2', () =>
+        of(0).pipe(
+          tap(() => {
+            expect(runningEffects().length).toBeGreaterThanOrEqual(1);
+          })
+        )
       );
 
       // act
@@ -123,6 +109,43 @@ describe('StoreStatusPlugin', () => {
       ]);
 
       // assert
+      expect(runningEffects()).toHaveLength(0);
+    });
+
+    it('should register promise efffect while it runs', async () => {
+      // arrange
+      const effect = createEffect('dummyEffect', async () => {
+        await delay(100);
+        expect(runningEffects()).toHaveLength(1);
+        expect(runningEffects()[0][1]).toBe(effect);
+      });
+
+      // act & assert
+      expect(runningEffects()).toHaveLength(0);
+
+      await store.runEffect(effect);
+
+      expect(runningEffects()).toHaveLength(0);
+    });
+
+    it('should register throwing promise efffect while it runs', async () => {
+      // arrange
+      const effect = createEffect('dummyEffect', async () => {
+        await delay(100);
+        expect(runningEffects()).toHaveLength(1);
+        expect(runningEffects()[0][1]).toBe(effect);
+        throw new Error('Error');
+      });
+
+      // act & assert
+      expect(runningEffects()).toHaveLength(0);
+
+      try {
+        await store.runEffect(effect);
+      } catch (_) {
+        /* empty */
+      }
+
       expect(runningEffects()).toHaveLength(0);
     });
   });
@@ -349,5 +372,88 @@ describe('isModified', () => {
 
     // assert
     expect(isModified(store)()).toBe(false);
+  });
+});
+
+describe('markAsUnmodified', () => {
+  let store: Store<{ value: number }>;
+
+  beforeEach(() => {
+    store = new Store<{ value: number }>({
+      initialState: { value: 10 },
+      plugins: [useStatus()],
+    });
+  });
+
+  it('should manually mark the store as unmodified', () => {
+    // arrange
+    store.set({ value: 20 });
+    expect(isModified(store)()).toBe(true); // sanity check
+
+    // act
+    markAsUnmodified(store);
+
+    // assert
+    expect(isModified(store)()).toBe(false);
+  });
+});
+
+describe('markAsHavingNoRunningEffects', () => {
+  let store: Store<{ value: number }>;
+  const effect = createEffect('dummyEffect', () => of(30));
+
+  beforeEach(() => {
+    store = new Store<{ value: number }>({
+      initialState: { value: 10 },
+      plugins: [useStatus()],
+    });
+    runningEffects.set([]);
+  });
+
+  it('should manually mark the store as not having running effects', () => {
+    // arrange
+    runningEffects.set([[new WeakRef(store), effect]]);
+
+    // act
+    markAsHavingNoRunningEffects(store);
+
+    // assert
+    expect(runningEffects()).toHaveLength(0);
+  });
+
+  it('should not affect effects from other stores', () => {
+    // arrange
+    const otherStore = new Store<{ value: number }>({
+      initialState: { value: 20 },
+      plugins: [useStatus()],
+    });
+    runningEffects.set([
+      [new WeakRef(store), effect],
+      [new WeakRef(otherStore), effect],
+    ]);
+
+    // act
+    markAsHavingNoRunningEffects(otherStore);
+
+    // assert
+    expect(runningEffects()).toHaveLength(1);
+    expect(runningEffects()[0][0].deref()).toBe(store);
+    expect(runningEffects()[0][1]).toBe(effect);
+  });
+
+  it('should handle multiple effects running concurrently for the same store', () => {
+    // arrange
+    const otherEffect = createEffect('dummyOtherEffect', () => of(50));
+
+    runningEffects.set([
+      [new WeakRef(store), effect],
+      [new WeakRef(store), otherEffect],
+    ]);
+
+    // act
+    markAsHavingNoRunningEffects(store);
+
+    // assert
+    expect(runningEffects()).toHaveLength(0);
   });
 });

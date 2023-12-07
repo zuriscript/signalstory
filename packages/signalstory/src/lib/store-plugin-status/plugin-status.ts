@@ -43,6 +43,7 @@ export function isModified(store: Store<any>): Signal<boolean> {
  * flag on the relevant effects to automatically manage the modification status.
  *
  * @param store - The store to manually mark as unmodified.
+ * @returns void
  */
 export function markAsUnmodified(store: Store<any>): void {
   isStoreModifiedMap.get(store)?.set(false);
@@ -74,6 +75,23 @@ export function isLoading(...stores: Store<any>[]): Signal<boolean> {
       })
     );
   }
+}
+
+/**
+ * Manually marks the provided store as not having any running effects.
+ *
+ * @note This method is intended for exceptional cases, specifically when you observe
+ * that an effect is not removed from the running state by signalstory automatically.
+ * If you encounter such a situation, use this method as a temporary workaround and
+ * be sure to file an issue on GitHub for further investigation and resolution.
+ *
+ * @param store - The store to manually mark as not having running effects.
+ * @returns void
+ */
+export function markAsHavingNoRunningEffects(store: Store<any>): void {
+  runningEffects.update(state =>
+    state.filter(runningEffect => runningEffect[0].deref() !== store)
+  );
 }
 
 /**
