@@ -5,9 +5,24 @@ import { Store } from './store';
  * Configuration for a store effect.
  */
 export interface StoreEffectConfig {
-  withInjectionContext?: boolean; // Indicates whether the effect requires an injection context. Defaults to true.
-  setLoadingStatus?: boolean; // Indicates whether the effect sets loading status. Defaults to false.
-  setUnmodifiedStatus?: boolean; // Indicates whether the effect sets unmodified status. Defaults to false.
+  /**
+   * Indicates whether the effect requires an injection context. Defaults to true.
+   */
+  withInjectionContext?: boolean;
+
+  /**
+   * Indicates whether the effect sets loading status.
+   * Only applicable if the `StoreStatus` plugin is used.
+   * Defaults to false.
+   */
+  setLoadingStatus?: boolean;
+
+  /**
+   * Indicates whether the effect sets unmodified status.
+   * Only applicable if the `StoreStatus` plugin is used.
+   * Defaults to false.
+   */
+  setUnmodifiedStatus?: boolean;
 }
 
 /**
