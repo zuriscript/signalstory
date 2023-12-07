@@ -23,4 +23,13 @@ export {
   clearStoreStorage,
   useStorePersistence,
 } from './lib/store-plugin-persistence/plugin-persistence';
+export {
+  isAnyEffectRunning,
+  isEffectRunning,
+  isLoading,
+  isModified,
+  markAsHavingNoRunningEffects,
+  markAsUnmodified,
+  useStoreStatus,
+} from './lib/store-plugin-status/plugin-status';
 export { StoreQuery, createQuery } from './lib/store-query';
