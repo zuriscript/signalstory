@@ -14,6 +14,29 @@ What sets signalstory apart from many other solutions is its use of [Angular sig
 
 > Having used multiple libraries and architectures in the past, I envisioned signalstory to be very simple to use. It should provide an enjoyable user experience for developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements. At its core, signalstory imposes as few restrictions as possible, providing a toolbox of utilities and concepts to spark creativity.
 
+### Let the store grow with your project
+
+import ThemedImage from '@theme/ThemedImage';
+import { useWindowSize } from '@docusaurus/theme-common';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+<ThemedImage
+alt="Code Hero image"
+sources={{
+    light: useBaseUrl(
+      useWindowSize() === 'mobile'
+        ? '/img/code_evolve_portrait_light.png'
+        : '/img/code_evolve_landscape_light.png'
+    ),
+    dark: useBaseUrl(
+      useWindowSize() === 'mobile'
+        ? '/img/code_evolve_portrait_dark.png'
+        : '/img/code_evolve_landscape_dark.png'
+    ),
+  }}
+/>
+;
+
 ### How does it scale?
 
 In signalstory, think of a `store` as a `signal-in-a-service`. Start by establishing a store dedicated to a domain entity, a component, or both. Hence, state is distributed across multiple stores but can also be partially kept at the component level.  
