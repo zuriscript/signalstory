@@ -25,6 +25,13 @@
 
 signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to decoupled commands, managed side effect objects, and inter-store communication using an event-based approach. The goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
 
+## Let the store grow with your project
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/static/img/code_evolve_landscape_dark.png" width="100%" height="100">
+  <img src="docs/static/img/code_evolve_landscape_light.png" width="100%" height="100">
+</picture>
+
 ## Philosophy
 
 - 🚀 Use class methods to provide controlled access and mutations to shared state.
