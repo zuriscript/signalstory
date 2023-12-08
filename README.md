@@ -28,8 +28,8 @@ signalstory is a state management library based on angular signals. It offers a 
 ## Let the store grow with your project
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/static/img/code_evolve_landscape_dark.png" width="100%" height="100">
-  <img src="docs/static/img/code_evolve_landscape_light.png" width="100%" height="100">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/static/img/code_evolve_landscape_dark.png">
+  <img src="docs/static/img/code_evolve_landscape_light.png">
 </picture>
 
 ## Philosophy
