@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from './store';
 import { StoreEvent } from './store-event';
-import { log } from './utility/logger';
 
 type EventHandler<TStore extends Store<unknown>, TPayload> = {
   store: WeakRef<TStore>;
@@ -118,7 +117,6 @@ export function publish<T>(
       if (store) {
         try {
           handler.handler(store, eventWithPayload);
-          log?.(`[${store.name}->Event] handeled event ${event.name}`);
         } catch (error) {
           errors.push(error as Error);
         }
@@ -149,6 +147,5 @@ export function publishStoreEvent(
 ): void;
 export function publishStoreEvent<T>(event: StoreEvent<T>, payload: T): void;
 export function publishStoreEvent<T>(event: StoreEvent<T>, payload?: T): void {
-  log?.(`[Event] Published event ${event.name}`, payload);
   publish(rootRegistry, event, payload);
 }

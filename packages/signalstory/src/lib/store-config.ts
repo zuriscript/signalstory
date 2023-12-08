@@ -16,7 +16,7 @@ export interface StoreConfig<TState> {
    */
   name?: string;
   /**
-   * Optional Di injector can be passed for effects and query objects. Only useful for dynamic stores, that are not registered in DI (optional, default: false)
+   * Optional Di injector can be passed for effects and query objects. Only useful for dynamic stores, that are not registered in DI (optional, default: null)
    */
   injector?: Injector | null;
   /**
@@ -29,6 +29,7 @@ export interface StoreConfig<TState> {
   stateEqualityFn?: ValueEqualityFn<TState> | null;
   /**
    * Indicates whether logging is enabled. (optional, default: false).
+   * @deprecated Use the `StoreLogger` plugin created by `useStoreLogger` instead.
    */
   enableLogging?: boolean;
   /**

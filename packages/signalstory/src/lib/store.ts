@@ -22,9 +22,9 @@ import {
   EffectPreprocessor,
   InitPostprocessor,
 } from './store-plugin';
+import { useStoreLogger } from './store-plugin-logger/plugin-logger';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
-import { enableLogging, log } from './utility/logger';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
@@ -37,11 +37,6 @@ export class Store<TState> {
   private readonly commandPostprocessor?: CommandPostprocessor[];
   private readonly effectPreprocessor?: EffectPreprocessor[];
   private readonly effectPostprocessor?: EffectPostprocessor<unknown>[];
-  private log?: (
-    action: string,
-    description?: string,
-    ...data: unknown[]
-  ) => void;
   /**
    * The config of the store as readonly
    */
@@ -65,10 +60,12 @@ export class Store<TState> {
       equal: this.config.stateEqualityFn ?? undefined,
     });
 
-    if (this.config.enableLogging) {
-      enableLogging();
-      this.log = (a: string, d?: string, ...p: unknown[]) =>
-        log?.(`[${this.config.name}->${a}] ${d ?? 'Unspecified'}`, ...p);
+    //TODO: Remove as soon as enableLogging removed due to deprecation
+    if (
+      this.config.enableLogging &&
+      !this.config.plugins.some(x => 'name' in x && x['name'] === 'StoreLogger')
+    ) {
+      this.config.plugins.push(useStoreLogger());
     }
 
     this.config.plugins
@@ -124,7 +121,6 @@ export class Store<TState> {
     this._state.set(newState);
 
     this.commandPostprocessor?.forEach(p => p(this, commandName));
-    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -141,7 +137,6 @@ export class Store<TState> {
     this._state.update(state => updateFn(state));
 
     this.commandPostprocessor?.forEach(p => p(this, commandName));
-    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -162,7 +157,6 @@ export class Store<TState> {
     });
 
     this.commandPostprocessor?.forEach(p => p(this, commandName));
-    this.log?.('Command', commandName, this.state());
   }
 
   /**
@@ -175,7 +169,6 @@ export class Store<TState> {
     handler: (store: this, event: StoreEvent<TPayload>) => void
   ) {
     register(rootRegistry, this, event, handler);
-    this.log?.('Event', `Register handler for ${event.name}`);
   }
 
   /**
@@ -189,7 +182,6 @@ export class Store<TState> {
   ): void;
   public unregisterHandler(...events: StoreEvent<any>[]): void {
     unregister(rootRegistry, this, ...events);
-    this.log?.('Event', `Unegister handler for ${events.join(', ')}`);
   }
 
   /**
@@ -206,7 +198,6 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
-    this.log?.('Effect', `Running ${effect.name}`, ...args);
     this.effectPreprocessor?.forEach(p => p(this, effect));
 
     const effectResult =
