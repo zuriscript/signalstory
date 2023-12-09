@@ -51,8 +51,10 @@ And then:
 - Don't want full immutability because your store has to be super fast? - Don't activate it.
 - Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
 - Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
-- Tired of debugging state changes in the console? - Enable redux devtools.
+- Tired of debugging state changes in the console? - Enable redux devtools plugin.
+- Still want some good old logging magic? - Enable Store logger plugin
 - Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
 - Want to sync your state with local storage? - Enable the persistence plugin.
+- Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
 - Something's missing? - Write a custom plugin.
 - Read the docs for more features and concepts

@@ -22,7 +22,7 @@ import {
   EffectPreprocessor,
   InitPostprocessor,
 } from './store-plugin';
-import { useStoreLogger } from './store-plugin-logger/plugin-logger';
+import { useLogger } from './store-plugin-logger/plugin-logger';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
 
@@ -65,7 +65,7 @@ export class Store<TState> {
       this.config.enableLogging &&
       !this.config.plugins.some(x => 'name' in x && x['name'] === 'StoreLogger')
     ) {
-      this.config.plugins.push(useStoreLogger());
+      this.config.plugins.push(useLogger());
     }
 
     this.config.plugins
