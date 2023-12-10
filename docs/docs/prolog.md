@@ -35,24 +35,26 @@ sources={{
     ),
   }}
 />
-;
 
 ### How does it scale?
 
 In signalstory, think of a `store` as a `signal-in-a-service`. Start by establishing a store dedicated to a domain entity, a component, or both. Hence, state is distributed across multiple stores but can also be partially kept at the component level.  
 And then:
 
-- Use class methods to provide controlled access and mutations to shared state.
-- If your store becomes unwieldy, slice it into multiple stores.
-- Join and aggregate your state at the component level using signal mechanics.
-- Need to sync states between stores? - Use events.
-- Need to decouple actors and consumers as you do in redux? - Use events.
-- Craving Immutability? - Just activate it.
-- Don't want full immutability because your store has to be super fast? - Don't activate it.
-- Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
-- Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
-- Tired of debugging state changes in the console? - Enable redux devtools.
-- Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
-- Want to sync your state with local storage? - Enable the persistence plugin.
-- Something's missing? - Write a custom plugin.
-- Read the docs for more features and concepts
+- 🚀 Use class methods to provide controlled access and mutations to shared state.
+- 🌌 If your store becomes too complex and bloated, slice it into multiple stores.
+- ✨ Join and aggregate your state at the component level using signal mechanics.
+- 🌐 Need to sync states between stores synchronously? - Use events.
+- 🔮 Need to decouple actors and consumers as you do in redux? - Use events.
+- 🔄 Craving Immutability? - Just activate it.
+- 🏎️ Don't want full immutability because your store has to be super fast? - Don't activate it.
+- 🧙‍♂️ Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
+- 🔍 Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
+- 📦 Don't want to use a class for stores? - You don't have to.
+- 🛠️ Tired of debugging state changes in the console? - Enable redux devtools.
+- 🪄 Still want some good old logging magic? - Enable Store logger plugin
+- ⏳ Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
+- 💾 Want to sync your state with local storage? - Enable the persistence plugin.
+- 📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
+- 🎨 Something's missing? - Write a custom plugin.
+- 📖 Read the [docs](https://zuriscript.github.io/signalstory/) for more features and concepts.
