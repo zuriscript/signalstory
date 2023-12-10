@@ -103,8 +103,9 @@ const config = {
         ],
       },
       announcementBar: {
-        id: 'support_us',
-        content: '<b>signalstory 17.0.0</b> has been released! 🚀',
+        id: '17.1.0',
+        content:
+          '<b>signalstory 17.1.0</b> has been released ✨ We are in rapid development mode until February. Submit feature requests <a href="https://github.com/zuriscript/signalstory/discussions/categories/ideas" target="_blank">here</a>; yours might get considered! 🏆',
         backgroundColor: '#e35e75',
         textColor: '#091E42',
         isCloseable: true,
@@ -204,6 +205,10 @@ const config = {
               {
                 label: 'Trees by Freepik - Flaticon',
                 href: 'https://www.flaticon.com/free-icons/trees',
+              },
+              {
+                label: 'Game Charatcers by max.icons - Flaticon',
+                href: 'https://www.flaticon.com/free-icons/warrior',
               },
             ],
           },

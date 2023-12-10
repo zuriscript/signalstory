@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 7
 ---
 
 # Custom
@@ -15,6 +15,15 @@ type StorePlugin = {
   init?: (store: Store<any>) => void;
   preprocessCommand?: (store: Store<any>, command: string | undefined) => void;
   postprocessCommand?: (store: Store<any>, command: string | undefined) => void;
+  preprocessEffect?: (
+    store: Store<any>,
+    effect: StoreEffect<any, any, any>
+  ) => void;
+  postprocessEffect?: <TResult>(
+    store: Store<any>,
+    effect: StoreEffect<any, any, TResult>,
+    result: TResult
+  ) => TResult;
 };
 ```
 
@@ -23,6 +32,8 @@ Here's a breakdown of the available hooks:
 - **init**: This function is called during the initialization of a store. It allows you to perform any setup or configuration specific to your plugin and the store.
 - **preprocessCommand**: This function is called before a command is executed on a store.
 - **postprocessCommand**: This function is called after a command has been executed on a store.
+- **preprocessEffect**: This function is called before an effect is executed on a store.
+- **postprocessEffect**: This function is called after an effect has been executed on a store.
 
 ## Creating a custom plugin
 

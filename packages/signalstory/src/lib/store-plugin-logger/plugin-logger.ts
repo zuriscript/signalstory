@@ -22,7 +22,7 @@ export interface StoreLoggerPluginOptions {
  * Enables StorePlugin that logs command and effect execution
  * @returns A StorePlugin instance for logging.
  */
-export function useStoreLogger(
+export function useLogger(
   options: StoreLoggerPluginOptions = {}
 ): StorePlugin & { log: Logger; name: string } {
   const plugin: StorePlugin & { log: Logger; name: string } = {

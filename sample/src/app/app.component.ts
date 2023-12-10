@@ -1,6 +1,12 @@
 /* eslint-disable @angular-eslint/component-selector */
 import { Component, effect } from '@angular/core';
-import { getHistory, publishStoreEvent, redo, undo } from 'signalstory';
+import {
+  getHistory,
+  isLoading,
+  publishStoreEvent,
+  redo,
+  undo,
+} from 'signalstory';
 import {
   getGoogleBooksBySearchArgument,
   postCollection,
@@ -15,6 +21,7 @@ import { storeResetRequestEvent } from './state/events';
       <h2>Books</h2>
       <app-book-search (SearchTextChanged)="onSearchTextChanged($event)">
       </app-book-search>
+      <app-loading-spinner *ngIf="isCollectionLoading()"></app-loading-spinner>
       <app-book-list
         [books]="store.getBooksInSearchscope()"
         (add)="store.addToCollection($event)"></app-book-list>
@@ -80,6 +87,7 @@ export class AppComponent {
   history: string[] = [];
   undo = undo;
   redo = redo;
+  isCollectionLoading = isLoading(this.store);
 
   constructor(public store: BooksStore) {
     effect(() => {

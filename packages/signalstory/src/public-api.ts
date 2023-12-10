@@ -18,6 +18,7 @@ export {
   undo,
   useStoreHistory,
 } from './lib/store-plugin-history/plugin-history';
+export { useLogger } from './lib/store-plugin-logger/plugin-logger';
 export {
   StorePersistencePluginOptions,
   clearStoreStorage,

@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class FakeService {
-  postFakeData(...arg: any) {
+  postFakeData(...arg: unknown[]) {
     alert('FakeService posted collection ' + JSON.stringify(arg, null, 4));
   }
 }
