@@ -32,7 +32,7 @@ signalstory is a state management library based on angular signals. It offers a 
   <img src="docs/static/img/code_evolve_landscape_light.png">
 </picture>
 
-## Philosophy
+## Guiding Principles
 
 - 🚀 Use class methods to provide controlled access and mutations to shared state.
 - 🌌 If your store becomes too complex and bloated, slice it into multiple stores.
@@ -45,8 +45,10 @@ signalstory is a state management library based on angular signals. It offers a 
 - 🔍 Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
 - 📦 Don't want to use a class for stores? - You don't have to.
 - 🛠️ Tired of debugging state changes in the console? - Enable redux devtools.
+- 🪄 Still want some good old logging magic? - Enable Store logger plugin
 - ⏳ Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
 - 💾 Want to sync your state with local storage? - Enable the persistence plugin.
+- 📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
 - 🎨 Something's missing? - Write a custom plugin.
 - 📖 Read the [docs](https://zuriscript.github.io/signalstory/) for more features and concepts.
 

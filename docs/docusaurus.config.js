@@ -43,7 +43,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/social-card.jpg',
+      image: 'img/social-card.png',
       hideOnScroll: 'false',
       metadata: [
         {
@@ -64,7 +64,7 @@ const config = {
         {
           name: 'twitter:image',
           content:
-            'https://zuriscript.github.io/signalstory/img/social-card.jpg',
+            'https://zuriscript.github.io/signalstory/img/social-card.png',
         },
         {
           property: 'og:url',
@@ -79,7 +79,7 @@ const config = {
         {
           property: 'og:image',
           content:
-            'https://zuriscript.github.io/signalstory/img/social-card.jpg',
+            'https://zuriscript.github.io/signalstory/img/social-card.png',
         },
       ],
       navbar: {
