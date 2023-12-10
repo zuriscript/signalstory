@@ -25,6 +25,8 @@
 
 signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to decoupled commands, managed side effect objects, and inter-store communication using an event-based approach. The goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
 
+> Starting out? You can keep it nice and simple if you prefer to avoid exploring all the advanced features that a state management library can offer! Begin by checking out the [store](https://zuriscript.github.io/signalstory/docs/store), and only dive into the rest if you're curious later on.
+
 ## Let the store grow with your project
 
 <picture>
@@ -71,10 +73,10 @@ class BookStore extends ImmutableStore<Book[]> {
     super({
         initialState: { ... },
         name: 'Books Store',
-        enableLogging: true,
         mutationProducerFn: produce,
         plugins: [
           useDevtools(),
+          useLogger(),
           useStoreHistory(),
           useStorePersistence(),
           useStoreStatus(),
@@ -136,14 +138,14 @@ export const fetchBooksEffect = createEffect(
     );
   },
   {
-    setLoadingStatus: true, // mark the effect as having loading character
+    setLoadingStatus: true, // indicates that the store is loading while the effect runs
     setUnmodifiedStatus: true, // it should mark the store as unmodified upon completion
   }
 );
 // And then run it
 myBookStore.runEffect(fetchBooksEffect).subscribe();
 const loadingSignal = isLoading(myBookStore); // true while effect is running
-const isModifiedSignal = isModified(myBookStore); // false after effect completion
+const isModifiedSignal = isModified(myBookStore); // false after store update
 ```
 
 ## Sample Application

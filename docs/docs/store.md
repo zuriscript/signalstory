@@ -6,7 +6,7 @@ sidebar_position: 3
 
 `Stores` serve as a central hub for managing a specific slice of the application's state. A store may be used globally but can also be scoped at a component or service level. Rather than using a single store for the entire application, the state can be distributed across multiple isolated stores. Each store could be responsible for managing state related to a specific domain entity or a feature.
 
-A store encapsulates a `WrtiableSignal` as state. It exposes the functions `set`, `update`, and `mutate` for performing state modifications. You may visit [Command](./building-blocks/command.md) to read more about semantics.
+A store encapsulates a `WrtiableSignal` as state. It exposes the functions `set`, `update`, and `mutate` for performing state modifications. If you're curious about semantics and theory, feel free to visit the [Command](./building-blocks/command.md) section for more information.
 
 :::info
 
@@ -16,7 +16,7 @@ Starting from Angular version 17, the `mutate` feature has been removed from the
 
 ## Create an Injectable Store
 
-signalstory stores can be defined as injectable concrete classes extending the generic `Store` class, that can be injected into Angular components, services, and other classes.
+Stores can be defined as injectable concrete classes extending the generic `Store` class, that can be injected into Angular components, services, and other classes.
 
 ```typescript
 export interface UserData {
@@ -34,6 +34,21 @@ export type UserState = (UserData & UserUI)[];
 export class UserStore extends Store<UserState> {
   constructor() {
     super({ initialState: [] });
+  }
+
+  // Expose functions to modify the state
+  public selectUser(name: string): void {
+    this.mutate(state => {
+      const userToSelect = state.find(user => user.name === name);
+      if (userToSelect) {
+        userToSelect.isSelected = true;
+      }
+    });
+  }
+
+  // Expose functions to query the state
+  public get selectedUsers(): Signal<UserState[]> {
+    return computed(() => this.state().filter(user => user.isSelected));
   }
 }
 ```

@@ -4,7 +4,7 @@ sidebar_position: 6
 
 # Logger
 
-`signalstory` Logger Plugin facilitates logging of crucial events related to the state management of your store. By enabling the `LoggerPlugin`, you can gain insights into store initialization, command execution, and effect execution.
+Use the Logger plugin for the logging of crucial events related to the state management of your store. By enabling the `LoggerPlugin`, you can gain insights into store initialization, command execution, and effect execution.
 
 ## Enabling Logging
 
@@ -31,14 +31,6 @@ The `useLogger` function accepts an optional configuration object, allowing you 
 | Option        | Description                            | Default Value |
 | ------------- | -------------------------------------- | ------------- |
 | `logFunction` | Log function for commands and effects. | `console.log` |
-
-You can customize the configuration like this:
-
-```typescript
-useLogger({
-  logFunction: customLoggerFunction,
-});
-```
 
 ## Logging Events
 
@@ -71,4 +63,9 @@ type Logger = (message?: unknown, ...optionalParams: unknown[]) => void;
 const customLoggerFunction: Logger = (message, ...optionalParams) => {
   // Your custom logging logic here
 };
+
+// Use it
+useLogger({
+  logFunction: customLoggerFunction,
+});
 ```

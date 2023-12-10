@@ -4,8 +4,10 @@ import {
   clearStoreStorage,
   useDeepFreeze,
   useDevtools,
+  useLogger,
   useStoreHistory,
   useStorePersistence,
+  useStoreStatus,
 } from 'signalstory';
 import { Book, BookData } from './books.state';
 import { storeResetRequestEvent } from './events';
@@ -16,12 +18,13 @@ export class BooksStore extends ImmutableStore<Book[]> {
     super({
       initialState: [],
       name: 'BookStore',
-      enableLogging: true,
       plugins: [
         useDevtools(),
         useStoreHistory(),
         useDeepFreeze(),
         useStorePersistence(),
+        useLogger(),
+        useStoreStatus(),
       ],
     });
 

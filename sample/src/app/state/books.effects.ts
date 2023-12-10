@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { delay, filter, tap } from 'rxjs/operators';
 import { createEffect } from 'signalstory';
 import { FakeService } from '../services/fake.service';
 import { BookData } from './books.state';
@@ -20,7 +20,14 @@ export const getGoogleBooksBySearchArgument = createEffect(
       .get<{ items: BookData[] }>(
         `https://www.googleapis.com/books/v1/volumes?maxResults=6&orderBy=relevance&q=${searchArgument}`
       )
-      .pipe(tap(books => store.setBookData(books.items)));
+      .pipe(
+        delay(150), // Just to show off loading spinner
+        filter(books => !!books && !!books.items),
+        tap(books => store.setBookData(books.items))
+      );
+  },
+  {
+    setLoadingStatus: true,
   }
 );
 

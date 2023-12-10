@@ -28,7 +28,7 @@ class StoreWithStatus extends Store<MyState> {
 
 This plugin works only with [effects objects](../building-blocks/effect.md#effect-objects). Generally, it works well with effects that return observables or promises which makes it particularly useful when dealing with asynchronous operations such as HTTP calls or other asynchronous tasks that modify or retrieve information from a store's state.
 
-1. **Effect returning Observables**: The plugin can monitor the loading status and modification status of the store during the asynchronous execution of the observable. it works also if the effect is throwing an Error, is using the filter operator or is hot (i.e. a subject).
+1. **Effect returning Observables**: The plugin can monitor the loading status and modification status of the store during the asynchronous execution of the observable. It works even if the effect's observable encounters errors, uses the filter operator, or operates as a hot observable (i.e., a subject).
 
    ```typescript
    const myObservableEffect = createEffect(
@@ -45,7 +45,7 @@ This plugin works only with [effects objects](../building-blocks/effect.md#effec
    );
    ```
 
-2. **Effect returning Promises**: Effects returning promises are also fully supported by Plugin, either using an async block or directly returning a promise. The loading and modification status of the store can be tracked during the execution of the promise.
+2. **Effect returning Promises**: the plugin fully supports effects that return promises, whether utilizing an async block or directly returning a promise.
 
    ```typescript
    // Example of using a promise in an effect
@@ -60,10 +60,11 @@ This plugin works only with [effects objects](../building-blocks/effect.md#effec
 
 #### Considerations for Synchronous Effects
 
-While the Store Status Plugin could technically support synchronous effects, it's important to note that synchronous effects can block the UI thread. As a result, using status tracking for synchronous effects may not provide significant benefits.
+While the Store Status Plugin can technically work with synchronous effects, it's essential to know that change detection doesn't run during their execution. As a result, consumers won't be notified of status changes, making status tracking less beneficial for synchronous effects.
+
 :::info
 
-If there is a specific use case for tracking status in synchronous effects, please raise the request on GitHub for further consideration and implementation.
+If you have a specific need to track status in synchronous effects, signalstory could potentially provide a solution by scheduling such effects using the macrotask queue. This approach introduces a slight delay in the execution of the effect, but it ensures the ability to notify consumers about status changes. Feel free to raise a request on GitHub for us to further explore and consider this implementation.
 
 :::
 
