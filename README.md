@@ -40,7 +40,7 @@ signalstory is a state management library based on angular signals. It offers a 
 - 🌌 If your store becomes too complex and bloated, slice it into multiple stores.
 - ✨ Join and aggregate your state at the component level using signal mechanics.
 - 🌐 Need to sync states between stores synchronously? - Use events.
-- 🔮 Need to decouple actors and consumers as you do in ``redux`? - Use events.
+- 🔮 Need to decouple actors and consumers as you do in `redux`? - Use events.
 - 🔄 Craving `Immutability`? - Just activate it.
 - 🏎️ Don't want full immutability because your store has to be super fast? - Don't activate it.
 - 🧙‍♂️ Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
@@ -48,7 +48,7 @@ signalstory is a state management library based on angular signals. It offers a 
 - 📦 Don't want to use a class for stores? - You don't have to.
 - 🛠️ Tired of debugging state changes in the console? - Enable redux devtools.
 - 🪄 Still want some good old logging magic? - Enable Store logger plugin
-- ⏳ Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
+- ⏳ Need to keep track of store history and perform undo/redo operations? - Enable the history plugin.
 - 💾 Want to sync your state with local storage? - Enable the persistence plugin.
 - 📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
 - 🎨 Something's missing? - Write a custom plugin.

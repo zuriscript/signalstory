@@ -12,21 +12,25 @@
 
 signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to decoupled commands, managed side effect objects, and inter-store communication using an event-based approach. The goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
 
-## Philosophy
+> Starting out? You can keep it nice and simple if you prefer to avoid exploring all the advanced features that a state management library can offer! Begin by checking out the [store](https://zuriscript.github.io/signalstory/docs/store), and only dive into the rest if you're curious later on.
+
+## Guiding Principles
 
 - 🚀 Use class methods to provide controlled access and mutations to shared state.
 - 🌌 If your store becomes too complex and bloated, slice it into multiple stores.
 - ✨ Join and aggregate your state at the component level using signal mechanics.
 - 🌐 Need to sync states between stores synchronously? - Use events.
-- 🔮 Need to decouple actors and consumers as you do in redux? - Use events.
-- 🔄 Craving Immutability? - Just activate it.
+- 🔮 Need to decouple actors and consumers as you do in `redux`? - Use events.
+- 🔄 Craving `Immutability`? - Just activate it.
 - 🏎️ Don't want full immutability because your store has to be super fast? - Don't activate it.
 - 🧙‍♂️ Seeking a way to encapsulate side effects in a reusable, maintainable, and testable way? - Use effect objects.
 - 🔍 Want a way to reuse and test queries spanning over multiple stores? - Use query objects.
 - 📦 Don't want to use a class for stores? - You don't have to.
 - 🛠️ Tired of debugging state changes in the console? - Enable redux devtools.
-- ⏳ Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.
+- 🪄 Still want some good old logging magic? - Enable Store logger plugin
+- ⏳ Need to keep track of store history and perform undo/redo operations? - Enable the history plugin.
 - 💾 Want to sync your state with local storage? - Enable the persistence plugin.
+- 📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
 - 🎨 Something's missing? - Write a custom plugin.
 - 📖 Read the [docs](https://zuriscript.github.io/signalstory/) for more features and concepts.
 
@@ -49,12 +53,13 @@ class BookStore extends ImmutableStore<Book[]> {
     super({
         initialState: { ... },
         name: 'Books Store',
-        enableLogging: true,
         mutationProducerFn: produce,
         plugins: [
           useDevtools(),
+          useLogger(),
           useStoreHistory(),
-          useStorePersistence()
+          useStorePersistence(),
+          useStoreStatus(),
         ],
     });
 
@@ -82,18 +87,20 @@ class BookStore extends ImmutableStore<Book[]> {
 
 
 // Encapsulated multi store query object
-export const BooksAndVendorsByAuthorInSwitzerlandQuery = createQuery(
-  [BookStore, VendorStore],
-  (books, vendors, authorId: string) => {
+export const BooksAndPublishersByAuthorInSwitzerlandQuery = createQuery(
+  [BookStore, PublisherStore],
+  (books, publishers, authorId: string) => {
     const booksFromAuthor = books.state().filter(x => x.author === authorId);
-    const vendorsInSwitzerland = vendors.state().filter(x => x.country === 'CH');
+    const publishersInSwitzerland = publishers.state().filter(x => x.country === 'CH');
 
     return booksFromAuthor.map(book => ({
       book,
-      vendors: vendorsInSwitzerland.find(vendor => vendor.id === book.vendorId),
+      publisher: publishersInSwitzerland.find(p => p.id === book.mainPublisherId),
     }));
   }
 );
+// And then run it
+const query = myBookStore.runQuery(BooksAndPublishersByAuthorInSwitzerlandQuery, 'sapowski');
 
 // Encapsulated effect object
 export const fetchBooksEffect = createEffect(
@@ -109,8 +116,16 @@ export const fetchBooksEffect = createEffect(
       }),
       tap(result => store.setBooks(result))
     );
+  },
+  {
+    setLoadingStatus: true, // indicates that the store is loading while the effect runs
+    setUnmodifiedStatus: true, // it should mark the store as unmodified upon completion
   }
 );
+// And then run it
+myBookStore.runEffect(fetchBooksEffect).subscribe();
+const loadingSignal = isLoading(myBookStore); // true while effect is running
+const isModifiedSignal = isModified(myBookStore); // false after store update
 ```
 
 ## Sample Application
