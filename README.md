@@ -145,7 +145,7 @@ export const fetchBooksEffect = createEffect(
 // And then run it
 myBookStore.runEffect(fetchBooksEffect).subscribe();
 const loadingSignal = isLoading(myBookStore); // true while effect is running
-const isModifiedSignal = isModified(myBookStore); // false after store update
+const isModifiedSignal = isModified(myBookStore); // true after store update
 ```
 
 ## Sample Application
