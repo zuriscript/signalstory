@@ -56,10 +56,14 @@ const config = {
           property: 'twitter:url',
           content: 'https://zuriscript.github.io/signalstory/',
         },
-        { name: 'twitter:title', content: 'Signalstory 🧙‍♀️' },
+        {
+          name: 'twitter:title',
+          content: 'Signalstory 🧙‍♀️: State Management for Angular Wizards',
+        },
         {
           name: 'twitter:description',
-          content: 'Signal-based state management for Angular applications',
+          content:
+            'Signal-based state management solution for Angular that grows with your project. Explore feature-rich plugins, concepts and a versatile toolbox for developers at all levels.',
         },
         {
           name: 'twitter:image',
@@ -71,10 +75,14 @@ const config = {
           content: 'https://zuriscript.github.io/signalstory/',
         },
         { property: 'og:type', content: 'website' },
-        { property: 'og:title', content: 'Signalstory 🧙‍♀️' },
+        {
+          property: 'og:title',
+          content: 'Signalstory 🧙‍♀️: State Management for Angular Wizards',
+        },
         {
           property: 'og:description',
-          content: 'Signal-based state management for Angular applications',
+          content:
+            'Signal-based state management solution for Angular that grows with your project. Explore feature-rich plugins, concepts and a versatile toolbox for developers at all levels.',
         },
         {
           property: 'og:image',
