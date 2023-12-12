@@ -7,7 +7,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'signalstory | Empower Your Angular State Management',
-  tagline: 'Signal-based state management for Angular applications',
+  tagline:
+    'Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.',
   favicon: 'img/favicon.ico',
   url: 'https://zuriscript.github.io/',
   baseUrl: '/signalstory/',
@@ -58,12 +59,12 @@ const config = {
         },
         {
           name: 'twitter:title',
-          content: 'Signalstory 🧙‍♀️: State Management for Angular Wizards',
+          content: 'Signalstory 🏰: State Management with Angular Signals',
         },
         {
           name: 'twitter:description',
           content:
-            'Signal-based state management solution for Angular that grows with your project. Explore feature-rich plugins, concepts and a versatile toolbox for developers at all levels.',
+            'Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.',
         },
         {
           name: 'twitter:image',
@@ -77,12 +78,12 @@ const config = {
         { property: 'og:type', content: 'website' },
         {
           property: 'og:title',
-          content: 'Signalstory 🧙‍♀️: State Management for Angular Wizards',
+          content: 'Signalstory 🏰: State Management with Angular Signals',
         },
         {
           property: 'og:description',
           content:
-            'Signal-based state management solution for Angular that grows with your project. Explore feature-rich plugins, concepts and a versatile toolbox for developers at all levels.',
+            'Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.',
         },
         {
           property: 'og:image',
