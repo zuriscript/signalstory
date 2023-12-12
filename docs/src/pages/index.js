@@ -32,7 +32,7 @@ function HomepageHeader() {
 
 export default function Home() {
   return (
-    <Layout description="Signal-based state management for Angular applications">
+    <Layout description="Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
