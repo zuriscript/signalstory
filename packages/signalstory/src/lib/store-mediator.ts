@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from './store';
 import { StoreEvent } from './store-event';
+import { runNonBlockingBatch } from './utility/scheduling';
 
 type EventHandler<TStore extends Store<unknown>, TPayload> = {
   store: WeakRef<TStore>;
@@ -111,25 +112,20 @@ export function publish<T>(
   };
 
   if (handlers) {
-    const errors: Error[] = [];
-    for (const handler of handlers) {
-      const store = handler.store.deref();
-      if (store) {
-        try {
-          handler.handler(store, eventWithPayload);
-        } catch (error) {
-          errors.push(error as Error);
-        }
+    const relevantHandlers: EventHandler<any, unknown>[] = [];
+    handlers.forEach(handler => {
+      if (handler.store.deref()) {
+        relevantHandlers.push(handler);
       } else {
         handlers.delete(handler);
       }
-    }
-    if (errors.length > 0) {
-      throw new AggregateError(
-        errors,
-        `Errors in Handler for event ${eventWithPayload.name}`
-      );
-    }
+    });
+
+    runNonBlockingBatch(
+      relevantHandlers.map(x => x.handler),
+      0,
+      relevantHandlers.map(x => [x.store.deref(), eventWithPayload])
+    );
   }
 }
 
