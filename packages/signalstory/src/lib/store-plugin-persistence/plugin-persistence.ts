@@ -2,11 +2,16 @@
 import { Store } from '../store';
 import { StorePlugin, StoreState } from '../store-plugin';
 import {
-  PersistenceStorage,
+  PersistenceStorageAsynchronous,
+  isPersistenceStorageAsynchronous,
+} from './persistence-asynchronous';
+import {
+  PersistenceStorageSynchronous,
   clearStorage,
+  isPersistenceStorageSynchronous,
   loadFromStorage,
   saveToStorage,
-} from './persistence';
+} from './persistence-synchronous';
 
 /**
  * Options for configuring the Store Persistence Plugin.
@@ -19,15 +24,17 @@ export interface StorePersistencePluginOptions {
   /**
    * The storage mechanism for persistence.  (optional, default: localStorage).
    */
-  persistenceStorage?: PersistenceStorage;
+  persistenceStorage?:
+    | PersistenceStorageSynchronous
+    | PersistenceStorageAsynchronous;
 }
 
 /**
  * Represents the Store Persistence Plugin, enhancing a store with state persistence functionality.
  */
 type StorePersistencePlugin = StorePlugin & {
-  storage: PersistenceStorage;
-  getPersistenceKeyFromStore: (store: Store<unknown>) => string;
+  storage: PersistenceStorageSynchronous | PersistenceStorageAsynchronous;
+  persistenceKey: string;
 };
 
 /**
@@ -42,7 +49,7 @@ function isStorePersistencePlugin(
     obj &&
     typeof obj === 'object' &&
     'storage' in obj &&
-    'getPersistenceKeyFromStore' in obj
+    'persistenceKey' in obj
   );
 }
 
@@ -56,7 +63,11 @@ function isStorePersistencePlugin(
 export function clearStoreStorage(store: Store<any>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
-    clearStorage(plugin.storage, plugin.getPersistenceKeyFromStore(store));
+    if (isPersistenceStorageSynchronous(plugin.storage)) {
+      clearStorage(plugin.storage, plugin.persistenceKey);
+    } else if (isPersistenceStorageAsynchronous(plugin.storage)) {
+      plugin.storage.removeItem(plugin.persistenceKey);
+    }
   } else {
     throw new Error(
       `Store persistence plugin is not enabed for store ${store.config.name}`
@@ -76,11 +87,13 @@ export function saveToStoreStorage<TStore extends Store<any>>(
 ): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
-    saveToStorage(
-      plugin.storage,
-      plugin.getPersistenceKeyFromStore(store),
-      state
-    );
+    if (isPersistenceStorageSynchronous(plugin.storage)) {
+      console.log('SETTING SYNC');
+      saveToStorage(plugin.storage, plugin.persistenceKey, state);
+    } else if (isPersistenceStorageAsynchronous(plugin.storage)) {
+      console.log('SETTING ASYNC');
+      plugin.storage.setItem(plugin.persistenceKey, state);
+    }
   }
 }
 
@@ -94,8 +107,8 @@ export function loadFromStoreStorage<TStore extends Store<any>>(
   store: TStore
 ): StoreState<TStore> | undefined {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
-  return plugin
-    ? loadFromStorage(plugin.storage, plugin.getPersistenceKeyFromStore(store))
+  return plugin && isPersistenceStorageSynchronous(plugin.storage)
+    ? loadFromStorage(plugin.storage, plugin.persistenceKey)
     : undefined;
 }
 
@@ -109,19 +122,35 @@ export function useStorePersistence(
   options: StorePersistencePluginOptions = {}
 ): StorePersistencePlugin {
   const plugin: StorePersistencePlugin = {
+    name: 'StoreLogger',
     storage: options.persistenceStorage ?? localStorage,
-    getPersistenceKeyFromStore: store =>
-      options.persistenceKey ?? `_persisted_state_of_${store.config.name}`,
-    init(store) {
+    persistenceKey: options.persistenceKey ?? '',
+  };
+
+  plugin.init = store => {
+    if (!plugin.persistenceKey) {
+      plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
+    }
+
+    if (isPersistenceStorageSynchronous(plugin.storage)) {
       const persistedState = loadFromStoreStorage(store);
       if (persistedState) {
         store.set(persistedState, 'Load state from storage');
       }
-    },
-    postprocessCommand(store) {
-      saveToStoreStorage(store, store.state());
-    },
+    } else if (isPersistenceStorageAsynchronous(plugin.storage)) {
+      plugin.storage.init(plugin.persistenceKey, () => {
+        if (isPersistenceStorageAsynchronous(plugin.storage)) {
+          plugin.storage.getAndProcessValue(
+            plugin.persistenceKey,
+            persistedState =>
+              store.set(persistedState, 'Load state from storage')
+          );
+        }
+      });
+    }
   };
 
-  return plugin;
+  plugin.postprocessCommand = store => saveToStoreStorage(store, store.state());
+
+  return plugin as unknown as StorePersistencePlugin;
 }

@@ -2,6 +2,7 @@ import { Injectable, computed } from '@angular/core';
 import {
   ImmutableStore,
   clearStoreStorage,
+  createIndexedDbAdapter,
   useDeepFreeze,
   useDevtools,
   useLogger,
@@ -22,7 +23,9 @@ export class BooksStore extends ImmutableStore<Book[]> {
         useDevtools(),
         useStoreHistory(),
         useDeepFreeze(),
-        useStorePersistence(),
+        useStorePersistence({
+          persistenceStorage: createIndexedDbAdapter('SampleApplication', 1),
+        }),
         useLogger(),
         useStoreStatus(),
       ],
