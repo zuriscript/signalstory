@@ -22,7 +22,7 @@ function noPendingUserEvents(): boolean {
  * @param currentTaskIndex - The index of the current task to start from (optional: default is 0).
  * @param args - An array of arrays, each containing arguments for the corresponding task (optional: default is none).
  * @remarks The function uses a time-based approach to break the execution into non-blocking batches.
- * @remarks The deadline for each batch is set to 50 milliseconds.
+ * @remarks The deadline for each batch is set to 40 milliseconds.
  * @remarks If the tasks take longer to execute than the deadline, they will be scheduled in subsequent batches.
  * @example
  * ```typescript
