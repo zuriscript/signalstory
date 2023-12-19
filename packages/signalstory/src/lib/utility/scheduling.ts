@@ -1,5 +1,22 @@
 /**
- * Executes a batch of tasks with a possibly asynchronous scheduling designed to minimize UI thread blocking
+ * Checks if there are no pending user events.
+ * @returns {boolean} True if there are no pending user events given the detection feature is supported by the browser, false otherwise.
+ */
+function noPendingUserEvents(): boolean {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const scheduling = (navigator as any).scheduling;
+    return (
+      scheduling?.isInputPending &&
+      !scheduling.isInputPending({ includeContinuous: true })
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Executes a batch of tasks with a potentially asynchronous scheduling designed to minimize UI thread blocking
  *
  * @param tasks - An array of functions representing tasks to be executed.
  * @param currentTaskIndex - The index of the current task to start from (optional: default is 0).
@@ -22,18 +39,27 @@
 export function runNonBlockingBatch(
   tasks: ((...args: never[]) => unknown)[],
   currentTaskIndex = 0,
-  args: unknown[][] = []
+  args: unknown[][] | undefined = undefined
 ): void {
-  const deadline = performance.now() + 50;
-  while (currentTaskIndex < tasks.length && performance.now() < deadline) {
-    const currentArgs = args?.[currentTaskIndex] as never[];
-    currentArgs && currentArgs.length > 0
-      ? tasks[currentTaskIndex](...currentArgs)
-      : tasks[currentTaskIndex]();
-    currentTaskIndex++;
-  }
+  if (tasks && currentTaskIndex < tasks.length) {
+    const deadline = performance.now() + 40;
 
-  if (currentTaskIndex < tasks.length) {
-    setTimeout(runNonBlockingBatch, 0, tasks, currentTaskIndex, args);
+    do {
+      const currentArgs = args?.[currentTaskIndex] as never[];
+      if (currentArgs && currentArgs.length > 0) {
+        tasks[currentTaskIndex](...currentArgs);
+      } else {
+        tasks[currentTaskIndex]();
+      }
+      currentTaskIndex++;
+    } while (currentTaskIndex < tasks.length && performance.now() < deadline);
+
+    if (currentTaskIndex < tasks.length) {
+      if (noPendingUserEvents()) {
+        runNonBlockingBatch(tasks, currentTaskIndex, args);
+      } else {
+        setTimeout(runNonBlockingBatch, 0, tasks, currentTaskIndex, args);
+      }
+    }
   }
 }
