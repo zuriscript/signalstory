@@ -1,5 +1,7 @@
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 /**
  * Represents a Redux action.
@@ -171,6 +173,12 @@ export function removeFromDevtools<TStore extends Store<unknown>>(
  * @returns Devtools Storeplugin
  */
 export function useDevtools(): StorePlugin {
+  const platformId = inject(PLATFORM_ID);
+
+  if (!isPlatformBrowser(platformId)) {
+    return {};
+  }
+
   return {
     init(store) {
       registerForDevtools(store);
