@@ -81,7 +81,7 @@ export class Store<TState> {
         }
         if (plugin.postprocessCommand) {
           (this.commandPostprocessor as any) ??= [];
-          this.commandPostprocessor!.push(plugin.postprocessCommand);
+          this.commandPostprocessor!.unshift(plugin.postprocessCommand);
         }
         if (plugin.preprocessEffect) {
           (this.effectPreprocessor as any) ??= [];
@@ -89,7 +89,7 @@ export class Store<TState> {
         }
         if (plugin.postprocessEffect) {
           (this.effectPostprocessor as any) ??= [];
-          this.effectPostprocessor!.push(plugin.postprocessEffect);
+          this.effectPostprocessor!.unshift(plugin.postprocessEffect);
         }
       });
 
