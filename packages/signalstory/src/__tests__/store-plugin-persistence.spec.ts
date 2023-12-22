@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { lastValueFrom, take } from 'rxjs';
 import { Store } from '../lib/store';
-import { PersistenceStorage } from '../lib/store-plugin-persistence/persistence-synchronous';
+import { PersistenceStorage } from '../lib/store-plugin-persistence/persistence-web-storage';
 import {
   clearStoreStorage,
   loadFromStoreStorage,

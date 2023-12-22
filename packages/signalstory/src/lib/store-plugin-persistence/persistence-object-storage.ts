@@ -2,19 +2,16 @@
 /**
  * Represents the interface for store persistence methods with asynchronous operations.
  */
-export interface PersistenceStorageAsynchronous<
-  TKey = string,
-  TValue = unknown,
-> {
+export interface ObjectStorage<TValue = unknown> {
   /**
    * Retrieves the value associated with the specified key and processes it asynchronously.
    * @param key - The key to retrieve the value for.
    * @param callback - A callback function to handle the retrieved value asynchronously.
    */
-  init(key: TKey, onSuccess: () => void): void;
-  getAndProcessValue(key: TKey, callback: (value: TValue | null) => void): void;
-  setItem(key: TKey, value: TValue): void;
-  removeItem(key: TKey): void;
+  init(storeName: string, callback?: () => void): void;
+  getAndProcessState(callback: (value: TValue | null) => void): void;
+  setState(value: TValue): void;
+  clearState(): void;
 }
 
 /**
@@ -22,13 +19,11 @@ export interface PersistenceStorageAsynchronous<
  * @param obj - The object to check.
  * @returns True if the object implements the `PersistenceStorageAsynchronous` interface, false otherwise.
  */
-export function isPersistenceStorageAsynchronous(
-  obj: any
-): obj is PersistenceStorageAsynchronous {
+export function isObjectStorage(obj: any): obj is ObjectStorage {
   return (
     typeof obj === 'object' &&
-    typeof obj.getAndProcessValue === 'function' &&
-    typeof obj.setItem === 'function' &&
-    typeof obj.removeItem === 'function'
+    typeof obj.getAndProcessState === 'function' &&
+    typeof obj.setState === 'function' &&
+    typeof obj.clearState === 'function'
   );
 }

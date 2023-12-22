@@ -2,10 +2,10 @@
 /**
  * Represents the interface for store persistence methods with synchronous operations.
  */
-export interface PersistenceStorageSynchronous<TKey = string, TValue = string> {
-  getItem(key: TKey): TValue | null;
-  setItem(key: TKey, value: TValue): void;
-  removeItem(key: TKey): void;
+export interface WebStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
 }
 
 /**
@@ -13,9 +13,7 @@ export interface PersistenceStorageSynchronous<TKey = string, TValue = string> {
  * @param obj - The object to check.
  * @returns True if the object implements the `PersistenceStorageSynchronous` interface, false otherwise.
  */
-export function isPersistenceStorageSynchronous(
-  obj: any
-): obj is PersistenceStorageSynchronous {
+export function isWebStorage(obj: any): obj is WebStorage {
   return (
     typeof obj === 'object' &&
     typeof obj.getItem === 'function' &&
@@ -32,7 +30,7 @@ export function isPersistenceStorageSynchronous(
  * @returns The loaded value if available and successfully parsed, otherwise undefined.
  */
 export function loadFromStorage<TState>(
-  persistenceStorage: PersistenceStorageSynchronous,
+  persistenceStorage: WebStorage,
   persistenceKey: string
 ): TState | undefined {
   const value = persistenceStorage.getItem(persistenceKey);
@@ -52,22 +50,9 @@ export function loadFromStorage<TState>(
  * @param value - The store value to store.
  */
 export function saveToStorage<TState>(
-  persistenceStorage: PersistenceStorageSynchronous,
+  persistenceStorage: WebStorage,
   persistenceKey: string,
   value: TState
 ): void {
   persistenceStorage.setItem(persistenceKey, JSON.stringify(value));
-}
-
-/**
- * Clears the value associated with the provided key from local storage.
- *
- * @template TState - The type of state to clear from local storage.
- * @param store - The store instance.
- */
-export function clearStorage(
-  persistenceStorage: PersistenceStorageSynchronous,
-  persistenceKey: string
-): void {
-  persistenceStorage.removeItem(persistenceKey);
 }

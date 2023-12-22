@@ -1,41 +1,37 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
-import { StorePlugin, StoreState } from '../store-plugin';
+import { StorePlugin } from '../store-plugin';
+import { ObjectStorage, isObjectStorage } from './persistence-object-storage';
 import {
-  PersistenceStorageAsynchronous,
-  isPersistenceStorageAsynchronous,
-} from './persistence-asynchronous';
-import {
-  PersistenceStorageSynchronous,
-  clearStorage,
-  isPersistenceStorageSynchronous,
+  WebStorage,
+  isWebStorage,
   loadFromStorage,
   saveToStorage,
-} from './persistence-synchronous';
+} from './persistence-web-storage';
 
 /**
  * Options for configuring the Store Persistence Plugin.
  */
 export interface StorePersistencePluginOptions {
-  /**
-   * The key to use for the local storage entry. (optional, default: _persisted_state_of_storeName_).
-   */
   persistenceKey?: string;
-  /**
-   * The storage mechanism for persistence.  (optional, default: localStorage).
-   */
-  persistenceStorage?:
-    | PersistenceStorageSynchronous
-    | PersistenceStorageAsynchronous;
+  persistenceStorage?: WebStorage | ObjectStorage;
 }
 
 /**
  * Represents the Store Persistence Plugin, enhancing a store with state persistence functionality.
  */
-type StorePersistencePlugin = StorePlugin & {
-  storage: PersistenceStorageSynchronous | PersistenceStorageAsynchronous;
+type StorePersistenceWebStoragePlugin = StorePlugin & {
+  storage: WebStorage;
   persistenceKey: string;
 };
+
+type StorePersistenceObjectStoragePlugin = StorePlugin & {
+  storage: ObjectStorage;
+};
+
+type StorePersistencePlugin =
+  | StorePersistenceWebStoragePlugin
+  | StorePersistenceObjectStoragePlugin;
 
 /**
  * typeguard for StorePersistencePlugin.
@@ -48,8 +44,8 @@ function isStorePersistencePlugin(
   return (
     obj &&
     typeof obj === 'object' &&
-    'storage' in obj &&
-    'persistenceKey' in obj
+    'name' in obj &&
+    obj['name'] === 'StorePersistence'
   );
 }
 
@@ -63,10 +59,10 @@ function isStorePersistencePlugin(
 export function clearStoreStorage(store: Store<any>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
-    if (isPersistenceStorageSynchronous(plugin.storage)) {
-      clearStorage(plugin.storage, plugin.persistenceKey);
-    } else if (isPersistenceStorageAsynchronous(plugin.storage)) {
+    if (isWebStorage(plugin.storage)) {
       plugin.storage.removeItem(plugin.persistenceKey);
+    } else if (isObjectStorage(plugin.storage)) {
+      plugin.storage.clearState();
     }
   } else {
     throw new Error(
@@ -75,41 +71,41 @@ export function clearStoreStorage(store: Store<any>): void {
   }
 }
 
-/**
- * Saves the provided state to the store's storage.
- * @template TStore - The type of store to save the state for.
- * @param store - The store instance.
- * @param state - The state to save.
- */
-export function saveToStoreStorage<TStore extends Store<any>>(
-  store: TStore,
-  state: StoreState<TStore>
-): void {
-  const plugin = store.config.plugins.find(isStorePersistencePlugin);
-  if (plugin) {
-    if (isPersistenceStorageSynchronous(plugin.storage)) {
-      console.log('SETTING SYNC');
-      saveToStorage(plugin.storage, plugin.persistenceKey, state);
-    } else if (isPersistenceStorageAsynchronous(plugin.storage)) {
-      console.log('SETTING ASYNC');
-      plugin.storage.setItem(plugin.persistenceKey, state);
+function configureWebStorage(plugin: StorePersistenceWebStoragePlugin) {
+  plugin.init = store => {
+    if (!plugin.persistenceKey) {
+      plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
     }
-  }
+
+    const persistedState = loadFromStorage(
+      plugin.storage,
+      plugin.persistenceKey
+    );
+    if (persistedState) {
+      store.set(persistedState, 'Load state from storage');
+    }
+  };
+
+  plugin.postprocessCommand = store =>
+    saveToStorage(plugin.storage, plugin.persistenceKey, store.state());
+
+  return plugin;
 }
 
-/**
- * Loads and retrieves the stored state for the store.
- * @template TStore - The type of store to load the state for.
- * @param store - The store instance.
- * @returns The stored state for the store, or undefined if not found.
- */
-export function loadFromStoreStorage<TStore extends Store<any>>(
-  store: TStore
-): StoreState<TStore> | undefined {
-  const plugin = store.config.plugins.find(isStorePersistencePlugin);
-  return plugin && isPersistenceStorageSynchronous(plugin.storage)
-    ? loadFromStorage(plugin.storage, plugin.persistenceKey)
-    : undefined;
+function configureObjectStorage(plugin: StorePersistenceObjectStoragePlugin) {
+  plugin.init = store => {
+    plugin.storage.init(store.name, () => {
+      plugin.storage.getAndProcessState(persistedState => {
+        if (persistedState) {
+          store.set(persistedState, 'Load state from storage');
+        }
+      });
+    });
+  };
+
+  plugin.postprocessCommand = store => plugin.storage.setState(store.state());
+
+  return plugin;
 }
 
 /**
@@ -121,36 +117,22 @@ export function loadFromStoreStorage<TStore extends Store<any>>(
 export function useStorePersistence(
   options: StorePersistencePluginOptions = {}
 ): StorePersistencePlugin {
-  const plugin: StorePersistencePlugin = {
-    name: 'StoreLogger',
-    storage: options.persistenceStorage ?? localStorage,
-    persistenceKey: options.persistenceKey ?? '',
-  };
+  const storage = options.persistenceStorage ?? (localStorage as WebStorage);
 
-  plugin.init = store => {
-    if (!plugin.persistenceKey) {
-      plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
-    }
-
-    if (isPersistenceStorageSynchronous(plugin.storage)) {
-      const persistedState = loadFromStoreStorage(store);
-      if (persistedState) {
-        store.set(persistedState, 'Load state from storage');
-      }
-    } else if (isPersistenceStorageAsynchronous(plugin.storage)) {
-      plugin.storage.init(plugin.persistenceKey, () => {
-        if (isPersistenceStorageAsynchronous(plugin.storage)) {
-          plugin.storage.getAndProcessValue(
-            plugin.persistenceKey,
-            persistedState =>
-              store.set(persistedState, 'Load state from storage')
-          );
-        }
-      });
-    }
-  };
-
-  plugin.postprocessCommand = store => saveToStoreStorage(store, store.state());
-
-  return plugin as unknown as StorePersistencePlugin;
+  if (isWebStorage(storage)) {
+    return configureWebStorage({
+      name: 'StorePersistence',
+      storage,
+      persistenceKey: options.persistenceKey ?? '',
+    });
+  } else if (isObjectStorage(storage)) {
+    return configureObjectStorage({
+      name: 'StorePersistence',
+      storage,
+    });
+  } else {
+    throw new Error(
+      'Passed StorePersistencePluginOptions is not coompatible with the plugin specification.'
+    );
+  }
 }
