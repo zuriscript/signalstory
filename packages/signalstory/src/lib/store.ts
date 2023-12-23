@@ -25,6 +25,7 @@ import {
 import { useLogger } from './store-plugin-logger/plugin-logger';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
+import { withSideEffect } from './utility/sideeffect';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
@@ -207,12 +208,13 @@ export class Store<TState> {
           )
         : effect.func(this, ...args);
 
-    return (
-      this.effectPostprocessor?.reduce(
-        (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
-        effectResult
-      ) ?? effectResult
-    );
+    return !this.effectPostprocessor
+      ? effectResult
+      : withSideEffect(effectResult, () => {
+          this.effectPostprocessor?.forEach(action =>
+            action(this, effect, effectResult)
+          );
+        });
   }
 
   /**
