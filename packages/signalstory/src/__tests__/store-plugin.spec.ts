@@ -4,7 +4,6 @@ import { Subject, filter, lastValueFrom, of, tap, throwError } from 'rxjs';
 import { Store } from '../lib/store';
 import { createEffect } from '../lib/store-effect';
 import { StorePlugin } from '../lib/store-plugin';
-import { withSideEffect } from '../lib/utility/sideeffect';
 
 describe('StorePlugin', () => {
   it('should not add processors to store if not used', () => {
@@ -237,11 +236,9 @@ describe('StorePlugin', () => {
 
     beforeEach(() => {
       processedStoreValue = undefined;
-      effectPostprocessorMock = jest.fn((store, _, result) =>
-        withSideEffect(result, () => {
-          processedStoreValue = store.state().value;
-        })
-      );
+      effectPostprocessorMock = jest.fn(store => {
+        processedStoreValue = store.state().value;
+      });
       store = new Store<{ value: number }>({
         initialState: { value: initialValue },
         plugins: [
@@ -295,6 +292,44 @@ describe('StorePlugin', () => {
 
       // assert
       expect(effectPostprocessorMock).toHaveBeenCalledTimes(1);
+      expect(effectPostprocessorMock).toHaveBeenCalledWith(
+        store,
+        effect,
+        expect.anything()
+      );
+      expect(processedStoreValue).toBe(newValue);
+    });
+
+    it('should postprocess observable effect successfully using multiple preprocessors', async () => {
+      // arrange
+      const store = new Store<{ value: number }>({
+        initialState: { value: initialValue },
+        plugins: [
+          <StorePlugin>{
+            postprocessEffect: effectPostprocessorMock,
+          },
+          <StorePlugin>{
+            postprocessEffect: effectPostprocessorMock,
+          },
+        ],
+      });
+      const effect = createEffect(
+        'dummyEffect',
+        (store: Store<{ value: number }>) =>
+          of(newValue).pipe(
+            tap(val =>
+              store.mutate(x => {
+                x.value = val;
+              })
+            )
+          )
+      );
+
+      // act
+      await lastValueFrom(store.runEffect(effect));
+
+      // assert
+      expect(effectPostprocessorMock).toHaveBeenCalledTimes(2);
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
