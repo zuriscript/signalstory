@@ -2,6 +2,7 @@ import { Injectable, computed } from '@angular/core';
 import {
   ImmutableStore,
   clearStoreStorage,
+  useBenchmark,
   useDeepFreeze,
   useDevtools,
   useLogger,
@@ -25,6 +26,7 @@ export class BooksStore extends ImmutableStore<Book[]> {
         useStorePersistence(),
         useLogger(),
         useStoreStatus(),
+        useBenchmark(),
       ],
     });
 

@@ -19,6 +19,7 @@ export {
   useStoreHistory,
 } from './lib/store-plugin-history/plugin-history';
 export { useLogger } from './lib/store-plugin-logger/plugin-logger';
+export { useBenchmark } from './lib/store-plugin-performance-counter/plugin-performance-counter';
 export {
   StorePersistencePluginOptions,
   clearStoreStorage,

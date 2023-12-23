@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StorePlugin } from '../store-plugin';
-import { withSideEffect } from '../utility/sideeffect';
+import { registry } from '../store-plugin-devtools/plugin-devtools';
 
 class PerformanceCounter {
   private count = 0;
@@ -69,8 +70,8 @@ class PerformanceCounter {
 }
 
 class StorePerformanceCounter {
-  private readonly commands = new Map<string, PerformanceCounter>();
-  private readonly effects = new Map<string, PerformanceCounter>();
+  public readonly commands = new Map<string, PerformanceCounter>();
+  public readonly effects = new Map<string, PerformanceCounter>();
 
   constructor(public name: string) {}
 
@@ -100,6 +101,40 @@ class StorePerformanceCounter {
 }
 
 const counters = new Map<string, StorePerformanceCounter>();
+const counterStore = {
+  name: '@signalstory/performance-counter',
+  state() {
+    return getReport();
+  },
+};
+
+function getReport() {
+  const flatResult: any = {
+    commands: [],
+    effects: [],
+  };
+
+  const flattenCounterEntries = (
+    key: string,
+    entries: Map<string, PerformanceCounter>,
+    storeName: string
+  ) => {
+    entries.forEach((counter, counterName) => {
+      flatResult[key].push({
+        store: storeName,
+        name: counterName,
+        ...counter.getReport(),
+      });
+    });
+  };
+
+  counters.forEach((counter, storeName) => {
+    flattenCounterEntries('commands', counter.commands, storeName);
+    flattenCounterEntries('effects', counter.effects, storeName);
+  });
+
+  return flatResult;
+}
 
 /**
  * Enables StorePlugin that logs command and effect execution
@@ -111,6 +146,9 @@ export function useBenchmark(): StorePlugin {
       if (!counters.has(store.name)) {
         counters.set(store.name, new StorePerformanceCounter(store.name));
       }
+      if (!registry.has(counterStore.name)) {
+        registry.set(counterStore.name, new WeakRef(counterStore) as any);
+      }
     },
     preprocessCommand(store, command) {
       counters.get(store.name)?.toggleCommandTimer(command);
@@ -119,12 +157,12 @@ export function useBenchmark(): StorePlugin {
       counters.get(store.name)?.toggleCommandTimer(command);
     },
     preprocessEffect(store, effect) {
+      console.log(`${effect.name} STARTED`);
       counters.get(store.name)?.toggleEffectTimer(effect.name);
     },
-    postprocessEffect(store, effect, result) {
-      withSideEffect(result, () => {
-        counters.get(store.name)?.toggleEffectTimer(effect.name);
-      });
+    postprocessEffect(store, effect) {
+      console.log(`${effect.name} ENDED`);
+      counters.get(store.name)?.toggleEffectTimer(effect.name);
     },
   };
 }

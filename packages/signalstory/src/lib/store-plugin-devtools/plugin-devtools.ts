@@ -51,7 +51,7 @@ declare global {
  * Registry for store with attached redux devtools monitoring
  * It maps the store name to a Weak reference of the store
  */
-const registry = new Map<string, WeakRef<Store<unknown>>>();
+export const registry = new Map<string, WeakRef<Store<unknown>>>();
 
 /**
  * Retrieves a store from the registry by name.
