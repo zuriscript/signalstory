@@ -69,19 +69,30 @@ class PerformanceCounter {
   }
 }
 
+type KeyValuePair<TValue = unknown> = [string, TValue];
+function getOrDefault<TValue>(
+  list: KeyValuePair<TValue>[],
+  key: string
+): TValue | undefined {
+  return list.find(x => x[0] === key)?.[1];
+}
+function hasKey(list: KeyValuePair[], key: string): boolean {
+  return !!list.find(x => x[0] === key);
+}
+
 class StorePerformanceCounter {
-  public readonly commands = new Map<string, PerformanceCounter>();
-  public readonly effects = new Map<string, PerformanceCounter>();
+  public readonly commands: [string, PerformanceCounter][] = [];
+  public readonly effects: [string, PerformanceCounter][] = [];
 
   constructor(public name: string) {}
 
   toggleCommandTimer(command: string | undefined) {
     const commandName = command ?? 'Unspecified';
-    let counter = this.commands.get(commandName);
+    let counter = getOrDefault(this.commands, commandName);
 
     if (!counter) {
       counter = new PerformanceCounter();
-      this.commands.set(commandName, counter);
+      this.commands.push([commandName, counter]);
     }
 
     counter.toggleTimer();
@@ -89,18 +100,31 @@ class StorePerformanceCounter {
 
   toggleEffectTimer(effect: string | undefined) {
     const effectName = effect ?? 'Unspecified';
-    let counter = this.effects.get(effectName);
+    let counter = getOrDefault(this.effects, effectName);
 
     if (!counter) {
       counter = new PerformanceCounter();
-      this.effects.set(effectName, counter);
+      this.effects.push([effectName, counter]);
     }
 
     counter.toggleTimer();
   }
+
+  public getReport() {
+    return {
+      commands: this.commands.map(counter => ({
+        command: counter[0],
+        ...counter[1].getReport(),
+      })),
+      effects: this.effects.map(counter => ({
+        command: counter[0],
+        ...counter[1].getReport(),
+      })),
+    };
+  }
 }
 
-const counters = new Map<string, StorePerformanceCounter>();
+const counters: [string, StorePerformanceCounter][] = [];
 const counterStore = {
   name: '@signalstory/performance-counter',
   state() {
@@ -109,31 +133,24 @@ const counterStore = {
 };
 
 function getReport() {
-  const flatResult: any = {
-    commands: [],
-    effects: [],
+  return {
+    commands: counters
+      .flatMap(x =>
+        x[1].getReport().commands.map(y => ({
+          store: x[0],
+          ...y,
+        }))
+      )
+      .sort((a, b) => b.averageDurationMs - a.averageDurationMs),
+    effects: counters
+      .flatMap(x =>
+        x[1].getReport().effects.map(y => ({
+          store: x[0],
+          ...y,
+        }))
+      )
+      .sort((a, b) => b.averageDurationMs - a.averageDurationMs),
   };
-
-  const flattenCounterEntries = (
-    key: string,
-    entries: Map<string, PerformanceCounter>,
-    storeName: string
-  ) => {
-    entries.forEach((counter, counterName) => {
-      flatResult[key].push({
-        store: storeName,
-        name: counterName,
-        ...counter.getReport(),
-      });
-    });
-  };
-
-  counters.forEach((counter, storeName) => {
-    flattenCounterEntries('commands', counter.commands, storeName);
-    flattenCounterEntries('effects', counter.effects, storeName);
-  });
-
-  return flatResult;
 }
 
 /**
@@ -143,26 +160,24 @@ function getReport() {
 export function useBenchmark(): StorePlugin {
   return {
     init(store) {
-      if (!counters.has(store.name)) {
-        counters.set(store.name, new StorePerformanceCounter(store.name));
+      if (!hasKey(counters, store.name)) {
+        counters.push([store.name, new StorePerformanceCounter(store.name)]);
       }
       if (!registry.has(counterStore.name)) {
         registry.set(counterStore.name, new WeakRef(counterStore) as any);
       }
     },
     preprocessCommand(store, command) {
-      counters.get(store.name)?.toggleCommandTimer(command);
+      getOrDefault(counters, store.name)?.toggleCommandTimer(command);
     },
     postprocessCommand(store, command) {
-      counters.get(store.name)?.toggleCommandTimer(command);
+      getOrDefault(counters, store.name)?.toggleCommandTimer(command);
     },
     preprocessEffect(store, effect) {
-      console.log(`${effect.name} STARTED`);
-      counters.get(store.name)?.toggleEffectTimer(effect.name);
+      getOrDefault(counters, store.name)?.toggleEffectTimer(effect.name);
     },
     postprocessEffect(store, effect) {
-      console.log(`${effect.name} ENDED`);
-      counters.get(store.name)?.toggleEffectTimer(effect.name);
+      getOrDefault(counters, store.name)?.toggleEffectTimer(effect.name);
     },
   };
 }
