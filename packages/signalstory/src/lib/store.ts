@@ -199,7 +199,8 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
-    this.effectPreprocessor?.forEach(p => p(this, effect));
+    const invocationId = performance.now() + Math.random();
+    this.effectPreprocessor?.forEach(p => p(this, effect, invocationId));
 
     const effectResult =
       effect.config.withInjectionContext && this.config.injector
@@ -212,7 +213,7 @@ export class Store<TState> {
       ? effectResult
       : withSideEffect(effectResult, () => {
           this.effectPostprocessor?.forEach(action =>
-            action(this, effect, effectResult)
+            action(this, effect, effectResult, invocationId)
           );
         });
   }

@@ -11,7 +11,7 @@ const isStoreModifiedMap = new WeakMap<
 >();
 
 export const runningEffects: WritableSignal<
-  [WeakRef<Store<any>>, StoreEffect<any, any, any>][]
+  [WeakRef<Store<any>>, StoreEffect<any, any, any>, number][]
 > = signal([]);
 
 /**
@@ -149,14 +149,16 @@ export function useStoreStatus(): StorePlugin {
     postprocessCommand(store) {
       isStoreModifiedMap.get(store)?.set(true);
     },
-    preprocessEffect(store, effect) {
+    preprocessEffect(store, effect, invocationId) {
       runningEffects.update(effects => [
         ...effects,
-        [new WeakRef(store), effect],
+        [new WeakRef(store), effect, invocationId],
       ]);
     },
-    postprocessEffect(store, effect) {
-      runningEffects.update(effects => effects.filter(x => x[1] !== effect));
+    postprocessEffect(store, effect, _, invocationId) {
+      runningEffects.update(effects =>
+        effects.filter(x => x[2] !== invocationId)
+      );
       if (effect.config.setUnmodifiedStatus) {
         isStoreModifiedMap.get(store)?.set(false);
       }
