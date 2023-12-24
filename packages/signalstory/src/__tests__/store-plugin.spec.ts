@@ -199,7 +199,11 @@ describe('StorePlugin', () => {
 
       // assert
       expect(effectPreprocessorMock).toHaveBeenCalledTimes(1);
-      expect(effectPreprocessorMock).toHaveBeenCalledWith(store, effect);
+      expect(effectPreprocessorMock).toHaveBeenCalledWith(
+        store,
+        effect,
+        expect.any(Number)
+      );
       expect(processedStoreValue).toBe(initialValue);
     });
 
@@ -221,9 +225,17 @@ describe('StorePlugin', () => {
 
       // assert
       expect(effectPreprocessorMock).toHaveBeenCalledTimes(1);
-      expect(effectPreprocessorMock).toHaveBeenCalledWith(store, effect);
+      expect(effectPreprocessorMock).toHaveBeenCalledWith(
+        store,
+        effect,
+        expect.any(Number)
+      );
       expect(effectPreprocessorMock2).toHaveBeenCalledTimes(1);
-      expect(effectPreprocessorMock2).toHaveBeenCalledWith(store, effect);
+      expect(effectPreprocessorMock2).toHaveBeenCalledWith(
+        store,
+        effect,
+        expect.any(Number)
+      );
     });
   });
 
@@ -268,7 +280,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        undefined
+        undefined,
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(newValue);
     });
@@ -295,7 +308,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        expect.anything()
+        expect.anything(),
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(newValue);
     });
@@ -333,7 +347,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        expect.anything()
+        expect.anything(),
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(newValue);
     });
@@ -356,7 +371,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        expect.anything()
+        expect.anything(),
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(initialValue);
     });
@@ -386,7 +402,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        expect.anything()
+        expect.anything(),
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(initialValue);
     });
@@ -440,7 +457,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        expect.anything()
+        expect.anything(),
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(newValue);
     });
@@ -464,7 +482,8 @@ describe('StorePlugin', () => {
       expect(effectPostprocessorMock).toHaveBeenCalledWith(
         store,
         effect,
-        expect.anything()
+        expect.anything(),
+        expect.any(Number)
       );
       expect(processedStoreValue).toBe(initialValue);
     });

@@ -40,9 +40,11 @@ export function useLogger(
       `[${store.name}->Effect STARTED] ${effect.name ?? 'Unspecified'}`,
       store.state()
     );
-  plugin.postprocessEffect = (store, effect) =>
+  plugin.postprocessEffect = (store, effect, _, invocationId) =>
     plugin.log(
-      `[${store.name}->Effect FINNISHED] ${effect.name ?? 'Unspecified'}`,
+      `[${store.name}->Effect FINNISHED in ${Math.floor(
+        performance.now() - invocationId
+      )} ms] ${effect.name ?? 'Unspecified'}`,
       store.state()
     );
 

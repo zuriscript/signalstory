@@ -175,7 +175,7 @@ describe('isLoading', () => {
   it('should be false for a running effect that has not been created with setLoadingStatus enabled', () => {
     // arrange
     const effect = createEffect('effect', () => {});
-    runningEffects.set([[new WeakRef(store), effect]]);
+    runningEffects.set([[new WeakRef(store), effect, 0]]);
 
     // act
     const isLoadingStatus = isLoading(store)();
@@ -189,7 +189,7 @@ describe('isLoading', () => {
   it('should be true for a running effect that has been created with setLoadingStatus enabled', () => {
     // arrange
     const effect = createEffect('effect', () => {}, { setLoadingStatus: true });
-    runningEffects.set([[new WeakRef(store), effect]]);
+    runningEffects.set([[new WeakRef(store), effect, 0]]);
 
     // act
     const isLoadingStatus = isLoading(store)();
@@ -226,7 +226,7 @@ describe('isAnyEffectRunning', () => {
   it('should be false for a running effect that is registered for another store', () => {
     // arrange
     runningEffects.set([
-      [new WeakRef(new Store<number>({ initialState: 0 })), effect],
+      [new WeakRef(new Store<number>({ initialState: 0 })), effect, 0],
     ]);
 
     // act
@@ -240,7 +240,7 @@ describe('isAnyEffectRunning', () => {
 
   it('should be true for a running effect and the corresponding store', () => {
     // arrange
-    runningEffects.set([[new WeakRef(store), effect]]);
+    runningEffects.set([[new WeakRef(store), effect, 0]]);
 
     // act
     const isRunningForStore = isAnyEffectRunning(store)();
@@ -267,7 +267,7 @@ describe('isEffectRunning', () => {
   it('should be false if effect is not running', () => {
     // arrange
     runningEffects.set([
-      [new WeakRef(store), createEffect('Other eeffect', () => {})],
+      [new WeakRef(store), createEffect('Other effect', () => {}), 0],
     ]);
 
     // act
@@ -282,7 +282,7 @@ describe('isEffectRunning', () => {
   it('should be false for a running effect that is registered for another store', () => {
     // arrange
     runningEffects.set([
-      [new WeakRef(new Store<number>({ initialState: 0 })), effect],
+      [new WeakRef(new Store<number>({ initialState: 0 })), effect, 0],
     ]);
 
     // act
@@ -296,7 +296,7 @@ describe('isEffectRunning', () => {
 
   it('should be true for a running effect and the corresponding store', () => {
     // arrange
-    runningEffects.set([[new WeakRef(store), effect]]);
+    runningEffects.set([[new WeakRef(store), effect, 0]]);
 
     // act
     const isRunningForStore = isEffectRunning(effect, store)();
@@ -412,7 +412,7 @@ describe('markAsHavingNoRunningEffects', () => {
 
   it('should manually mark the store as not having running effects', () => {
     // arrange
-    runningEffects.set([[new WeakRef(store), effect]]);
+    runningEffects.set([[new WeakRef(store), effect, 0]]);
 
     // act
     markAsHavingNoRunningEffects(store);
@@ -428,8 +428,8 @@ describe('markAsHavingNoRunningEffects', () => {
       plugins: [useStoreStatus()],
     });
     runningEffects.set([
-      [new WeakRef(store), effect],
-      [new WeakRef(otherStore), effect],
+      [new WeakRef(store), effect, 0],
+      [new WeakRef(otherStore), effect, 0],
     ]);
 
     // act
@@ -446,8 +446,8 @@ describe('markAsHavingNoRunningEffects', () => {
     const otherEffect = createEffect('dummyOtherEffect', () => of(50));
 
     runningEffects.set([
-      [new WeakRef(store), effect],
-      [new WeakRef(store), otherEffect],
+      [new WeakRef(store), effect, 0],
+      [new WeakRef(store), otherEffect, 0],
     ]);
 
     // act
