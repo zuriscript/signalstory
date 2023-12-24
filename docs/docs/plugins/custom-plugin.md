@@ -17,12 +17,14 @@ type StorePlugin = {
   postprocessCommand?: (store: Store<any>, command: string | undefined) => void;
   preprocessEffect?: (
     store: Store<any>,
-    effect: StoreEffect<any, any, any>
+    effect: StoreEffect<any, any, any>,
+    invocationId: number
   ) => void;
   postprocessEffect?: <TResult>(
     store: Store<any>,
     effect: StoreEffect<any, any, TResult>,
-    result: TResult
+    result: TResult,
+    invocationId: number
   ) => TResult;
 };
 ```
@@ -34,6 +36,12 @@ Here's a breakdown of the available hooks:
 - **postprocessCommand**: This function is called after a command has been executed on a store.
 - **preprocessEffect**: This function is called before an effect is executed on a store.
 - **postprocessEffect**: This function is called after an effect has been executed on a store.
+
+:::info
+
+`invocationId` is used to distinguish between running effect invocations. Given the potentially asynchronous nature of effect objects, the same effects can run concurrently. An `invocationId` is composed by `performance.now() + Math.random()`. The addition of the random suffix is essential to differentiate running effects, that have been called close after each other.
+
+:::
 
 ## Creating a custom plugin
 
