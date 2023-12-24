@@ -1,130 +1,89 @@
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StorePlugin } from '../store-plugin';
 import { registry } from '../store-plugin-devtools/plugin-devtools';
+import { PerformanceCounter } from './performance-counter';
 
-class PerformanceCounter {
-  private count = 0;
-  private totalDurationMs = 0;
-  private maxDurationMs = 0;
-  private minDurationMs = Number.POSITIVE_INFINITY;
-  private sumSquares = 0;
+type StoreCounter = {
+  name: string;
+  store: string;
+  counter: PerformanceCounter;
+};
 
-  private currentTimer: number | null = null;
+const globalCommandCounter: PerformanceCounter =
+  /*@__PURE__*/ new PerformanceCounter();
+const globalEffectCounter: PerformanceCounter =
+  /*@__PURE__*/ new PerformanceCounter();
+const commandCounters: StoreCounter[] = [];
+const effectCounters: StoreCounter[] = [];
 
-  public startTimer() {
-    this.currentTimer = performance.now();
+function toggleCommandTimer(store: string, command?: string) {
+  const commandName = command ?? 'Unspecified';
+  const counterRegistration = commandCounters.find(
+    c => c.store === store && c.name === commandName
+  );
+  const counter = counterRegistration?.counter ?? new PerformanceCounter();
+
+  if (!counterRegistration) {
+    commandCounters.push({
+      name: commandName,
+      store,
+      counter,
+    });
   }
 
-  public stopTimer(): void {
-    const duration = performance.now() - this.currentTimer!;
-
-    this.count++;
-    this.totalDurationMs += duration;
-    this.maxDurationMs = Math.max(this.maxDurationMs, duration);
-    this.minDurationMs = Math.min(
-      this.minDurationMs ?? Number.MAX_SAFE_INTEGER,
-      duration
-    );
-    this.sumSquares += duration * duration;
-
-    this.currentTimer = null;
-  }
-
-  public toggleTimer(): void {
-    if (this.isRunning) {
-      this.stopTimer();
-    } else {
-      this.startTimer();
-    }
-  }
-
-  private getAverageDuration(): number {
-    return this.count === 0 ? 0 : this.totalDurationMs / this.count;
-  }
-
-  private getStandardDeviation(): number {
-    if (this.count === 0) {
-      return 0;
-    }
-
-    const count = this.count;
-    const meanSquared = (this.totalDurationMs / count) ** 2;
-    const variance = (this.sumSquares - meanSquared * count) / count;
-
-    return Math.sqrt(variance);
-  }
-
-  public getReport() {
-    return {
-      count: this.count,
-      maxDurationMs: this.maxDurationMs,
-      minDurationMs: this.minDurationMs,
-      averageDurationMs: this.getAverageDuration(),
-      standardDeviation: this.getStandardDeviation(),
-    };
-  }
-
-  public get isRunning() {
-    return !!this.currentTimer;
-  }
+  counter.toggleTimer();
 }
 
-type KeyValuePair<TValue = unknown> = [string, TValue];
-function getOrDefault<TValue>(
-  list: KeyValuePair<TValue>[],
-  key: string
-): TValue | undefined {
-  return list.find(x => x[0] === key)?.[1];
-}
-function hasKey(list: KeyValuePair[], key: string): boolean {
-  return !!list.find(x => x[0] === key);
-}
+function addEffectDuration(
+  store: string,
+  effect: string | undefined,
+  duration: number
+) {
+  const effectName = effect ?? 'Unspecified';
+  const counterRegistration = effectCounters.find(
+    e => e.store === store && e.name === effectName
+  );
+  const counter = counterRegistration?.counter ?? new PerformanceCounter();
 
-class StorePerformanceCounter {
-  public readonly commands: [string, PerformanceCounter][] = [];
-  public readonly effects: [string, PerformanceCounter][] = [];
-
-  constructor(public name: string) {}
-
-  toggleCommandTimer(command: string | undefined) {
-    const commandName = command ?? 'Unspecified';
-    let counter = getOrDefault(this.commands, commandName);
-
-    if (!counter) {
-      counter = new PerformanceCounter();
-      this.commands.push([commandName, counter]);
-    }
-
-    counter.toggleTimer();
+  if (!counterRegistration) {
+    effectCounters.push({
+      name: effectName,
+      store,
+      counter,
+    });
   }
 
-  toggleEffectTimer(effect: string | undefined) {
-    const effectName = effect ?? 'Unspecified';
-    let counter = getOrDefault(this.effects, effectName);
-
-    if (!counter) {
-      counter = new PerformanceCounter();
-      this.effects.push([effectName, counter]);
-    }
-
-    counter.toggleTimer();
-  }
-
-  public getReport() {
-    return {
-      commands: this.commands.map(counter => ({
-        command: counter[0],
-        ...counter[1].getReport(),
-      })),
-      effects: this.effects.map(counter => ({
-        command: counter[0],
-        ...counter[1].getReport(),
-      })),
-    };
-  }
+  counter.addDuration(duration);
 }
 
-const counters: [string, StorePerformanceCounter][] = [];
+function getReport() {
+  const globalCommandReport = globalCommandCounter.getReport();
+  const globalEffectReport = globalEffectCounter.getReport();
+  return {
+    totalCommandCount: globalCommandReport.count,
+    averageCommandDurationMs: globalCommandReport.averageDurationMs,
+    commandDurationStandartDeviation: globalCommandReport.standardDeviation,
+    totalEffectCount: globalEffectReport.count,
+    averageEffectDurationMs: globalEffectReport.averageDurationMs,
+    effectDurationStandartDeviation: globalEffectReport.standardDeviation,
+    commands: commandCounters
+      .map(c => ({
+        name: c.name,
+        store: c.store,
+        ...c.counter.getReport(),
+      }))
+      .sort((a, b) => b.averageDurationMs - a.averageDurationMs),
+    effects: effectCounters
+      .map(e => ({
+        name: e.name,
+        store: e.store,
+        ...e.counter.getReport(),
+      }))
+      .sort((a, b) => b.averageDurationMs - a.averageDurationMs),
+  };
+}
+
 const counterStore = {
   name: '@signalstory/performance-counter',
   state() {
@@ -132,52 +91,29 @@ const counterStore = {
   },
 };
 
-function getReport() {
-  return {
-    commands: counters
-      .flatMap(x =>
-        x[1].getReport().commands.map(y => ({
-          store: x[0],
-          ...y,
-        }))
-      )
-      .sort((a, b) => b.averageDurationMs - a.averageDurationMs),
-    effects: counters
-      .flatMap(x =>
-        x[1].getReport().effects.map(y => ({
-          store: x[0],
-          ...y,
-        }))
-      )
-      .sort((a, b) => b.averageDurationMs - a.averageDurationMs),
-  };
-}
-
 /**
  * Enables StorePlugin that logs command and effect execution
  * @returns A StorePlugin instance for logging.
  */
 export function useBenchmark(): StorePlugin {
   return {
-    init(store) {
-      if (!hasKey(counters, store.name)) {
-        counters.push([store.name, new StorePerformanceCounter(store.name)]);
-      }
+    init() {
       if (!registry.has(counterStore.name)) {
         registry.set(counterStore.name, new WeakRef(counterStore) as any);
       }
     },
     preprocessCommand(store, command) {
-      getOrDefault(counters, store.name)?.toggleCommandTimer(command);
+      globalCommandCounter.toggleTimer();
+      toggleCommandTimer(store.name, command);
     },
     postprocessCommand(store, command) {
-      getOrDefault(counters, store.name)?.toggleCommandTimer(command);
+      globalCommandCounter.toggleTimer();
+      toggleCommandTimer(store.name, command);
     },
-    preprocessEffect(store, effect) {
-      getOrDefault(counters, store.name)?.toggleEffectTimer(effect.name);
-    },
-    postprocessEffect(store, effect) {
-      getOrDefault(counters, store.name)?.toggleEffectTimer(effect.name);
+    postprocessEffect(store, effect, _, invocationId) {
+      const duration = Math.floor(performance.now() - invocationId);
+      globalEffectCounter.addDuration(duration);
+      addEffectDuration(store.name, effect.name, duration);
     },
   };
 }
