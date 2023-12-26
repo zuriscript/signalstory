@@ -20,6 +20,10 @@ export {
 } from './lib/store-plugin-history/plugin-history';
 export { useLogger } from './lib/store-plugin-logger/plugin-logger';
 export {
+  getReport,
+  usePerformanceCounter,
+} from './lib/store-plugin-performance-counter/plugin-performance-counter';
+export {
   StorePersistencePluginOptions,
   clearStoreStorage,
   useStorePersistence,

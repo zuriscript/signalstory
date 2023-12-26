@@ -5,6 +5,7 @@ import {
   useDeepFreeze,
   useDevtools,
   useLogger,
+  usePerformanceCounter,
   useStoreHistory,
   useStorePersistence,
   useStoreStatus,
@@ -25,6 +26,7 @@ export class BooksStore extends ImmutableStore<Book[]> {
         useStorePersistence(),
         useLogger(),
         useStoreStatus(),
+        usePerformanceCounter(),
       ],
     });
 
