@@ -4,12 +4,16 @@ import { StorePlugin } from '../store-plugin';
 import { registry } from '../store-plugin-devtools/plugin-devtools';
 import { PerformanceCounter } from './performance-counter';
 
+/**
+ * Represents a counter associated with a specific store, tracking command execution metrics.
+ */
 type StoreCounter = {
   name: string;
   store: string;
   counter: PerformanceCounter;
 };
 
+// Counters
 const globalCommandCounter: PerformanceCounter =
   /*@__PURE__*/ new PerformanceCounter();
 const globalEffectCounter: PerformanceCounter =
@@ -17,6 +21,11 @@ const globalEffectCounter: PerformanceCounter =
 const commandCounters: StoreCounter[] = [];
 const effectCounters: StoreCounter[] = [];
 
+/**
+ * Toggles the timer for a specific command, updating the associated counter.
+ * @param store - The name of the store.
+ * @param command - The name of the command.
+ */
 function toggleCommandTimer(store: string, command?: string) {
   const commandName = command ?? 'Unspecified';
   const counterRegistration = commandCounters.find(
@@ -35,6 +44,12 @@ function toggleCommandTimer(store: string, command?: string) {
   counter.toggleTimer();
 }
 
+/**
+ * Adds the duration of an effect to the associated counter.
+ * @param store - The name of the store.
+ * @param effect - The name of the effect.
+ * @param duration - The duration of the effect execution.
+ */
 function addEffectDuration(
   store: string,
   effect: string | undefined,
@@ -57,7 +72,11 @@ function addEffectDuration(
   counter.addDuration(duration);
 }
 
-function getReport() {
+/**
+ * Generates and returns a performance report with various metrics.
+ * @returns An object containing performance statistics.
+ */
+export function getReport() {
   const globalCommandReport = globalCommandCounter.getReport();
   const globalEffectReport = globalEffectCounter.getReport();
   return {
@@ -84,6 +103,9 @@ function getReport() {
   };
 }
 
+/**
+ * Store-Like object for registering the performance counters in redux devtools
+ */
 const counterStore = {
   name: '@signalstory/performance-counter',
   state() {
@@ -92,11 +114,12 @@ const counterStore = {
 };
 
 /**
- * Enables StorePlugin that logs command and effect execution
- * @returns A StorePlugin instance for logging.
+ * Returns a StorePlugin that includes initialization and hooks for tracking command and effect performance.
+ * @returns The StorePlugin for performance tracking.
  */
-export function useBenchmark(): StorePlugin {
+export function usePerformanceCounter(): StorePlugin {
   return {
+    precedence: 11, // should come early in initialization
     init() {
       if (!registry.has(counterStore.name)) {
         registry.set(counterStore.name, new WeakRef(counterStore) as any);
