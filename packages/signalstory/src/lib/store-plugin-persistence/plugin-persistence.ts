@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
-import { ObjectStorage, isObjectStorage } from './persistence-object-storage';
+import {
+  IndexedDbStorage,
+  isIndexedDbStorage,
+} from './persistence-idb-storage';
 import {
   WebStorage,
   isWebStorage,
@@ -9,13 +12,21 @@ import {
   saveToStorage,
 } from './persistence-web-storage';
 
+export interface WebStorageOptions {
+  persistenceKey?: string;
+  persistenceStorage?: WebStorage;
+}
+
+export interface IndexedDbStorageOptions {
+  persistenceStorage: IndexedDbStorage;
+}
+
 /**
  * Options for configuring the Store Persistence Plugin.
  */
-export interface StorePersistencePluginOptions {
-  persistenceKey?: string;
-  persistenceStorage?: WebStorage | ObjectStorage;
-}
+export type StorePersistencePluginOptions =
+  | WebStorageOptions
+  | IndexedDbStorageOptions;
 
 /**
  * Represents the Store Persistence Plugin, enhancing a store with state persistence functionality.
@@ -26,7 +37,7 @@ type StorePersistenceWebStoragePlugin = StorePlugin & {
 };
 
 type StorePersistenceObjectStoragePlugin = StorePlugin & {
-  storage: ObjectStorage;
+  storage: IndexedDbStorage;
 };
 
 type StorePersistencePlugin =
@@ -61,12 +72,12 @@ export function clearStoreStorage(store: Store<any>): void {
   if (plugin) {
     if (isWebStorage(plugin.storage)) {
       plugin.storage.removeItem(plugin.persistenceKey);
-    } else if (isObjectStorage(plugin.storage)) {
+    } else if (isIndexedDbStorage(plugin.storage)) {
       plugin.storage.clearState();
     }
   } else {
     throw new Error(
-      `Store persistence plugin is not enabed for store ${store.config.name}`
+      `Store persistence plugin is not enabled for store ${store.config.name}`
     );
   }
 }
@@ -92,7 +103,9 @@ function configureWebStorage(plugin: StorePersistenceWebStoragePlugin) {
   return plugin;
 }
 
-function configureObjectStorage(plugin: StorePersistenceObjectStoragePlugin) {
+function configureIndexedDbStorage(
+  plugin: StorePersistenceObjectStoragePlugin
+) {
   plugin.init = store => {
     plugin.storage.init(store.name, () => {
       plugin.storage.getAndProcessState(persistedState => {
@@ -123,16 +136,16 @@ export function useStorePersistence(
     return configureWebStorage({
       name: 'StorePersistence',
       storage,
-      persistenceKey: options.persistenceKey ?? '',
+      persistenceKey: (options as WebStorageOptions).persistenceKey ?? '',
     });
-  } else if (isObjectStorage(storage)) {
-    return configureObjectStorage({
+  } else if (isIndexedDbStorage(storage)) {
+    return configureIndexedDbStorage({
       name: 'StorePersistence',
       storage,
     });
   } else {
     throw new Error(
-      'Passed StorePersistencePluginOptions is not coompatible with the plugin specification.'
+      'Passed StorePersistencePluginOptions is not compatible with the plugin specification.'
     );
   }
 }
