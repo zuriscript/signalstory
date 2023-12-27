@@ -1,18 +1,39 @@
+/* eslint-disable tree-shaking/no-side-effects-in-initialization */
+import { memoize } from './memoize';
+
+/**
+ * Extends the Navigator interface to include the scheduling property which is not supported on all environments
+ */
+interface NavigatorWithScheduling extends Navigator {
+  scheduling: {
+    isInputPending(options: { includeContinuous: boolean }): boolean;
+  };
+}
+
+/**
+ * Feature detection for navigator.scheduling.isInputPending.
+ */
+const isInputPendingSupported = /*@__PURE__*/ memoize((): boolean => {
+  try {
+    const scheduling = (navigator as NavigatorWithScheduling)?.scheduling;
+    scheduling?.isInputPending?.({ includeContinuous: true }); // Test invocation
+    return true;
+  } catch {
+    return false;
+  }
+});
+
 /**
  * Checks if there are no pending user events.
  * @returns {boolean} True if there are no pending user events given the detection feature is supported by the browser, false otherwise.
  */
 function noPendingUserEvents(): boolean {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const scheduling = (navigator as any).scheduling;
-    return (
-      scheduling?.isInputPending &&
-      !scheduling.isInputPending({ includeContinuous: true })
-    );
-  } catch {
-    return false;
-  }
+  return (
+    isInputPendingSupported() &&
+    !(navigator as NavigatorWithScheduling).scheduling.isInputPending({
+      includeContinuous: true,
+    })
+  );
 }
 
 /**
