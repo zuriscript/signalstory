@@ -19,7 +19,10 @@ export {
   useStoreHistory,
 } from './lib/store-plugin-history/plugin-history';
 export { useLogger } from './lib/store-plugin-logger/plugin-logger';
-export { configureIndexedDb } from './lib/store-plugin-persistence/persistence-idb-storage';
+export {
+  configureIndexedDb,
+  initIndexDb,
+} from './lib/store-plugin-persistence/persistence-idb-storage';
 export {
   StorePersistencePluginOptions,
   clearStoreStorage,

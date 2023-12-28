@@ -33,7 +33,7 @@ export function isIndexedDbStorage(obj: any): obj is IndexedDbStorage {
 }
 
 export interface IndexedDbSetupHandlers {
-  onUpgradeNeeded?: (db: IDBDatabase) => void;
+  onUpgradeNeeded?: (event: IDBVersionChangeEvent) => void;
   onSuccess?: () => void;
   onBlocked?: () => void;
   onInitializationError?: () => void;
@@ -41,9 +41,8 @@ export interface IndexedDbSetupHandlers {
 
 export interface IndexedDbOptions {
   dbName: string;
-  dbVersion: number;
+  dbVersion?: number;
   objectStoreName?: string;
-  key?: number;
   handlers?: IndexedDbSetupHandlers;
 }
 
@@ -55,7 +54,6 @@ export function configureIndexedDb(
       options.dbName,
       options.dbVersion,
       options.objectStoreName,
-      options.key,
       options.handlers
     ),
   };
@@ -70,12 +68,12 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
   private static dbPool = new Map<string, BehaviorSubject<IdbPoolEntry>>();
   private static objectStoreCounter = new Map<string, number>();
   private db: IDBDatabase | undefined;
+  private _key: number | undefined;
 
   constructor(
     private dbName: string,
-    private dbVersion: number,
+    private dbVersion?: number,
     private _objectStoreName?: string,
-    private _key?: number,
     private handlers?: IndexedDbSetupHandlers
   ) {}
 
@@ -96,22 +94,22 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
 
   init(storeName: string, callback?: () => void) {
     const cachedDb = IndexedDbAdapter.dbPool.get(this.dbName);
+    this._objectStoreName = storeName;
+    this._key = IndexedDbAdapter.incrementKey(
+      this.dbName,
+      this.objectStoreName
+    );
 
     if (cachedDb) {
       if (isIdbDataBase(cachedDb.value)) {
         this.db = cachedDb.value;
+        this.dbVersion ??= this.db.version;
 
         if (this.db.version !== this.dbVersion) {
           throw new Error(
             `Attempted to open a connection to IndexedDb ${this.dbName} with the version ${this.dbVersion}, but another connection to the same db with the version ${this.db.version} is already open. Please use only one version for a specific db.`
           );
         }
-
-        this._objectStoreName ??= storeName;
-        this._key ??= IndexedDbAdapter.incrementKey(
-          this.dbName,
-          this.objectStoreName
-        );
 
         this.handlers?.onSuccess?.();
         callback?.();
@@ -130,12 +128,6 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
           });
       }
     } else {
-      this._objectStoreName ??= storeName;
-      this._key ??= IndexedDbAdapter.incrementKey(
-        this.dbName,
-        this.objectStoreName
-      );
-
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
       IndexedDbAdapter.dbPool.set(
@@ -147,7 +139,7 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
         this.db ??= (event.target as IDBRequest)?.result;
 
         if (this.db) {
-          this.handlers?.onUpgradeNeeded?.(this.db);
+          this.handlers?.onUpgradeNeeded?.(event);
           if (!this.db.objectStoreNames.contains(this.objectStoreName)) {
             this.db.createObjectStore(this.objectStoreName);
           }
@@ -159,10 +151,8 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
 
         if (this.db) {
           IndexedDbAdapter.dbPool.get(this.dbName)?.next(this.db);
-          setTimeout(() => {
-            this.handlers?.onSuccess?.();
-            callback?.();
-          }, 0);
+          this.handlers?.onSuccess?.();
+          callback?.();
         }
       };
 
@@ -206,4 +196,78 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
       ?.objectStore(this.objectStoreName)
       ?.clear();
   }
+}
+
+type IndexedDbUpdateOperation =
+  | ((oldVersion: number, oldState: unknown) => unknown)
+  | 'CLEAR'
+  | 'DELETE'
+  | undefined;
+
+export class IndexedDbStoreRegistrator {
+  private readonly registrations: [string, IndexedDbUpdateOperation][] = [];
+
+  addStore(objectStoreName: string) {
+    this.registrations.push([objectStoreName, undefined]);
+  }
+
+  addStoreWithCleanState(objectStoreName: string) {
+    this.registrations.push([objectStoreName, 'CLEAR']);
+  }
+
+  addStoreWithTransformation(
+    objectStoreName: string,
+    transformation: (oldVersion: number, oldState: any) => any
+  ) {
+    this.registrations.push([objectStoreName, transformation]);
+    return this;
+  }
+
+  removeStore(objectStoreName: string) {
+    this.registrations.push([objectStoreName, 'DELETE']);
+  }
+
+  build(): ReadonlyArray<[string, IndexedDbUpdateOperation]> {
+    return this.registrations;
+  }
+}
+
+export function initIndexDb(
+  dbName: string,
+  dbVersion: number,
+  registration: (
+    registration: IndexedDbStoreRegistrator
+  ) => IndexedDbStoreRegistrator
+) {
+  const initializers = registration(new IndexedDbStoreRegistrator()).build();
+  const adapter = new IndexedDbAdapter(dbName, dbVersion, undefined, {
+    onUpgradeNeeded: event => {
+      const target = event.target as IDBRequest;
+      const db = target.result;
+      const transaction = target.transaction!;
+      const oldVersion = event.oldVersion;
+      initializers.forEach(x => {
+        if (!db.objectStoreNames.contains(x[0])) {
+          db.createObjectStore(x[0]);
+        }
+
+        if (x[1] === 'DELETE') {
+          db.deleteObjectStore();
+        } else if (x[1]) {
+          const objectStore = transaction.objectStore(x[0]);
+          const currentValueRequest = objectStore.get(1);
+          currentValueRequest.onsuccess = (event: any) => {
+            if (x[1] === 'CLEAR') {
+              objectStore.clear();
+            } else if (typeof x[1] === 'function') {
+              const existingData = event.target.result;
+              const newData = x[1](oldVersion, existingData);
+              objectStore.put(newData, 1);
+            }
+          };
+        }
+      });
+    },
+  });
+  adapter.init(initializers[0][0]);
 }
