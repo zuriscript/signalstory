@@ -42,9 +42,11 @@ function noPendingUserEvents(): boolean {
  * @param tasks - An array of functions representing tasks to be executed.
  * @param currentTaskIndex - The index of the current task to start from (optional: default is 0).
  * @param args - An array of arrays, each containing arguments for the corresponding task (optional: default is none).
+ *
  * @remarks The function uses a time-based approach to break the execution into non-blocking batches.
- * @remarks The deadline for each batch is set to 40 milliseconds.
+ * @remarks The deadline for each batch is set to 45 milliseconds.
  * @remarks If the tasks take longer to execute than the deadline, they will be scheduled in subsequent batches.
+ *
  * @example
  * ```typescript
  * // Without parameter:
@@ -63,7 +65,7 @@ export function runNonBlockingBatch(
   args: unknown[][] | undefined = undefined
 ): void {
   if (tasks && currentTaskIndex < tasks.length) {
-    const deadline = performance.now() + 40;
+    const deadline = performance.now() + 45;
 
     do {
       const currentArgs = args?.[currentTaskIndex] as never[];
