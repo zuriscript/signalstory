@@ -19,10 +19,11 @@ export function naiveDeepClone<TState>(state: TState): TState {
  * @param {T} value - The value object to be cloned.
  * @returns {T} A deep clone of the provided value object.
  */
-export const deepClone = <TState>(state: TState) =>
-  window && 'structuredClone' in window
+export function deepClone<TState>(state: TState): TState {
+  return window && 'structuredClone' in window
     ? structuredClone(state)
     : naiveDeepClone(state);
+}
 
 /**
  * Creates a shallow clone of a given value object
