@@ -4,7 +4,6 @@ import { Signal, WritableSignal, computed, signal } from '@angular/core';
 import { Store } from '../store';
 import { StoreEffect } from '../store-effect';
 import { StorePlugin } from '../store-plugin';
-import { withSideEffect } from '../utility/sideeffect';
 
 const isStoreModifiedMap = new WeakMap<
   Store<unknown>,
@@ -12,7 +11,7 @@ const isStoreModifiedMap = new WeakMap<
 >();
 
 export const runningEffects: WritableSignal<
-  [WeakRef<Store<any>>, StoreEffect<any, any, any>][]
+  [WeakRef<Store<any>>, StoreEffect<any, any, any>, number][]
 > = signal([]);
 
 /**
@@ -150,19 +149,19 @@ export function useStoreStatus(): StorePlugin {
     postprocessCommand(store) {
       isStoreModifiedMap.get(store)?.set(true);
     },
-    preprocessEffect(store, effect) {
+    preprocessEffect(store, effect, invocationId) {
       runningEffects.update(effects => [
         ...effects,
-        [new WeakRef(store), effect],
+        [new WeakRef(store), effect, invocationId],
       ]);
     },
-    postprocessEffect(store, effect, result) {
-      return withSideEffect(result, () => {
-        runningEffects.update(effects => effects.filter(x => x[1] !== effect));
-        if (effect.config.setUnmodifiedStatus) {
-          isStoreModifiedMap.get(store)?.set(false);
-        }
-      });
+    postprocessEffect(store, effect, _, invocationId) {
+      runningEffects.update(effects =>
+        effects.filter(x => x[2] !== invocationId)
+      );
+      if (effect.config.setUnmodifiedStatus) {
+        isStoreModifiedMap.get(store)?.set(false);
+      }
     },
   };
 }

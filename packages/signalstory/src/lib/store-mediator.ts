@@ -25,7 +25,7 @@ export function createRegistry(): MediatorRegistry {
 /**
  * Root mediator registry instance.
  */
-export const rootRegistry: MediatorRegistry = createRegistry();
+export const rootRegistry: MediatorRegistry = /*@__PURE__*/ createRegistry();
 
 /**
  * Register an event handler for a specific event.

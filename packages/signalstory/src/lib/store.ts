@@ -25,6 +25,7 @@ import {
 import { useLogger } from './store-plugin-logger/plugin-logger';
 import { StoreQuery } from './store-query';
 import { getInjectorOrNull } from './utility/injector-helper';
+import { withSideEffect } from './utility/sideeffect';
 
 /**
  * Represents a signal store that manages a state and provides methods for state mutation, event handling, and more.
@@ -81,7 +82,7 @@ export class Store<TState> {
         }
         if (plugin.postprocessCommand) {
           (this.commandPostprocessor as any) ??= [];
-          this.commandPostprocessor!.push(plugin.postprocessCommand);
+          this.commandPostprocessor!.unshift(plugin.postprocessCommand);
         }
         if (plugin.preprocessEffect) {
           (this.effectPreprocessor as any) ??= [];
@@ -89,7 +90,7 @@ export class Store<TState> {
         }
         if (plugin.postprocessEffect) {
           (this.effectPostprocessor as any) ??= [];
-          this.effectPostprocessor!.push(plugin.postprocessEffect);
+          this.effectPostprocessor!.unshift(plugin.postprocessEffect);
         }
       });
 
@@ -198,7 +199,8 @@ export class Store<TState> {
     effect: StoreEffect<this, TArgs, TResult>,
     ...args: TArgs
   ): TResult {
-    this.effectPreprocessor?.forEach(p => p(this, effect));
+    const invocationId = performance.now() + Math.random();
+    this.effectPreprocessor?.forEach(p => p(this, effect, invocationId));
 
     const effectResult =
       effect.config.withInjectionContext && this.config.injector
@@ -207,12 +209,13 @@ export class Store<TState> {
           )
         : effect.func(this, ...args);
 
-    return (
-      this.effectPostprocessor?.reduce(
-        (acc, postprocessor) => postprocessor(this, effect, acc) as TResult,
-        effectResult
-      ) ?? effectResult
-    );
+    return !this.effectPostprocessor
+      ? effectResult
+      : withSideEffect(effectResult, () => {
+          this.effectPostprocessor?.forEach(action =>
+            action(this, effect, effectResult, invocationId)
+          );
+        });
   }
 
   /**

@@ -1,5 +1,4 @@
 import { StorePlugin } from '../store-plugin';
-import { withSideEffect } from '../utility/sideeffect';
 
 /**
  * Represents a logger function that can be used for logging messages.
@@ -41,13 +40,13 @@ export function useLogger(
       `[${store.name}->Effect STARTED] ${effect.name ?? 'Unspecified'}`,
       store.state()
     );
-  plugin.postprocessEffect = (store, effect, result) =>
-    withSideEffect(result, () => {
-      plugin.log(
-        `[${store.name}->Effect FINNISHED] ${effect.name ?? 'Unspecified'}`,
-        store.state()
-      );
-    });
+  plugin.postprocessEffect = (store, effect, _, invocationId) =>
+    plugin.log(
+      `[${store.name}->Effect FINNISHED in ${Math.floor(
+        performance.now() - invocationId
+      )} ms] ${effect.name ?? 'Unspecified'}`,
+      store.state()
+    );
 
   return plugin;
 }
