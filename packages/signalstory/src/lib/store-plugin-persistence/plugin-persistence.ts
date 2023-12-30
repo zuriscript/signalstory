@@ -1,48 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
+import { AsyncStorage, isAsyncStorage } from './persistence-async-storage';
 import {
-  IndexedDbStorage,
-  isIndexedDbStorage,
-} from './persistence-idb-storage';
-import {
-  WebStorage,
-  isWebStorage,
+  SyncStorage,
   loadFromStorage,
   saveToStorage,
-} from './persistence-web-storage';
-
-export interface WebStorageOptions {
-  persistenceKey?: string;
-  persistenceStorage?: WebStorage;
-}
-
-export interface IndexedDbStorageOptions {
-  persistenceStorage: IndexedDbStorage;
-}
+} from './persistence-sync-storage';
 
 /**
  * Options for configuring the Store Persistence Plugin.
  */
-export type StorePersistencePluginOptions =
-  | WebStorageOptions
-  | IndexedDbStorageOptions;
+export interface StorePersistencePluginOptions {
+  persistenceKey?: string;
+  persistenceStorage?: SyncStorage | AsyncStorage;
+}
 
 /**
  * Represents the Store Persistence Plugin, enhancing a store with state persistence functionality.
  */
-type StorePersistenceWebStoragePlugin = StorePlugin & {
-  storage: WebStorage;
-  persistenceKey: string;
-};
-
-type StorePersistenceObjectStoragePlugin = StorePlugin & {
-  storage: IndexedDbStorage;
-};
-
-type StorePersistencePlugin =
-  | StorePersistenceWebStoragePlugin
-  | StorePersistenceObjectStoragePlugin;
+type StorePersistencePlugin<TStorage extends SyncStorage | AsyncStorage> =
+  StorePlugin & {
+    storage: TStorage;
+    persistenceKey: string;
+  };
 
 /**
  * typeguard for StorePersistencePlugin.
@@ -51,7 +32,7 @@ type StorePersistencePlugin =
  */
 function isStorePersistencePlugin(
   obj: StorePlugin
-): obj is StorePersistencePlugin {
+): obj is StorePersistencePlugin<any> {
   return (
     obj &&
     typeof obj === 'object' &&
@@ -70,11 +51,7 @@ function isStorePersistencePlugin(
 export function clearStoreStorage(store: Store<any>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
-    if (isWebStorage(plugin.storage)) {
-      plugin.storage.removeItem(plugin.persistenceKey);
-    } else if (isIndexedDbStorage(plugin.storage)) {
-      plugin.storage.clearState();
-    }
+    plugin.storage.removeItem(plugin.persistenceKey);
   } else {
     throw new Error(
       `Store persistence plugin is not enabled for store ${store.config.name}`
@@ -82,7 +59,7 @@ export function clearStoreStorage(store: Store<any>): void {
   }
 }
 
-function configureWebStorage(plugin: StorePersistenceWebStoragePlugin) {
+function configureSyncStorage(plugin: StorePersistencePlugin<SyncStorage>) {
   plugin.init = store => {
     if (!plugin.persistenceKey) {
       plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
@@ -103,12 +80,14 @@ function configureWebStorage(plugin: StorePersistenceWebStoragePlugin) {
   return plugin;
 }
 
-function configureIndexedDbStorage(
-  plugin: StorePersistenceObjectStoragePlugin
-) {
+function configureAsyncStorage(plugin: StorePersistencePlugin<AsyncStorage>) {
   plugin.init = store => {
-    plugin.storage.init(store.name, () => {
-      plugin.storage.getAndProcessState(persistedState => {
+    if (!plugin.persistenceKey) {
+      plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
+    }
+
+    plugin.storage.initAsync(store.name, () => {
+      plugin.storage.getItemAsync(plugin.persistenceKey, persistedState => {
         if (persistedState) {
           store.set(persistedState, 'Load state from storage');
         }
@@ -116,7 +95,8 @@ function configureIndexedDbStorage(
     });
   };
 
-  plugin.postprocessCommand = store => plugin.storage.setState(store.state());
+  plugin.postprocessCommand = store =>
+    plugin.storage.setItemAsync(plugin.persistenceKey, store.state());
 
   return plugin;
 }
@@ -129,23 +109,15 @@ function configureIndexedDbStorage(
  */
 export function useStorePersistence(
   options: StorePersistencePluginOptions = {}
-): StorePersistencePlugin {
-  const storage = options.persistenceStorage ?? (localStorage as WebStorage);
+): StorePersistencePlugin<any> {
+  const storage = options.persistenceStorage ?? (localStorage as SyncStorage);
+  const plugin = <StorePersistencePlugin<any>>{
+    name: 'StorePersistence',
+    storage,
+    persistenceKey: options.persistenceKey ?? '',
+  };
 
-  if (isWebStorage(storage)) {
-    return configureWebStorage({
-      name: 'StorePersistence',
-      storage,
-      persistenceKey: (options as WebStorageOptions).persistenceKey ?? '',
-    });
-  } else if (isIndexedDbStorage(storage)) {
-    return configureIndexedDbStorage({
-      name: 'StorePersistence',
-      storage,
-    });
-  } else {
-    throw new Error(
-      'Passed StorePersistencePluginOptions is not compatible with the plugin specification.'
-    );
-  }
+  return isAsyncStorage(storage)
+    ? configureAsyncStorage(plugin)
+    : configureSyncStorage(plugin);
 }

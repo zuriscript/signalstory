@@ -2,7 +2,7 @@
 /**
  * Represents the interface for store persistence methods with synchronous operations.
  */
-export interface WebStorage {
+export interface SyncStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
@@ -13,7 +13,7 @@ export interface WebStorage {
  * @param obj - The object to check.
  * @returns True if the object implements the `PersistenceStorageSynchronous` interface, false otherwise.
  */
-export function isWebStorage(obj: any): obj is WebStorage {
+export function isSyncStorage(obj: any): obj is SyncStorage {
   return (
     typeof obj === 'object' &&
     typeof obj.getItem === 'function' &&
@@ -30,7 +30,7 @@ export function isWebStorage(obj: any): obj is WebStorage {
  * @returns The loaded value if available and successfully parsed, otherwise undefined.
  */
 export function loadFromStorage<TState>(
-  persistenceStorage: WebStorage,
+  persistenceStorage: SyncStorage,
   persistenceKey: string
 ): TState | undefined {
   const value = persistenceStorage.getItem(persistenceKey);
@@ -50,7 +50,7 @@ export function loadFromStorage<TState>(
  * @param value - The store value to store.
  */
 export function saveToStorage<TState>(
-  persistenceStorage: WebStorage,
+  persistenceStorage: SyncStorage,
   persistenceKey: string,
   value: TState
 ): void {

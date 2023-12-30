@@ -1,36 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { BehaviorSubject, filter, first } from 'rxjs';
-import { StorePersistencePluginOptions } from './plugin-persistence';
-
-/**
- * Represents the interface for store persistence methods with asynchronous operations.
- */
-export interface IndexedDbStorage<TValue = unknown> {
-  /**
-   * Retrieves the value associated with the specified key and processes it asynchronously.
-   * @param key - The key to retrieve the value for.
-   * @param callback - A callback function to handle the retrieved value asynchronously.
-   */
-  init(storeName: string, callback?: () => void): void;
-  getAndProcessState(callback: (value: TValue | null) => void): void;
-  setState(value: TValue): void;
-  clearState(): void;
-}
-
-/**
- * Type guard to check if an object implements the `PersistenceStorageAsynchronous` interface.
- * @param obj - The object to check.
- * @returns True if the object implements the `PersistenceStorageAsynchronous` interface, false otherwise.
- */
-export function isIndexedDbStorage(obj: any): obj is IndexedDbStorage {
-  return (
-    typeof obj === 'object' &&
-    typeof obj.getAndProcessState === 'function' &&
-    typeof obj.setState === 'function' &&
-    typeof obj.clearState === 'function'
-  );
-}
+import { AsyncStorage } from '../persistence-async-storage';
+import { StorePersistencePluginOptions } from '../plugin-persistence';
 
 export interface IndexedDbSetupHandlers {
   onUpgradeNeeded?: (event: IDBVersionChangeEvent) => void;
@@ -46,7 +16,7 @@ export interface IndexedDbOptions {
   handlers?: IndexedDbSetupHandlers;
 }
 
-export function configureIndexedDb(
+export function connectToIndexedDb(
   options: IndexedDbOptions
 ): StorePersistencePluginOptions {
   return {
@@ -64,7 +34,7 @@ function isIdbDataBase(entry: IdbPoolEntry): entry is IDBDatabase {
   return !!entry && typeof entry === 'object' && 'name' in entry;
 }
 
-class IndexedDbAdapter implements IndexedDbStorage<unknown> {
+export class IndexedDbAdapter implements AsyncStorage {
   private static dbPool = new Map<string, BehaviorSubject<IdbPoolEntry>>();
   private static objectStoreCounter = new Map<string, number>();
   private db: IDBDatabase | undefined;
@@ -92,7 +62,7 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
     return storeCount + 1;
   }
 
-  init(storeName: string, callback?: () => void) {
+  initAsync(storeName: string, callback?: () => void) {
     const cachedDb = IndexedDbAdapter.dbPool.get(this.dbName);
     this._objectStoreName = storeName;
     this._key = IndexedDbAdapter.incrementKey(
@@ -124,7 +94,7 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
             first()
           )
           .subscribe(() => {
-            this.init(storeName, callback);
+            this.initAsync(storeName, callback);
           });
       }
     } else {
@@ -168,7 +138,8 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
     }
   }
 
-  getAndProcessState(
+  getItemAsync(
+    _: string,
     callback: (value: unknown | null | undefined) => void
   ): void {
     const request = this.db
@@ -183,91 +154,25 @@ class IndexedDbAdapter implements IndexedDbStorage<unknown> {
     }
   }
 
-  setState(value: unknown): void {
-    this.db
+  setItemAsync(_: string, value: unknown, callback?: () => void): void {
+    const request = this.db
       ?.transaction([this.objectStoreName], 'readwrite')
       ?.objectStore(this.objectStoreName)
       ?.put(value, this.key);
+
+    if (request && callback) {
+      request.onsuccess = callback;
+    }
   }
 
-  clearState(): void {
-    this.db
+  removeItemAsync(_: string, callback?: () => void): void {
+    const request = this.db
       ?.transaction([this.objectStoreName], 'readwrite')
       ?.objectStore(this.objectStoreName)
       ?.clear();
+
+    if (request && callback) {
+      request.onsuccess = callback;
+    }
   }
-}
-
-type IndexedDbUpdateOperation =
-  | ((oldVersion: number, oldState: unknown) => unknown)
-  | 'CLEAR'
-  | 'DELETE'
-  | undefined;
-
-export class IndexedDbStoreRegistrator {
-  private readonly registrations: [string, IndexedDbUpdateOperation][] = [];
-
-  addStore(objectStoreName: string) {
-    this.registrations.push([objectStoreName, undefined]);
-  }
-
-  addStoreWithCleanState(objectStoreName: string) {
-    this.registrations.push([objectStoreName, 'CLEAR']);
-  }
-
-  addStoreWithTransformation(
-    objectStoreName: string,
-    transformation: (oldVersion: number, oldState: any) => any
-  ) {
-    this.registrations.push([objectStoreName, transformation]);
-    return this;
-  }
-
-  removeStore(objectStoreName: string) {
-    this.registrations.push([objectStoreName, 'DELETE']);
-  }
-
-  build(): ReadonlyArray<[string, IndexedDbUpdateOperation]> {
-    return this.registrations;
-  }
-}
-
-export function initIndexDb(
-  dbName: string,
-  dbVersion: number,
-  registration: (
-    registration: IndexedDbStoreRegistrator
-  ) => IndexedDbStoreRegistrator
-) {
-  const initializers = registration(new IndexedDbStoreRegistrator()).build();
-  const adapter = new IndexedDbAdapter(dbName, dbVersion, undefined, {
-    onUpgradeNeeded: event => {
-      const target = event.target as IDBRequest;
-      const db = target.result;
-      const transaction = target.transaction!;
-      const oldVersion = event.oldVersion;
-      initializers.forEach(x => {
-        if (!db.objectStoreNames.contains(x[0])) {
-          db.createObjectStore(x[0]);
-        }
-
-        if (x[1] === 'DELETE') {
-          db.deleteObjectStore();
-        } else if (x[1]) {
-          const objectStore = transaction.objectStore(x[0]);
-          const currentValueRequest = objectStore.get(1);
-          currentValueRequest.onsuccess = (event: any) => {
-            if (x[1] === 'CLEAR') {
-              objectStore.clear();
-            } else if (typeof x[1] === 'function') {
-              const existingData = event.target.result;
-              const newData = x[1](oldVersion, existingData);
-              objectStore.put(newData, 1);
-            }
-          };
-        }
-      });
-    },
-  });
-  adapter.init(initializers[0][0]);
 }
