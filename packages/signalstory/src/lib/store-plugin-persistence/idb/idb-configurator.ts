@@ -1,25 +1,49 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Immutable } from '../../store-immutability/immutable-type';
-import { IndexedDbAdapter } from './idb-adapter';
+import { getOrOpenDb } from './idb-pool';
 
+// Define the possible update operations for the database
 type DbUpdateOperation =
   | ((oldVersion: number, oldState: unknown) => unknown)
   | 'CLEAR'
-  | 'DELETE'
+  | 'DROP'
   | undefined;
 
-export class IndexedDbStoreRegistrator {
+/**
+ * Class for configuring indexedb object stores
+ */
+class IndexedDbStoreRegistrator {
   private readonly _registrations: [string, DbUpdateOperation][] = [];
 
-  addStore(objectStoreName: string) {
+  /**
+   * Creates an object store if it does not exist
+   * @param objectStoreName - The name of the object store
+   * @returns The IndexedDbStoreRegistrator instance for chaining
+   */
+  createStore(objectStoreName: string) {
     this._registrations.push([objectStoreName, undefined]);
+    return this;
   }
 
-  addStoreWithCleanState(objectStoreName: string) {
+  /**
+   * Creates an object store if it does not exist.
+   * If it does exists, the current object store value is cleared
+   * @param objectStoreName - The name of the object store
+   * @returns The IndexedDbStoreRegistrator instance for chaining
+   */
+  createStoreOrClearState(objectStoreName: string) {
     this._registrations.push([objectStoreName, 'CLEAR']);
+    return this;
   }
 
-  addStoreWithTransformation(
+  /**
+   * Creates an object store if it does not exist.
+   * If it does exists, the current object store value can be transformed using the passed transformation function
+   * @param objectStoreName - The name of the object store
+   * @param transformation - Custom transformation function for update
+   * @returns The IndexedDbStoreRegistrator instance for chaining
+   */
+  createStoreOrTransform(
     objectStoreName: string,
     transformation: (oldVersion: number, oldState: any) => any
   ) {
@@ -27,16 +51,31 @@ export class IndexedDbStoreRegistrator {
     return this;
   }
 
-  removeStore(objectStoreName: string) {
-    this._registrations.push([objectStoreName, 'DELETE']);
+  /**
+   * Deletes the object store if it does exist.
+   * @param objectStoreName - The name of the object store
+   * @returns The IndexedDbStoreRegistrator instance for chaining
+   */
+  dropStore(objectStoreName: string) {
+    this._registrations.push([objectStoreName, 'DROP']);
+    return this;
   }
 
+  /**
+   * Get all registrations
+   */
   get registrations(): Immutable<[string, DbUpdateOperation][]> {
-    return this.registrations;
+    return this._registrations;
   }
 }
 
-export function configureIndexDb(
+/**
+ * Configure the indexed database with the specified registrations
+ * @param dbName - The name of the database
+ * @param dbVersion - The version of the database
+ * @param registration - A function to perform store registrations
+ */
+export function migrateIndexedDb(
   dbName: string,
   dbVersion: number,
   registration: (
@@ -46,35 +85,40 @@ export function configureIndexDb(
   const registrations = registration(
     new IndexedDbStoreRegistrator()
   ).registrations;
+
   if (!registrations || registrations.length === 0) {
-    throw new Error('configureIndexDb: Please register at least one Store');
+    throw new Error('configureIndexedDb: Please register at least one Store');
   }
-  const adapter = new IndexedDbAdapter(dbName, dbVersion, undefined, {
-    onUpgradeNeeded: event => {
-      const target = event.target as IDBRequest;
-      const db = target.result;
-      const transaction = target.transaction!;
-      const oldVersion = event.oldVersion;
-      registrations.forEach(x => {
-        if (!db.objectStoreNames.contains(x[0])) {
-          db.createObjectStore(x[0]);
-        } else if (x[1] === 'DELETE') {
-          db.deleteObjectStore();
-        } else if (x[1]) {
-          const objectStore = transaction.objectStore(x[0]);
+
+  getOrOpenDb(dbName, dbVersion, event => {
+    const target = event.target as IDBRequest;
+    const db = target.result;
+    const transaction = target.transaction!;
+    const oldVersion = event.oldVersion;
+
+    registrations.forEach(([store, op]) => {
+      if (!db.objectStoreNames.contains(store)) {
+        if (op !== 'DROP') {
+          db.createObjectStore(store);
+        }
+      } else if (op) {
+        if (op === 'DROP') {
+          db.deleteObjectStore(store);
+        } else {
+          const objectStore = transaction.objectStore(store);
           const currentValueRequest = objectStore.get(1);
+
           currentValueRequest.onsuccess = (event: any) => {
-            if (x[1] === 'CLEAR') {
+            if (op === 'CLEAR') {
               objectStore.clear();
-            } else if (typeof x[1] === 'function') {
+            } else if (typeof op === 'function') {
               const existingData = event.target.result;
-              const newData = x[1](oldVersion, existingData);
+              const newData = op(oldVersion, existingData);
               objectStore.put(newData, 1);
             }
           };
         }
-      });
-    },
+      }
+    });
   });
-  adapter.initAsync(registrations[0][0]);
 }

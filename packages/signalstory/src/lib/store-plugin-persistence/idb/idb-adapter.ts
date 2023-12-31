@@ -1,7 +1,11 @@
-import { BehaviorSubject, filter, first } from 'rxjs';
+import { filter, first } from 'rxjs';
 import { AsyncStorage } from '../persistence-async-storage';
 import { StorePersistencePluginOptions } from '../plugin-persistence';
+import { getOrOpenDb } from './idb-pool';
 
+/**
+ * Represents the configuration options for IndexedDB setup handlers.
+ */
 export interface IndexedDbSetupHandlers {
   onUpgradeNeeded?: (event: IDBVersionChangeEvent) => void;
   onSuccess?: () => void;
@@ -9,14 +13,23 @@ export interface IndexedDbSetupHandlers {
   onInitializationError?: () => void;
 }
 
+/**
+ * Represents the options for connecting to an IndexedDB.
+ */
 export interface IndexedDbOptions {
   dbName: string;
   dbVersion?: number;
   objectStoreName?: string;
+  key?: number;
   handlers?: IndexedDbSetupHandlers;
 }
 
-export function connectToIndexedDb(
+/**
+ * configures connection to an IndexedDb
+ * @param options - The configuration options for IndexedDB.
+ * @returns Store persistence plugin options.
+ */
+export function configureIndexedDb(
   options: IndexedDbOptions
 ): StorePersistencePluginOptions {
   return {
@@ -24,26 +37,37 @@ export function connectToIndexedDb(
       options.dbName,
       options.dbVersion,
       options.objectStoreName,
+      options.key,
       options.handlers
     ),
   };
 }
 
+/**
+ * Represents possible states of an IndexedDB pool entry.
+ */
 type IdbPoolEntry = undefined | 'InitError' | 'Blocked' | IDBDatabase;
+
+/**
+ * Checks if an entry is an instance of IDBDatabase.
+ * @param entry - The IndexedDB pool entry.
+ * @returns True if the entry is an IDBDatabase; otherwise, false.
+ */
 function isIdbDataBase(entry: IdbPoolEntry): entry is IDBDatabase {
   return !!entry && typeof entry === 'object' && 'name' in entry;
 }
 
+/**
+ * Represents an adapter for interacting with IndexedDB, implementing AsyncStorage.
+ */
 export class IndexedDbAdapter implements AsyncStorage {
-  private static dbPool = new Map<string, BehaviorSubject<IdbPoolEntry>>();
-  private static objectStoreCounter = new Map<string, number>();
   private db: IDBDatabase | undefined;
-  private _key: number | undefined;
 
   constructor(
     private dbName: string,
     private dbVersion?: number,
     private _objectStoreName?: string,
+    private _key?: number,
     private handlers?: IndexedDbSetupHandlers
   ) {}
 
@@ -55,87 +79,35 @@ export class IndexedDbAdapter implements AsyncStorage {
     return this._key!;
   }
 
-  private static incrementKey(dbName: string, objectStoreName: string): number {
-    const storeKey = `${dbName}▷${objectStoreName}`;
-    const storeCount = IndexedDbAdapter.objectStoreCounter.get(storeKey) ?? 0;
-    IndexedDbAdapter.objectStoreCounter.set(storeKey, storeCount + 1);
-    return storeCount + 1;
-  }
-
   initAsync(storeName: string, callback?: () => void) {
-    const cachedDb = IndexedDbAdapter.dbPool.get(this.dbName);
-    this._objectStoreName = storeName;
-    this._key = IndexedDbAdapter.incrementKey(
-      this.dbName,
-      this.objectStoreName
-    );
+    const db = getOrOpenDb(this.dbName, this.dbVersion, event => {
+      const db = (event.target as IDBRequest)?.result;
 
-    if (cachedDb) {
-      if (isIdbDataBase(cachedDb.value)) {
-        this.db = cachedDb.value;
-        this.dbVersion ??= this.db.version;
-
-        if (this.db.version !== this.dbVersion) {
-          throw new Error(
-            `Attempted to open a connection to IndexedDb ${this.dbName} with the version ${this.dbVersion}, but another connection to the same db with the version ${this.db.version} is already open. Please use only one version for a specific db.`
-          );
+      if (db) {
+        this.handlers?.onUpgradeNeeded?.(event);
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName);
         }
+      }
+    });
 
+    db.pipe(
+      filter(entry => !!entry),
+      first()
+    ).subscribe(entry => {
+      if (isIdbDataBase(entry)) {
+        this.db = entry;
+        this.dbVersion = entry.version;
+        this._objectStoreName ??= storeName;
+        this._key ??= 1;
         this.handlers?.onSuccess?.();
         callback?.();
-      } else if (cachedDb.value === 'Blocked') {
+      } else if (entry === 'Blocked') {
         this.handlers?.onBlocked?.();
-      } else if (cachedDb.value === 'InitError') {
+      } else if (entry === 'InitError') {
         this.handlers?.onInitializationError?.();
-      } else {
-        cachedDb
-          .pipe(
-            filter(db => !!db),
-            first()
-          )
-          .subscribe(() => {
-            this.initAsync(storeName, callback);
-          });
       }
-    } else {
-      const request = indexedDB.open(this.dbName, this.dbVersion);
-
-      IndexedDbAdapter.dbPool.set(
-        this.dbName,
-        new BehaviorSubject<IdbPoolEntry>(undefined)
-      );
-
-      request.onupgradeneeded = event => {
-        this.db ??= (event.target as IDBRequest)?.result;
-
-        if (this.db) {
-          this.handlers?.onUpgradeNeeded?.(event);
-          if (!this.db.objectStoreNames.contains(this.objectStoreName)) {
-            this.db.createObjectStore(this.objectStoreName);
-          }
-        }
-      };
-
-      request.onsuccess = event => {
-        this.db ??= (event.target as IDBRequest)?.result;
-
-        if (this.db) {
-          IndexedDbAdapter.dbPool.get(this.dbName)?.next(this.db);
-          this.handlers?.onSuccess?.();
-          callback?.();
-        }
-      };
-
-      request.onblocked = () => {
-        IndexedDbAdapter.dbPool.get(this.dbName)?.next('Blocked');
-        this.handlers?.onBlocked?.();
-      };
-
-      request.onerror = () => {
-        IndexedDbAdapter.dbPool.get(this.dbName)?.next('InitError');
-        this.handlers?.onInitializationError?.();
-      };
-    }
+    });
   }
 
   getItemAsync(
