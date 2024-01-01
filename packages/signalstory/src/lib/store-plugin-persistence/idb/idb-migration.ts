@@ -10,10 +10,10 @@ type DbUpdateOperation =
   | undefined;
 
 /**
- * Class for configuring indexedb object stores
+ * Class for configuring indexedb object stores and their corresponding miggrations
  */
-class IndexedDbStoreRegistrator {
-  private readonly _registrations: [string, DbUpdateOperation][] = [];
+class IndexedDbStoreMigrator {
+  private readonly migrations: [string, DbUpdateOperation][] = [];
 
   /**
    * Creates an object store if it does not exist
@@ -21,7 +21,7 @@ class IndexedDbStoreRegistrator {
    * @returns The IndexedDbStoreRegistrator instance for chaining
    */
   createStore(objectStoreName: string) {
-    this._registrations.push([objectStoreName, undefined]);
+    this.migrations.push([objectStoreName, undefined]);
     return this;
   }
 
@@ -32,7 +32,7 @@ class IndexedDbStoreRegistrator {
    * @returns The IndexedDbStoreRegistrator instance for chaining
    */
   createStoreOrClearState(objectStoreName: string) {
-    this._registrations.push([objectStoreName, 'CLEAR']);
+    this.migrations.push([objectStoreName, 'CLEAR']);
     return this;
   }
 
@@ -47,7 +47,7 @@ class IndexedDbStoreRegistrator {
     objectStoreName: string,
     transformation: (oldVersion: number, oldState: any) => any
   ) {
-    this._registrations.push([objectStoreName, transformation]);
+    this.migrations.push([objectStoreName, transformation]);
     return this;
   }
 
@@ -57,36 +57,34 @@ class IndexedDbStoreRegistrator {
    * @returns The IndexedDbStoreRegistrator instance for chaining
    */
   dropStore(objectStoreName: string) {
-    this._registrations.push([objectStoreName, 'DROP']);
+    this.migrations.push([objectStoreName, 'DROP']);
     return this;
   }
 
   /**
    * Get all registrations
    */
-  get registrations(): Immutable<[string, DbUpdateOperation][]> {
-    return this._registrations;
+  getMigrations(): Immutable<[string, DbUpdateOperation][]> {
+    return this.migrations;
   }
 }
 
 /**
- * Configure the indexed database with the specified registrations
- * @param dbName - The name of the database
- * @param dbVersion - The version of the database
- * @param registration - A function to perform store registrations
+ * Configure the IndexedDB with specified store registrations and database migration.
+ * @param dbName - The name of the IndexedDB database.
+ * @param dbVersion - The version of the IndexedDB database.
+ * @param migration - A function to define store registrations and migration operations.
+ * @remarks Ensure that the migration function registers at least one store to avoid errors.
+ * @throws Throws an error if no stores are registered for migration.
  */
 export function migrateIndexedDb(
   dbName: string,
   dbVersion: number,
-  registration: (
-    registration: IndexedDbStoreRegistrator
-  ) => IndexedDbStoreRegistrator
+  migration: (model: IndexedDbStoreMigrator) => IndexedDbStoreMigrator
 ) {
-  const registrations = registration(
-    new IndexedDbStoreRegistrator()
-  ).registrations;
+  const migrations = migration(new IndexedDbStoreMigrator()).getMigrations();
 
-  if (!registrations || registrations.length === 0) {
+  if (!migrations || migrations.length === 0) {
     throw new Error('configureIndexedDb: Please register at least one Store');
   }
 
@@ -96,7 +94,7 @@ export function migrateIndexedDb(
     const transaction = target.transaction!;
     const oldVersion = event.oldVersion;
 
-    registrations.forEach(([store, op]) => {
+    migrations.forEach(([store, op]) => {
       if (!db.objectStoreNames.contains(store)) {
         if (op !== 'DROP') {
           db.createObjectStore(store);

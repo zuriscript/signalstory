@@ -1,15 +1,34 @@
 import { filter, first } from 'rxjs';
 import { AsyncStorage } from '../persistence-async-storage';
 import { StorePersistencePluginOptions } from '../plugin-persistence';
-import { getOrOpenDb } from './idb-pool';
+import { getOrOpenDb, isIDBDatabase } from './idb-pool';
 
 /**
  * Represents the configuration options for IndexedDB setup handlers.
  */
 export interface IndexedDbSetupHandlers {
+  /**
+   * Callback for handling the 'upgradeneeded' event during database initialization.
+   * @param event - The 'upgradeneeded' event.
+   * @remarks
+   * ATTENTION: This method is triggered only when opening a fresh database connection.
+   * If a cached database instance is used, such as with `migrateIndexedDb`, this function will not be called.
+   */
   onUpgradeNeeded?: (event: IDBVersionChangeEvent) => void;
+
+  /**
+   * Callback for handling the 'success' event after successfully connecting to the database.
+   */
   onSuccess?: () => void;
+
+  /**
+   * Callback for handling the 'blocked' event when a connection request is blocked.
+   */
   onBlocked?: () => void;
+
+  /**
+   * Callback for handling errors during database initialization.
+   */
   onInitializationError?: () => void;
 }
 
@@ -17,10 +36,32 @@ export interface IndexedDbSetupHandlers {
  * Represents the options for connecting to an IndexedDB.
  */
 export interface IndexedDbOptions {
+  /**
+   * The name of the IndexedDB database.
+   */
   dbName: string;
+
+  /**
+   * The version of the IndexedDB database. If not provided,
+   * the adapter will attempt to deduce the version by inspecting the pool.
+   * This relies on prior configuration of IDB migration.
+   */
   dbVersion?: number;
+
+  /**
+   * The name of the object store to connect to within the database.
+   * If not provided, it will use the stores name
+   */
   objectStoreName?: string;
+
+  /**
+   * The key to use when connecting to a specific record within the object store. Default is 1.
+   */
   key?: number;
+
+  /**
+   * Configuration options for IndexedDB setup handlers.
+   */
   handlers?: IndexedDbSetupHandlers;
 }
 
@@ -41,20 +82,6 @@ export function configureIndexedDb(
       options.handlers
     ),
   };
-}
-
-/**
- * Represents possible states of an IndexedDB pool entry.
- */
-type IdbPoolEntry = undefined | 'InitError' | 'Blocked' | IDBDatabase;
-
-/**
- * Checks if an entry is an instance of IDBDatabase.
- * @param entry - The IndexedDB pool entry.
- * @returns True if the entry is an IDBDatabase; otherwise, false.
- */
-function isIdbDataBase(entry: IdbPoolEntry): entry is IDBDatabase {
-  return !!entry && typeof entry === 'object' && 'name' in entry;
 }
 
 /**
@@ -95,7 +122,7 @@ export class IndexedDbAdapter implements AsyncStorage {
       filter(entry => !!entry),
       first()
     ).subscribe(entry => {
-      if (isIdbDataBase(entry)) {
+      if (isIDBDatabase(entry)) {
         this.db = entry;
         this.dbVersion = entry.version;
         this._objectStoreName ??= storeName;
@@ -138,10 +165,18 @@ export class IndexedDbAdapter implements AsyncStorage {
   }
 
   removeItemAsync(_: string, callback?: () => void): void {
+    console.log('removeItemAsync', this.db, this.objectStoreName);
     const request = this.db
       ?.transaction([this.objectStoreName], 'readwrite')
       ?.objectStore(this.objectStoreName)
       ?.clear();
+
+    console.log(
+      'removeItemAsync AFTER',
+      this.db,
+      this.objectStoreName,
+      request
+    );
 
     if (request && callback) {
       request.onsuccess = callback;

@@ -4,6 +4,7 @@ import { StorePlugin } from '../store-plugin';
 import { AsyncStorage, isAsyncStorage } from './persistence-async-storage';
 import {
   SyncStorage,
+  isSyncStorage,
   loadFromStorage,
   saveToStorage,
 } from './persistence-sync-storage';
@@ -51,7 +52,11 @@ function isStorePersistencePlugin(
 export function clearStoreStorage(store: Store<any>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
-    plugin.storage.removeItem(plugin.persistenceKey);
+    if (isSyncStorage(plugin.storage)) {
+      plugin.storage.removeItem(plugin.persistenceKey);
+    } else if (isAsyncStorage(plugin.storage)) {
+      plugin.storage.removeItemAsync(plugin.persistenceKey);
+    }
   } else {
     throw new Error(
       `Store persistence plugin is not enabled for store ${store.config.name}`

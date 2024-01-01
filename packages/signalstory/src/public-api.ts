@@ -24,7 +24,7 @@ export {
   usePerformanceCounter,
 } from './lib/store-plugin-performance-counter/plugin-performance-counter';
 export { configureIndexedDb } from './lib/store-plugin-persistence/idb/idb-adapter';
-export { migrateIndexedDb } from './lib/store-plugin-persistence/idb/idb-configurator';
+export { migrateIndexedDb } from './lib/store-plugin-persistence/idb/idb-migration';
 export {
   StorePersistencePluginOptions,
   clearStoreStorage,
