@@ -42,6 +42,31 @@ describe('load from storage', () => {
       expect(storage.getItem).toHaveBeenCalledWith(key);
     });
 
+    it('should load the stored value from persistence storage on init using projection functions', () => {
+      // arrange
+      const storedValue = { val: 'stored' };
+      const projectedValue = { val: 'storedAndModified' };
+      storage.getItem = jest.fn(() => JSON.stringify(storedValue));
+
+      // act
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(() => projectedValue),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(projectedValue);
+    });
+
     it('should not set initial state when unable to parse the stored value', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
@@ -61,6 +86,30 @@ describe('load from storage', () => {
       // assert
       expect(store.state()).toStrictEqual(stateBeforeInit);
       expect(storage.getItem).toHaveBeenCalledWith(key);
+    });
+
+    it('should not set initial state when unable to parse the stored value while using projection function', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItem = jest.fn(() => 'INVALID STATE');
+
+      // act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
     });
 
     it('should not set initial state when there is no stored value', () => {
@@ -116,6 +165,30 @@ describe('load from storage', () => {
       expect(store.state()).toStrictEqual(storedValue);
     });
 
+    it('should load the stored value from persistence storage on init with projection function', () => {
+      // arrange
+      const storedValue = { val: 'stored' };
+      const projectedValue = { val: 'storedAndModified' };
+      storage.getItemAsync = jest.fn((_, callback) => callback(storedValue));
+
+      // act
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            projection: {
+              onLoad: jest.fn(() => projectedValue),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(projectedValue);
+    });
+
     it('should not set initial state when there is no stored value', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
@@ -127,6 +200,29 @@ describe('load from storage', () => {
         plugins: [
           useStorePersistence({
             persistenceStorage: storage,
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
+    });
+
+    it('should not set initial state when there is no stored value while using projection functions', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItemAsync = jest.fn((_, callback) => callback(null));
+
+      //act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(),
+            },
           }),
         ],
       });
@@ -206,6 +302,35 @@ describe('save to storage', () => {
         JSON.stringify(newValue)
       );
     });
+
+    it('should save the store state to persistence storage on set using projection functions', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+      const projectedValue = { val: 'projectedNewValue' };
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(() => projectedValue),
+            },
+          }),
+        ],
+      });
+
+      // act
+      store.set(newValue);
+
+      // assert
+      expect(storage.setItem).toHaveBeenCalledWith(
+        key,
+        JSON.stringify(projectedValue)
+      );
+    });
   });
 
   describe('with AsyncStorage', () => {
@@ -265,6 +390,31 @@ describe('save to storage', () => {
 
       // assert
       expect(storage.setItemAsync).toHaveBeenCalledWith(key, newValue);
+    });
+
+    it('should save the store state to persistence storage on set using projection functions', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+      const projectedValue = { val: 'projectedNewValue' };
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(() => projectedValue),
+            },
+          }),
+        ],
+      });
+
+      // act
+      store.set(newValue);
+
+      // assert
+      expect(storage.setItemAsync).toHaveBeenCalledWith(key, projectedValue);
     });
   });
 });
