@@ -1,4 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
+import { getRegisteredMigration, redeemMigration } from './idb-migration';
 
 /**
  * Represents possible states of an IndexedDB pool entry.
@@ -71,9 +72,10 @@ export function getOrOpenDb(
 
     return cachedDbEntry.db;
   } else {
+    dbVersion ??= getRegisteredMigration(dbName)?.dbVersion;
     if (!dbVersion) {
       throw new Error(
-        `getOrOpenDb: No db version specified. If you want to use auto versioning, than you have to setup db migration first using a specific version`
+        `getOrOpenDb: No db version specified. If you want to let the db pool infer the version, you have to setup db migration first using a specific version`
       );
     }
 
@@ -86,6 +88,9 @@ export function getOrOpenDb(
       const db = (event.target as IDBRequest)?.result as IDBDatabase;
 
       if (db) {
+        const registeredMigration = redeemMigration(db.name, db.version);
+
+        registeredMigration?.(event);
         migration?.(event);
       }
     };

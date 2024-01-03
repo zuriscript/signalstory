@@ -6,7 +6,7 @@ sidebar_position: 2
 
 `signalstory` provides a mechanism for persisting the state of your store, allowing you to save and load the state across different sessions or browser refreshes, or even creating fully offline applications using `indexedDB`. By enabling the `StorePersistencePlugin`, you can ensure that your store's state remains persistent and readily available.
 
-Signalstory provides both synchronous storage implementations like [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage) or [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) and asynchronos options such as [IndexedDb](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API). Importantly, you have the freedom to integrate your custom implementations for both synchronous and asynchronous use cases.
+Signalstory provides both synchronous storage implementations like [SessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage) or [LocalStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) and asynchronos options such as [IndexedDb](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API). Additionally, you have the freedom to integrate your custom implementations for both synchronous and asynchronous storages.
 
 ## Enabling Local Storage Persistence
 
@@ -25,8 +25,6 @@ class PersistedStore extends Store<MyState> {
   }
 }
 ```
-
-Certainly! Below is the updated documentation reflecting the new configuration options:
 
 ## Configuration
 
@@ -64,31 +62,42 @@ To clear the persisted state from storage without affecting the current state of
 clearStoreStorage(store); // Clears the persisted state from storage
 ```
 
-## IndexedDB
+## IndexedDB (experimental)
 
-Signalstory provides native integration for [IndexedDb](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), hence no further library is needed. Following configuration scenarios are possible:
+:::info
+
+The native indexedDB adapter has undergone testing, though it has not been deployed in production code as of now. Further manual and unit tests are required before we consider removing the experimental flag. Nevertheless, feel free to dive in and start using it - The api is stable and good to go!
+
+:::
+
+Signalstory provides native integration for [IndexedDb](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), hence no further library is needed. Note, however, that you could also use a third-party library, if you really wanted to, by creating an adapter implementing `AsyncStorage` by yourself.
+
+Following configuration scenarios are possible:
 
 - One database per store
 - One objectstore per store
 - One objectstore for all stores
 
-Note, that you can mix it, for example, you can cluster stores from the same feature in the same database or/and use the same objectStore for Ui and data related stores.
+It often makes sense to choose one single approach, but if your application has other IDB databases or objectstores, you can mix and match as you wish to get the best setup possible. Other possible use cases for mixing includes clustering stores from the same feature in the same database or using the same objectStore for related stores, etc.
 
 :::tip
-Use _One objectstore per store_ whenever possible as this is usually the most balanced approach. Managing IndexedDB is hard. You can only create objectstores inside versionchange transactions, which happens only once when opening a database with a new version. Therefore use `migrateIndexedDb` to setup your database and manage migrations.
+
+Using multiple objectstores for the same database needs a specialized setup, since the objectstores can only be created inside a versionchanged transaction.
+You can use [native db migrations](#database-migration) to prepare you objectstores but also for applying data migration and cleanups.
+
 :::
 
 ### IndexedDB Configuration Options
 
 When configuring the connection to IndexedDB in `signalstory`, you can use the following options provided by the `IndexedDbOptions` interface. The `configureIndexedDb` function takes these options to set up the necessary configuration for store persistence.
 
-| Option            | Description                                                                                                                                                                                                                                                                                    | Default Value  | Required |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------- |
-| `dbName`          | The name of the IndexedDB database.                                                                                                                                                                                                                                                            | -              | Yes      |
-| `dbVersion`       | The version of the IndexedDB database. If not provided, the adapter attempts to deduce the version by inspecting the pool, relying on prior IDB migration configuration. If you are using the dbMigration function, the db version is automatically infered and does not have to be specified. | auto-detection | No       |
-| `objectStoreName` | The name of the object store to connect to within the database. If not provided, it will use the store's name.                                                                                                                                                                                 | storename      | No       |
-| `key`             | The key to use when connecting to a specific record within the object store.                                                                                                                                                                                                                   | 1              | No       |
-| `handlers`        | Configuration options for IndexedDB setup handlers.                                                                                                                                                                                                                                            | None           | No       |
+| Option            | Description                                                                                                                                                                                                                                                       | Default Value | Required |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------- |
+| `dbName`          | The name of the IndexedDB database.                                                                                                                                                                                                                               | -             | Yes      |
+| `dbVersion`       | The version of the IndexedDB database. If not explicitly provided, the adapter attempts to infer the version by inspecting the pool. This inference relies on prior configuration through the `migrateIndexedDb` function or previous usage of the same database. | inference     | No       |
+| `objectStoreName` | The name of the object store to connect to within the database.                                                                                                                                                                                                   | storename     | No       |
+| `key`             | The key to use when connecting to a specific record within the object store.                                                                                                                                                                                      | storename     | No       |
+| `handlers`        | Configuration options for IndexedDB setup handlers.                                                                                                                                                                                                               | None          | No       |
 
 Example:
 
@@ -100,19 +109,17 @@ useStorePersistence(
     dbName: 'YourDatabaseName',
     dbVersion: 1,
     objectStoreName: 'YourObjectStoreName',
-    key: 2,
+    key: 'YourKey',
     handlers: {
-      onUpgradeNeeded: event => {
-        // Your upgrade needed handler
-      },
       onSuccess: () => {
-        // Your success handler
+        // Your success handler is called after successfull initialization
       },
       onBlocked: () => {
-        // Your blocked handler
+        // Your blocked handler is called
+        // when an open connection to a database is blocking a versionchange transaction
       },
       onInitializationError: () => {
-        // Your initialization error handler
+        // Your error handler is called in the case of an initialization error
       },
     },
   })
@@ -121,7 +128,7 @@ useStorePersistence(
 
 #### One database per store
 
-In this configuration, each store is associated with its dedicated IndexedDB database. This makes seting up the database very easy, since we can directly use a dedicated migration function for each store individually. However, this approach introduces potential drawbacks, including storage inefficiency for small data footprints, increased management overhead and challenges in cross-store queries.
+In this configuration, each store is associated with its dedicated IndexedDB database.
 
 ```typescript
 import { configureIndexedDb } from 'signalstory';
@@ -131,11 +138,6 @@ useStorePersistence(
   configureIndexedDb({
     dbName: 'StoreADatabase',
     dbVersion: 1,
-    handlers: {
-      onUpgradeNeeded: event => {
-        // Handle Migration duties for Store A
-      },
-    },
   })
 );
 
@@ -144,11 +146,6 @@ useStorePersistence(
   configureIndexedDb({
     dbName: 'StoreBDatabase',
     dbVersion: 1,
-    handlers: {
-      onUpgradeNeeded: event => {
-        // Handle Migration duties for Store B
-      },
-    },
   })
 );
 ```
@@ -156,11 +153,10 @@ useStorePersistence(
 #### One objectstore per store
 
 This configuration involves creating a distinct object store within the IndexedDB database for each store. Make sure that each plugin is using the same database name.
+It is recommended to use [db migrations](#database-migration) to establish the idb structure. An additional advantage of using the migration feature is the automatic setup of a database pool, allowing the required database version to be auto-detected.
 
 ```typescript
 import { configureIndexedDb } from 'signalstory';
-
-// Make sure that you have setup the indexedDb using migrateIndexedDb
 
 // Store A
 useStorePersistence(
@@ -179,12 +175,10 @@ useStorePersistence(
 
 #### One objectstore for multiple stores
 
-Here, a single object store is shared among all stores within the IndexedDB database.
+Here, a single object store is shared among all stores within the IndexedDB database. If you are using [db migrations](#database-migration), you also don't have to specify the database version.
 
 ```typescript
 import { configureIndexedDb } from 'signalstory';
-
-// If you want to migrate something, you should use migrateIndexedDb
 
 // Store A
 useStorePersistence(
@@ -192,7 +186,6 @@ useStorePersistence(
     dbName: 'SharedDatabase',
     dbVersion: 1,
     objectStoreName: 'SharedObjectStore',
-    key: 1,
   })
 );
 
@@ -202,27 +195,59 @@ useStorePersistence(
     dbName: 'SharedDatabase',
     dbVersion: 1,
     objectStoreName: 'SharedObjectStore',
-    key: 2,
   })
 );
 ```
 
 ### Database Migration
 
+When setting up `signalstory` with IndexedDB, database migration becomes essential for managing schema changes, applying data migrations, and performing cleanups. The `migrateIndexedDb` function allows you to define and execute these migrations. This will also setup a database pool, which makes the configuration at the stores simpler.
+
+`migrateIndexedDb` has to be called for all used databases individually and should be called before the first store is used. One possible approach is to use the [`APP_INITIALIZER`](https://angular.io/api/core/APP_INITIALIZER) DI token to register migrations. It's important to note that migrations are registered lazily and will only be applied during the first usage of the database.
+
+Here's an example of using `migrateIndexedDb` to configure the IndexedDB database with store registrations and migration operations.
+
 ```typescript
+// Somewhere very early in the application
+idbMigration();
+
+// idbMigration.ts
+import { migrateIndexedDb } from 'signalstory';
+
 const idbMigration = () => {
   migrateIndexedDb('MyApplicationDb', 5, model =>
     model
-      .createStoreOrTransform('StoreA', (oldVersion, state) => {
+      .createStore('StoreA')
+      .createStoreOrClearState('StoreB')
+      .createStoreOrTransform('StoreC', (oldVersion, state) => {
         if (oldVersion > 3) {
           return myMigrationLogicForStoreA(state);
         } else {
           return myVeryOldMigrationLogicForStoreA(state);
         }
       })
-      .createStoreOrClearState('StoreB')
-      .createStore('StoreC')
       .dropStore('StoreD')
+      .createStoreOrMigrateRecords('SharedObjectStore', records =>
+        records
+          .createStoreOrClearState('StoreX')
+          .createStoreOrTransform('StoreY', (oldVersion, state) => {
+            return myMigrationLogicForStoreY(state);
+          })
+          .dropStore('StoreZ')
+      )
   );
 };
 ```
+
+In this example, the migration is applied if:
+
+- The user doesn't have an IDB database named _MyApplicationDb_ in their browser storage.
+- The user has an IDB database named _MyApplicationDb_, but with a version smaller than 5.
+
+The migration operations:
+
+- `createStore` creates an object store if it doesn't exist. It's crucial to list all the object stores you're using here, unless you've registered them through another operation below.
+- `createStoreOrClearState` creates an object store or clears its current state.
+- `createStoreOrTransform` creates an object store or applies a custom transformation (data migration) on the existing state.
+- `createStoreOrMigrateRecords` creates an object store or migrates its records using the specified migration logic. This is only useful, if you are using a _single-objectstore-for-multiple-stores_ approach and you have to migrate stores on a record level.
+- `dropStore` deletes an object store if it exists.
