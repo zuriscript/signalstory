@@ -1,204 +1,487 @@
 /* eslint-disable tree-shaking/no-side-effects-in-initialization */
-import { EnvironmentInjector } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { lastValueFrom, take } from 'rxjs';
 import { Store } from '../lib/store';
-import { PersistenceStorage } from '../lib/store-plugin-persistence/persistence';
+import { AsyncStorage } from '../lib/store-plugin-persistence/persistence-async-storage';
+import { SyncStorage } from '../lib/store-plugin-persistence/persistence-sync-storage';
 import {
   clearStoreStorage,
-  loadFromStoreStorage,
-  saveToStoreStorage,
   useStorePersistence,
 } from '../lib/store-plugin-persistence/plugin-persistence';
-import { Cmp, registerAndGetStore } from './helper';
+import { registerAndGetStore } from './helper';
 
-describe('loadFromStorage', () => {
-  const initialValue = { val: 'initial' };
-  const key = 'myStoreKey';
-  let store: Store<{ val: string }>;
-  let storage: PersistenceStorage;
+describe('load from storage', () => {
+  describe('with SyncStorage', () => {
+    let storage: SyncStorage;
+    const key = 'key';
 
-  beforeEach(() => {
-    storage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    };
-    store = registerAndGetStore({
-      initialState: initialValue,
-      plugins: [
-        useStorePersistence({
-          persistenceKey: key,
-          persistenceStorage: storage,
-        }),
-      ],
+    beforeEach(() => {
+      storage = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+      };
+    });
+
+    it('should load the stored value from persistence storage on init', () => {
+      // arrange
+      const storedValue = { val: 'stored' };
+      storage.getItem = jest.fn(() => JSON.stringify(storedValue));
+
+      // act
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(storedValue);
+      expect(storage.getItem).toHaveBeenCalledWith(key);
+    });
+
+    it('should load the stored value from persistence storage on init using projection functions', () => {
+      // arrange
+      const storedValue = { val: 'stored' };
+      const projectedValue = { val: 'storedAndModified' };
+      storage.getItem = jest.fn(() => JSON.stringify(storedValue));
+
+      // act
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(() => projectedValue),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(projectedValue);
+    });
+
+    it('should not set initial state when unable to parse the stored value', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItem = jest.fn(() => 'INVALID STATE');
+
+      // act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
+      expect(storage.getItem).toHaveBeenCalledWith(key);
+    });
+
+    it('should not set initial state when unable to parse the stored value while using projection function', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItem = jest.fn(() => 'INVALID STATE');
+
+      // act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
+    });
+
+    it('should not set initial state when there is no stored value', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItem = jest.fn(() => null);
+
+      //act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
+      expect(storage.getItem).toHaveBeenCalledWith(key);
     });
   });
 
-  it('should load the stored value from persistence storage', () => {
-    // arrange
-    storage.getItem = jest.fn(() => JSON.stringify(initialValue));
+  describe('with AsyncStorage', () => {
+    let storage: AsyncStorage;
 
-    // act
-    const loadedValue = loadFromStoreStorage(store);
+    beforeEach(() => {
+      storage = {
+        getItemAsync: jest.fn(),
+        setItemAsync: jest.fn(),
+        removeItemAsync: jest.fn(),
+        initAsync: jest.fn((_, callback) => callback?.()),
+      };
+    });
 
-    // assert
-    expect(loadedValue).toStrictEqual(initialValue);
-    expect(storage.getItem).toHaveBeenCalledWith(key);
-  });
+    it('should load the stored value from persistence storage on init', () => {
+      // arrange
+      const storedValue = { val: 'stored' };
+      storage.getItemAsync = jest.fn((_, callback) => callback(storedValue));
 
-  it('should return undefined when unable to parse the stored value', () => {
-    // arrange
-    storage.getItem = jest.fn(() => 'INVALID STATE');
+      // act
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+          }),
+        ],
+      });
 
-    // act
-    const loadedValue = loadFromStoreStorage(store);
+      // assert
+      expect(store.state()).toStrictEqual(storedValue);
+    });
 
-    // assert
-    expect(loadedValue).toBeUndefined();
-    expect(storage.getItem).toHaveBeenCalledWith(key);
-  });
+    it('should load the stored value from persistence storage on init with projection function', () => {
+      // arrange
+      const storedValue = { val: 'stored' };
+      const projectedValue = { val: 'storedAndModified' };
+      storage.getItemAsync = jest.fn((_, callback) => callback(storedValue));
 
-  it('should return undefined when no stored value is available', () => {
-    // arrange
-    storage.getItem = jest.fn(() => null);
+      // act
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            projection: {
+              onLoad: jest.fn(() => projectedValue),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
 
-    //act
-    const loadedValue = loadFromStoreStorage(store);
+      // assert
+      expect(store.state()).toStrictEqual(projectedValue);
+    });
 
-    // assert
-    expect(loadedValue).toBeUndefined();
-    expect(storage.getItem).toHaveBeenCalledWith(key);
+    it('should not set initial state when there is no stored value', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItemAsync = jest.fn((_, callback) => callback(null));
+
+      //act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
+    });
+
+    it('should not set initial state when there is no stored value while using projection functions', () => {
+      // arrange
+      const stateBeforeInit = { val: 'dummy' };
+      storage.getItemAsync = jest.fn((_, callback) => callback(null));
+
+      //act
+      const store = new Store({
+        initialState: stateBeforeInit,
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(),
+            },
+          }),
+        ],
+      });
+
+      // assert
+      expect(store.state()).toStrictEqual(stateBeforeInit);
+    });
   });
 });
 
-describe('saveToStorage', () => {
-  const initialValue = { val: 'initial' };
+describe('save to storage', () => {
   const key = 'myStoreKey';
-  let store: Store<{ val: string }>;
-  let storage: PersistenceStorage;
 
-  beforeEach(() => {
-    storage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    };
-    store = registerAndGetStore({
-      initialState: initialValue,
-      plugins: [
-        useStorePersistence({
-          persistenceKey: key,
-          persistenceStorage: storage,
-        }),
-      ],
+  describe('with SyncStorage', () => {
+    let store: Store<{ val: string }>;
+    let storage: SyncStorage;
+
+    beforeEach(() => {
+      storage = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+      };
+
+      store = registerAndGetStore({
+        initialState: { val: 'initial' },
+        plugins: [
+          useStorePersistence({
+            persistenceKey: key,
+            persistenceStorage: storage,
+          }),
+        ],
+      });
+    });
+
+    it('should save the store state to persistence storage on set', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+
+      // act
+      store.set(newValue);
+
+      // assert
+      expect(storage.setItem).toHaveBeenCalledWith(
+        key,
+        JSON.stringify(newValue)
+      );
+    });
+
+    it('should save the store state to persistence storage on update', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+
+      // act
+      store.update(() => newValue);
+
+      // assert
+      expect(storage.setItem).toHaveBeenCalledWith(
+        key,
+        JSON.stringify(newValue)
+      );
+    });
+
+    it('should save the store state to persistence storage on mutate', () => {
+      // arrange
+      let newValue: { val: string } | undefined;
+
+      // act
+      store.mutate(state => {
+        state.val = 'newValue';
+        newValue = state;
+      });
+
+      // assert
+      expect(storage.setItem).toHaveBeenCalledWith(
+        key,
+        JSON.stringify(newValue)
+      );
+    });
+
+    it('should save the store state to persistence storage on set using projection functions', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+      const projectedValue = { val: 'projectedNewValue' };
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(() => projectedValue),
+            },
+          }),
+        ],
+      });
+
+      // act
+      store.set(newValue);
+
+      // assert
+      expect(storage.setItem).toHaveBeenCalledWith(
+        key,
+        JSON.stringify(projectedValue)
+      );
     });
   });
 
-  it('should save the store state to persistence storage', () => {
-    // act
-    saveToStoreStorage(store, store.state());
+  describe('with AsyncStorage', () => {
+    let store: Store<{ val: string }>;
+    let storage: AsyncStorage;
 
-    // assert
-    expect(storage.setItem).toHaveBeenCalledWith(
-      key,
-      JSON.stringify(store.state())
-    );
+    beforeEach(() => {
+      storage = {
+        getItemAsync: jest.fn(),
+        setItemAsync: jest.fn(),
+        removeItemAsync: jest.fn(),
+        initAsync: jest.fn((_, callback) => callback?.()),
+      };
+
+      store = registerAndGetStore({
+        initialState: { val: 'initial' },
+        plugins: [
+          useStorePersistence({
+            persistenceKey: key,
+            persistenceStorage: storage,
+          }),
+        ],
+      });
+    });
+
+    it('should save the store state to persistence storage on set', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+
+      // act
+      store.set(newValue);
+
+      // assert
+      expect(storage.setItemAsync).toHaveBeenCalledWith(key, newValue);
+    });
+
+    it('should save the store state to persistence storage on update', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+
+      // act
+      store.update(() => newValue);
+
+      // assert
+      expect(storage.setItemAsync).toHaveBeenCalledWith(key, newValue);
+    });
+
+    it('should save the store state to persistence storage on mutate', () => {
+      // arrange
+      let newValue: { val: string } | undefined;
+
+      // act
+      store.mutate(state => {
+        state.val = 'newValue';
+        newValue = state;
+      });
+
+      // assert
+      expect(storage.setItemAsync).toHaveBeenCalledWith(key, newValue);
+    });
+
+    it('should save the store state to persistence storage on set using projection functions', () => {
+      // arrange
+      const newValue = { val: 'newValue' };
+      const projectedValue = { val: 'projectedNewValue' };
+      const store = new Store({
+        initialState: { val: 'dummy' },
+        plugins: [
+          useStorePersistence({
+            persistenceStorage: storage,
+            persistenceKey: key,
+            projection: {
+              onLoad: jest.fn(),
+              onWrite: jest.fn(() => projectedValue),
+            },
+          }),
+        ],
+      });
+
+      // act
+      store.set(newValue);
+
+      // assert
+      expect(storage.setItemAsync).toHaveBeenCalledWith(key, projectedValue);
+    });
   });
 });
 
 describe('clearStorage', () => {
-  const initialValue = { val: 'initial' };
   const key = 'myStoreKey';
-  let store: Store<{ val: string }>;
-  let storage: PersistenceStorage;
 
-  beforeEach(() => {
-    storage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    };
-    store = registerAndGetStore({
-      initialState: initialValue,
-      plugins: [
-        useStorePersistence({
-          persistenceKey: key,
-          persistenceStorage: storage,
-        }),
-      ],
+  describe('with SyncStorage', () => {
+    let store: Store<{ val: string }>;
+    let storage: SyncStorage;
+
+    beforeEach(() => {
+      storage = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+      };
+
+      store = registerAndGetStore({
+        initialState: { val: 'initial' },
+        plugins: [
+          useStorePersistence({
+            persistenceKey: key,
+            persistenceStorage: storage,
+          }),
+        ],
+      });
+    });
+
+    it('should remove the stored value from persistence storage', () => {
+      // act
+      clearStoreStorage(store);
+
+      // assert
+      expect(storage.removeItem).toHaveBeenCalledWith(key);
     });
   });
 
-  it('should remove the stored value from persistence storage', () => {
-    // act
-    clearStoreStorage(store);
+  describe('with AsyncStorage', () => {
+    let store: Store<{ val: string }>;
+    let storage: AsyncStorage;
 
-    // assert
-    expect(storage.removeItem).toHaveBeenCalledWith(key);
-  });
-});
+    beforeEach(() => {
+      storage = {
+        getItemAsync: jest.fn(),
+        setItemAsync: jest.fn(),
+        removeItemAsync: jest.fn(),
+        initAsync: jest.fn((_, callback) => callback?.()),
+      };
 
-describe('automatic sync', () => {
-  const initialValue = { val: 'initial' };
-  const initialValueFromStorage = { val: 'initialFromStorage' };
-  const key = 'myStoreKey';
-  let store!: Store<{ val: string }>;
-  let storage!: PersistenceStorage;
-  let fixture!: ComponentFixture<unknown>;
-  let injector!: EnvironmentInjector;
-
-  function flushEffects(): void {
-    fixture.detectChanges();
-  }
-
-  beforeEach(() => {
-    storage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    };
-    storage.getItem = jest.fn(() => JSON.stringify(initialValueFromStorage));
-    store = registerAndGetStore({
-      initialState: initialValue,
-      plugins: [
-        useStorePersistence({
-          persistenceKey: key,
-          persistenceStorage: storage,
-        }),
-      ],
+      store = registerAndGetStore({
+        initialState: { val: 'initial' },
+        plugins: [
+          useStorePersistence({
+            persistenceKey: key,
+            persistenceStorage: storage,
+          }),
+        ],
+      });
     });
-    fixture = TestBed.createComponent(Cmp);
-    injector = TestBed.inject(EnvironmentInjector);
-  });
 
-  it('Should initialize from storage', () => {
-    // assert
-    expect(store.state()).toStrictEqual(initialValueFromStorage);
-    expect(loadFromStoreStorage(store)).toStrictEqual(initialValueFromStorage);
-  });
+    it('should remove the stored value from persistence storage', () => {
+      // act
+      clearStoreStorage(store);
 
-  it('should persist new state', async () => {
-    // arrange
-    // Clean prior effect emits and storage applications
-    flushEffects();
-    storage.setItem = jest.fn();
-    const newState = { val: 'newState' };
-    const storeChange = lastValueFrom(
-      toObservable(store.state, { injector }).pipe(take(1))
-    );
-
-    store.set(newState, 'blbal');
-    // emits last store change
-    flushEffects();
-
-    // act
-    const storeChangeResult = await storeChange;
-
-    // assert
-    expect(storeChangeResult).toEqual(newState);
-    expect(storage.setItem).toHaveBeenCalledTimes(1);
-    expect(storage.setItem).toHaveBeenCalledWith(key, JSON.stringify(newState));
+      // assert
+      expect(storage.removeItemAsync).toHaveBeenCalledWith(key);
+    });
   });
 });

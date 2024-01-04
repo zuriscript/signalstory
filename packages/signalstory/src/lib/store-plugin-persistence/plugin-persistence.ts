@@ -1,34 +1,67 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
-import { StorePlugin, StoreState } from '../store-plugin';
+import { StorePlugin } from '../store-plugin';
+import { AsyncStorage, isAsyncStorage } from './persistence-async-storage';
 import {
-  PersistenceStorage,
-  clearStorage,
+  SyncStorage,
+  isSyncStorage,
   loadFromStorage,
   saveToStorage,
-} from './persistence';
+} from './persistence-sync-storage';
+
+/**
+ * Projection functions which are applied before storing and after loading from storage
+ * This can be useful for obfuscating sensitive data prior to storing or for saving space
+ */
+export interface PersistenceProjection<TState = never, TProjection = never> {
+  /**
+   * Function to transform the state before saving it to storage.
+   * @param state - The current state of the store.
+   * @returns The transformed state to be stored.
+   */
+  onWrite: (state: TState) => TProjection;
+
+  /**
+   * Function to transform the loaded projection from storage before applying it to the store.
+   * @param projection - The loaded projection from storage.
+   * @returns The transformed state to be applied to the store.
+   */
+  onLoad: (projection: TProjection) => TState;
+}
 
 /**
  * Options for configuring the Store Persistence Plugin.
  */
-export interface StorePersistencePluginOptions {
+export interface StorePersistencePluginOptions<
+  TState = never,
+  TProjection = never,
+> {
   /**
-   * The key to use for the local storage entry. (optional, default: _persisted_state_of_storeName_).
+   * The key used for storing the state in the persistence storage (Optional, default _persisted_state_of_[storename]).
    */
   persistenceKey?: string;
+
   /**
-   * The storage mechanism for persistence.  (optional, default: localStorage).
+   * The storage medium used for persistence (Optional, default localStorage).
    */
-  persistenceStorage?: PersistenceStorage;
+  persistenceStorage?: SyncStorage | AsyncStorage;
+
+  /**
+   * Projection functions which are applied before storing and after loading from storage
+   * This can be useful for obfuscating sensitive data prior to storing or for saving space.
+   * Optional, default nothing.
+   */
+  projection?: PersistenceProjection<TState, TProjection>;
 }
 
 /**
  * Represents the Store Persistence Plugin, enhancing a store with state persistence functionality.
  */
-type StorePersistencePlugin = StorePlugin & {
-  storage: PersistenceStorage;
-  getPersistenceKeyFromStore: (store: Store<unknown>) => string;
-};
+type StorePersistencePlugin<TStorage extends SyncStorage | AsyncStorage> =
+  StorePlugin & {
+    storage: TStorage;
+    persistenceKey: string;
+  };
 
 /**
  * typeguard for StorePersistencePlugin.
@@ -37,12 +70,12 @@ type StorePersistencePlugin = StorePlugin & {
  */
 function isStorePersistencePlugin(
   obj: StorePlugin
-): obj is StorePersistencePlugin {
+): obj is StorePersistencePlugin<any> {
   return (
     obj &&
     typeof obj === 'object' &&
-    'storage' in obj &&
-    'getPersistenceKeyFromStore' in obj
+    'name' in obj &&
+    obj['name'] === 'StorePersistence'
   );
 }
 
@@ -56,47 +89,87 @@ function isStorePersistencePlugin(
 export function clearStoreStorage(store: Store<any>): void {
   const plugin = store.config.plugins.find(isStorePersistencePlugin);
   if (plugin) {
-    clearStorage(plugin.storage, plugin.getPersistenceKeyFromStore(store));
+    if (isSyncStorage(plugin.storage)) {
+      plugin.storage.removeItem(plugin.persistenceKey);
+    } else if (isAsyncStorage(plugin.storage)) {
+      plugin.storage.removeItemAsync(plugin.persistenceKey);
+    }
   } else {
     throw new Error(
-      `Store persistence plugin is not enabed for store ${store.config.name}`
+      `Store persistence plugin is not enabled for store ${store.config.name}`
     );
   }
 }
 
-/**
- * Saves the provided state to the store's storage.
- * @template TStore - The type of store to save the state for.
- * @param store - The store instance.
- * @param state - The state to save.
- */
-export function saveToStoreStorage<TStore extends Store<any>>(
-  store: TStore,
-  state: StoreState<TStore>
-): void {
-  const plugin = store.config.plugins.find(isStorePersistencePlugin);
-  if (plugin) {
-    saveToStorage(
+function configureSyncStorage<TState = never, TProjection = never>(
+  plugin: StorePersistencePlugin<SyncStorage>,
+  projection?: PersistenceProjection<TState, TProjection>
+) {
+  plugin.init = store => {
+    if (!plugin.persistenceKey) {
+      plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
+    }
+
+    const persistedState = loadFromStorage(
       plugin.storage,
-      plugin.getPersistenceKeyFromStore(store),
-      state
+      plugin.persistenceKey
     );
-  }
+    if (persistedState) {
+      store.set(
+        projection
+          ? projection.onLoad(persistedState as TProjection)
+          : persistedState,
+        'Load state from storage'
+      );
+    }
+  };
+
+  plugin.postprocessCommand = projection
+    ? store =>
+        saveToStorage(
+          plugin.storage,
+          plugin.persistenceKey,
+          projection.onWrite(store.state())
+        )
+    : store =>
+        saveToStorage(plugin.storage, plugin.persistenceKey, store.state());
+
+  return plugin;
 }
 
-/**
- * Loads and retrieves the stored state for the store.
- * @template TStore - The type of store to load the state for.
- * @param store - The store instance.
- * @returns The stored state for the store, or undefined if not found.
- */
-export function loadFromStoreStorage<TStore extends Store<any>>(
-  store: TStore
-): StoreState<TStore> | undefined {
-  const plugin = store.config.plugins.find(isStorePersistencePlugin);
-  return plugin
-    ? loadFromStorage(plugin.storage, plugin.getPersistenceKeyFromStore(store))
-    : undefined;
+function configureAsyncStorage<TState = never, TProjection = never>(
+  plugin: StorePersistencePlugin<AsyncStorage>,
+  projection?: PersistenceProjection<TState, TProjection>
+) {
+  plugin.init = store => {
+    if (!plugin.persistenceKey) {
+      plugin.persistenceKey = `_persisted_state_of_${store.config.name}`;
+    }
+
+    plugin.storage.initAsync(store.name, () => {
+      plugin.storage.getItemAsync(plugin.persistenceKey, persistedState => {
+        if (persistedState) {
+          store.set(
+            projection
+              ? projection.onLoad(persistedState as TProjection)
+              : persistedState,
+            'Load state from storage'
+          );
+        }
+      });
+    });
+  };
+
+  plugin.postprocessCommand = projection
+    ? store =>
+        plugin.storage.setItemAsync(
+          plugin.persistenceKey,
+          projection.onWrite(store.state())
+        )
+    : store =>
+        plugin.storage.setItemAsync(plugin.persistenceKey, store.state());
+
+  return plugin;
 }
 
 /**
@@ -105,23 +178,17 @@ export function loadFromStoreStorage<TStore extends Store<any>>(
  * @param options - Options for configuring the StorePersistencePlugin.
  * @returns A StorePersistencePlugin instance.
  */
-export function useStorePersistence(
-  options: StorePersistencePluginOptions = {}
-): StorePersistencePlugin {
-  const plugin: StorePersistencePlugin = {
-    storage: options.persistenceStorage ?? localStorage,
-    getPersistenceKeyFromStore: store =>
-      options.persistenceKey ?? `_persisted_state_of_${store.config.name}`,
-    init(store) {
-      const persistedState = loadFromStoreStorage(store);
-      if (persistedState) {
-        store.set(persistedState, 'Load state from storage');
-      }
-    },
-    postprocessCommand(store) {
-      saveToStoreStorage(store, store.state());
-    },
+export function useStorePersistence<TState = never, TProjection = never>(
+  options: StorePersistencePluginOptions<TState, TProjection> = {}
+): StorePersistencePlugin<any> {
+  const storage = options.persistenceStorage ?? (localStorage as SyncStorage);
+  const plugin = <StorePersistencePlugin<any>>{
+    name: 'StorePersistence',
+    storage,
+    persistenceKey: options.persistenceKey ?? '',
   };
 
-  return plugin;
+  return isAsyncStorage(storage)
+    ? configureAsyncStorage(plugin, options.projection)
+    : configureSyncStorage(plugin, options.projection);
 }
