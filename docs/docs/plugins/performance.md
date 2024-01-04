@@ -32,8 +32,15 @@ You can use the exposed `getReport` to get the current snapshot of the performan
 
 If you have enabled [devtools](./devtools.md) for at least one store, you can directly see your performance counters in the state panel under the key: `@signalstory\performance-counter`.
 
-import demo from '/img/docs/plugin_performance_counter_redux.png';
+import ThemedImage from '@theme/ThemedImage';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 <div style={{maxWidth: 500}}> 
-<img src={demo} alt="Peformance counter in redux devtools" style={{maxWidth: 500}}/>
+<ThemedImage
+alt="Peformance counter in redux devtools"
+sources={{
+    light: useBaseUrl('/img/docs/plugin_performance_counter_redux_light.png'),
+    dark: useBaseUrl('/img/docs/plugin_performance_counter_redux_dark.png'),
+  }}
+/>
 </div>
