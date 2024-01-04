@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
+import {
+  isIndexedDbAvailable,
+  isLocalStorageAvailable,
+  isSessionStorageAvailable,
+} from '../utility/feature-detection';
+import { IndexedDbAdapter } from './idb/idb-adapter';
 import { AsyncStorage, isAsyncStorage } from './persistence-async-storage';
 import {
   SyncStorage,
@@ -44,7 +50,11 @@ export interface StorePersistencePluginOptions<
   /**
    * The storage medium used for persistence (Optional, default localStorage).
    */
-  persistenceStorage?: SyncStorage | AsyncStorage;
+  persistenceStorage?:
+    | SyncStorage
+    | AsyncStorage
+    | 'LOCAL_STORAGE'
+    | 'SESSION_STORAGE';
 
   /**
    * Projection functions which are applied before storing and after loading from storage
@@ -181,7 +191,22 @@ function configureAsyncStorage<TState = never, TProjection = never>(
 export function useStorePersistence<TState = never, TProjection = never>(
   options: StorePersistencePluginOptions<TState, TProjection> = {}
 ): StorePersistencePlugin<any> {
-  const storage = options.persistenceStorage ?? (localStorage as SyncStorage);
+  const storageProvider = options.persistenceStorage ?? 'LOCAL_STORAGE';
+  if (
+    (storageProvider === 'LOCAL_STORAGE' && !isLocalStorageAvailable()) ||
+    (storageProvider === 'SESSION_STORAGE' && !isSessionStorageAvailable()) ||
+    (storageProvider instanceof IndexedDbAdapter && !isIndexedDbAvailable())
+  ) {
+    return {} as StorePersistencePlugin<any>;
+  }
+
+  const storage =
+    storageProvider === 'LOCAL_STORAGE'
+      ? localStorage
+      : storageProvider === 'SESSION_STORAGE'
+        ? sessionStorage
+        : storageProvider;
+
   const plugin = <StorePersistencePlugin<any>>{
     name: 'StorePersistence',
     storage,

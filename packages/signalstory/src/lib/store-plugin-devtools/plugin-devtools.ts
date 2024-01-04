@@ -1,5 +1,6 @@
 import { Store } from '../store';
 import { StorePlugin } from '../store-plugin';
+import { isDevtoolsAvailable } from '../utility/feature-detection';
 
 /**
  * Represents a Redux action.
@@ -72,14 +73,8 @@ let devtools: Devtools | undefined;
  * @param options DevTools options.
  */
 function initDevtools(options: DevtoolsOptions = {}): void {
-  if (window && '__REDUX_DEVTOOLS_EXTENSION__' in window) {
-    devtools = window.__REDUX_DEVTOOLS_EXTENSION__.connect(options);
-    devtools.subscribe(handleDevtoolsMessage);
-  } else {
-    console.warn(
-      'ATTENTION: Attempted to initialize redux devtools, but no browser extension was found!'
-    );
-  }
+  devtools = window.__REDUX_DEVTOOLS_EXTENSION__.connect(options);
+  devtools.subscribe(handleDevtoolsMessage);
 }
 
 /**
@@ -171,6 +166,10 @@ export function removeFromDevtools<TStore extends Store<unknown>>(
  * @returns Devtools Storeplugin
  */
 export function useDevtools(): StorePlugin {
+  if (!isDevtoolsAvailable()) {
+    return {};
+  }
+
   return {
     init(store) {
       registerForDevtools(store);
