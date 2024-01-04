@@ -1,7 +1,7 @@
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StorePlugin } from '../store-plugin';
 import { registry } from '../store-plugin-devtools/plugin-devtools';
+import { isDevtoolsAvailable } from '../utility/feature-detection';
 import { PerformanceCounter } from './performance-counter';
 
 /**
@@ -121,7 +121,7 @@ export function usePerformanceCounter(): StorePlugin {
   return {
     precedence: 11, // should come early in initialization
     init() {
-      if (!registry.has(counterStore.name)) {
+      if (isDevtoolsAvailable() && !registry.has(counterStore.name)) {
         registry.set(counterStore.name, new WeakRef(counterStore) as any);
       }
     },

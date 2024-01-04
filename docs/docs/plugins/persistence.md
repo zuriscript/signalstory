@@ -49,6 +49,17 @@ useStorePersistence({
 });
 ```
 
+## Feature detection (SSR)
+
+In cases where the storage providers are not available, for example for SSR, the plugin does not get registered and will not throw an error.
+Hence, you can reuse your Store plugin declerations without changing anything. However, note that Angular raises an error if there's an attempt to reference unsupported global variables during SSR. To work around this, instead of using the actual window variable, simply specify the string constant `LOCAL_STORAGE` or `SESSION_STORAGE`.
+
+```typescript
+useStorePersistence({
+  persistenceStorage: 'SESSION_STORAGE',
+});
+```
+
 ## Loading the Persisted State
 
 When your application starts up or the store is initialized, signalstory automatically loads the persisted state from the storage, if available.
