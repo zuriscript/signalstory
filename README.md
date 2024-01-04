@@ -1,27 +1,47 @@
+<h1 align="center">
+  <a
+    target="_blank"
+    href="https://github.com/zuriscript/signalstory"
+  >
+    <img
+      align="center"
+      alt="signalstory"
+      src="signalstory_banner.png"
+      style="width:100%;"
+    />
+  </a>
+</h1>
 <p align="center">
- <img width="30%" height="30%" src="signalstory.png">
+  Signalstory - Angular state management with signals
 </p>
 
-# signalstory
-
 <p align="center">
+  <a
+    href="https://zuriscript.github.io/signalstory/docs/prolog"
+    target="_blank"
+  ><b>Documentation</b></a>&nbsp;&nbsp;&nbsp;📚&nbsp;&nbsp;&nbsp;
+  <a
+    href="https://stackblitz.com/edit/stackblitz-starters-bjnmnr?file=src%2Fapp%2Fstate%2Fbooks.store.ts"
+    target="_blank"
+  ><b>Sample</b></a>&nbsp;&nbsp;&nbsp;🚀&nbsp;&nbsp;&nbsp;
+  <a
+    href="https://zuriscript.github.io/signalstory/"
+    target="_blank"
+  ><b>Website</b></a>&nbsp;&nbsp;&nbsp;🔥&nbsp;&nbsp;&nbsp;
+  <a
+    href="https://github.com/zuriscript/signalstory/releases"
+    target="_blank"
+  ><b>Release notes</b></a>&nbsp;&nbsp;&nbsp;✨&nbsp;&nbsp;&nbsp;
+</p>
+
+<div  align="center">
 
 [![npm version](https://badge.fury.io/js/signalstory.svg)](https://badge.fury.io/js/signalstory)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)]()
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-</p>
-
-### Check out the [sample 🚀 ](https://stackblitz.com/edit/stackblitz-starters-bjnmnr?file=src%2Fapp%2Fstate%2Fbooks.store.ts)
-
-### Visit the [docs 📚 ](https://zuriscript.github.io/signalstory/docs/prolog)
-
-### For a full feature overview, visit the [Website ✨ ](https://zuriscript.github.io/signalstory/)
-
-### For Release notes and Changelog, visit [Gtihub Releases 🧙‍♂️](https://github.com/zuriscript/signalstory/releases)
-
-**Empower your angular state management with signals**
+</div>
 
 signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to decoupled commands, managed side effect objects, and inter-store communication using an event-based approach. The goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
 
