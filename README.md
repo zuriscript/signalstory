@@ -1,7 +1,7 @@
 <h1 align="center">
   <a
     target="_blank"
-    href="https://github.com/zuriscript/signalstory"
+    href="https://zuriscript.github.io/signalstory/"
   >
     <img
       align="center"
@@ -12,9 +12,8 @@
   </a>
 </h1>
 <p align="center">
-  Signalstory - Angular state management with signals
+  <b>Signalstory - Angular state management with signals</b>
 </p>
-
 <p align="center">
   <a
     href="https://zuriscript.github.io/signalstory/docs/prolog"
@@ -191,3 +190,16 @@ To set up and run the sample app locally, follow the steps below:
    ```bash
    ng serve sample --open
    ```
+
+   <p align="center" style="margin-top:50px;">  
+     <img
+         align="center"
+         alt="signalstory"
+         src="signalstory.png"
+         style="width:60px;"
+       />
+   </p>
+
+   <p align="center">
+   made with ❤️ by zuriscript
+   </p>
