@@ -66,7 +66,7 @@ increment() {
 
 :::info
 
-- `Store` creates a [shalow copy](https://developer.mozilla.org/en-US/docs/Glossary/Shallow_copy) before applying the mutation
+- `Store` creates a [shallow copy](https://developer.mozilla.org/en-US/docs/Glossary/Shallow_copy) before applying the mutation
 - `ImmutableStore` creates a [deep copy](https://developer.mozilla.org/en-US/docs/Glossary/Deep_copy) before applying the mutation
 
 :::
