@@ -10,9 +10,27 @@
 
 **Empower your angular state management with signals**
 
-signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to decoupled commands, managed side effect objects, and inter-store communication using an event-based approach. The goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
+signalstory is a state management library based on angular signals. It offers a range of architectural options, from simple repository-based state management (`signal-in-a-service`) to orchestrating decoupled commands, handling side effects through encapsulated objects, and facilitating inter-store communication using an event-driven approach. The ultimate goal is to provide a great user experience for all developers, whether junior or senior, while incorporating all the features you need to master your frontend state requirements.
 
 > Starting out? You can keep it nice and simple if you prefer to avoid exploring all the advanced features that a state management library can offer! Begin by checking out the [store](https://zuriscript.github.io/signalstory/docs/store), and only dive into the rest if you're curious later on.
+
+Here's a snapshot of some notable highlights:
+
+✅ &nbsp;Signal-in-a-service approach  
+✅ &nbsp;Simple, non-intrusive and lightweight  
+✅ &nbsp;Optimized for Scalability  
+✅ &nbsp;Imperative-first with Declaritive capabilities  
+✅ &nbsp;Immutability on demand  
+✅ &nbsp;Rich plugin ecosystem  
+✅ &nbsp;Native IndexedDB support  
+✅ &nbsp;Granular Undo/Redo  
+✅ &nbsp;Devtools support  
+✅ &nbsp;Effect and Store status tracking  
+✅ &nbsp;Realtime store performance statistics  
+✅ &nbsp;Custom plugin support  
+✅ &nbsp;Built-in testing utilities  
+✅ &nbsp;SSR friendly  
+✅ &nbsp;Tree-shakeable
 
 ## Guiding Principles
 
@@ -30,7 +48,9 @@ signalstory is a state management library based on angular signals. It offers a 
 - 🪄 Still want some good old logging magic? - Enable Store logger plugin
 - ⏳ Need to keep track of store history and perform undo/redo operations? - Enable the history plugin.
 - 💾 Want to sync your state with local storage? - Enable the persistence plugin.
+- 🗄️ Need a more sophisticated store storage or building an offline app? - Use IndexedDB adapter
 - 📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
+- 📊 Wondering where your bottlenecks are? - Enable the performance counter plugin
 - 🎨 Something's missing? - Write a custom plugin.
 - 📖 Read the [docs](https://zuriscript.github.io/signalstory/) for more features and concepts.
 
@@ -56,10 +76,11 @@ class BookStore extends ImmutableStore<Book[]> {
         mutationProducerFn: produce,
         plugins: [
           useDevtools(),
-          useLogger(),
           useStoreHistory(),
           useStorePersistence(),
+          useLogger(),
           useStoreStatus(),
+          usePerformanceCounter(),
         ],
     });
 
@@ -125,7 +146,7 @@ export const fetchBooksEffect = createEffect(
 // And then run it
 myBookStore.runEffect(fetchBooksEffect).subscribe();
 const loadingSignal = isLoading(myBookStore); // true while effect is running
-const isModifiedSignal = isModified(myBookStore); // false after store update
+const isModifiedSignal = isModified(myBookStore); // true after store update
 ```
 
 ## Sample Application
