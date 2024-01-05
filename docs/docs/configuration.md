@@ -8,13 +8,12 @@ The store configuration allows you to customize the behavior of your store upon 
 
 Here are the available configuration options:
 
-| Option          | Description                                                                                                                 | Default Value | Required |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------- | -------- |
-| `initialState`  | Specifies the initial state of the store.                                                                                   | -             | Yes      |
-| `name`          | Sets the name of the store. This option is optional and defaults to the constructor name.                                   | Class name    | No       |
-| `injector`      | Optional DI injector that can be passed for effects and query objects. Only useful for dynamic stores not registered in DI. | `null`        | No       |
-| `enableLogging` | Enables logging for the store's actions and events, providing detailed information about the store's operations.            | `false`       | No       |
-| `plugins`       | A list of plugins to use with the store.                                                                                    | `[]`          | No       |
+| Option         | Description                                                                                                                 | Default Value | Required |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------- | -------- |
+| `initialState` | Specifies the initial state of the store.                                                                                   | -             | Yes      |
+| `name`         | Sets the name of the store. This option is optional and defaults to the constructor name.                                   | Class name    | No       |
+| `injector`     | Optional DI injector that can be passed for effects and query objects. Only useful for dynamic stores not registered in DI. | `null`        | No       |
+| `plugins`      | A list of plugins to use with the store.                                                                                    | `[]`          | No       |
 
 ```typescript
 

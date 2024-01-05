@@ -60,6 +60,8 @@ And then:
   <li style={{ marginBottom: '0.5em' }}>🪄 Still want some good old logging magic? - Enable Store logger plugin</li>
   <li style={{ marginBottom: '0.5em' }}>⏳ Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.</li>
   <li style={{ marginBottom: '0.5em' }}>💾 Want to sync your state with local storage? - Enable the persistence plugin.</li>
+  <li style={{ marginBottom: '0.5em' }}>🗄️ Need a more sophisticated store storage or building an offline app? - Use IndexedDB adapter.</li>
   <li style={{ marginBottom: '0.5em' }}>📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.</li>
+  <li style={{ marginBottom: '0.5em' }}>📊 Wondering where your bottlenecks are? - Enable the performance counter plugin.</li>
   <li style={{ marginBottom: '0.5em' }}>🎨 Something's missing? - Write a custom plugin.</li>
 </ul>

@@ -47,7 +47,7 @@ export class UserStore extends Store<UserState> {
   }
 
   // Expose functions to query the state
-  public get selectedUsers(): Signal<UserState[]> {
+  public get selectedUsers(): Signal<UserState> {
     return computed(() => this.state().filter(user => user.isSelected));
   }
 }
