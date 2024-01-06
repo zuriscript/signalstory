@@ -112,9 +112,9 @@ const config = {
         ],
       },
       announcementBar: {
-        id: '17.1.0',
+        id: '17.2.0',
         content:
-          '<b>signalstory 17.1.0</b> has been released ✨ We are in rapid development mode until February. Submit feature requests <a href="https://github.com/zuriscript/signalstory/discussions/categories/ideas" target="_blank">here</a>; yours might get considered! 🏆',
+          '<b>signalstory 17.2.0</b> is out! ✨ We are still in rapid development mode. Submit feature requests <a href="https://github.com/zuriscript/signalstory/discussions/categories/ideas" target="_blank">here</a>; yours might get considered! 🏆',
         backgroundColor: '#e35e75',
         textColor: '#091E42',
         isCloseable: true,

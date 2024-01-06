@@ -212,7 +212,9 @@ To set up and run the sample app locally, follow the steps below:
    ng serve sample --open
    ```
 
-   <p align="center" style="margin-top:50px;">  
+---
+
+   <p align="center">  
      <img
          align="center"
          alt="signalstory"
