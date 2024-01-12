@@ -24,6 +24,7 @@ import {
 } from './store-plugin';
 import { useLogger } from './store-plugin-logger/plugin-logger';
 import { StoreQuery } from './store-query';
+import { addToRegistry } from './store-registry';
 import { getInjectorOrNull } from './utility/injector-helper';
 import { withSideEffect } from './utility/sideeffect';
 
@@ -68,6 +69,8 @@ export class Store<TState> {
     ) {
       this.config.plugins.push(useLogger());
     }
+
+    addToRegistry(this);
 
     this.config.plugins
       .sort((a, b) => (b.precedence ?? 0) - (a.precedence ?? 0))
