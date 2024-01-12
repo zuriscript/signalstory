@@ -55,7 +55,8 @@ Here's a snapshot of some notable highlights:
 ✅ &nbsp;Immutability on demand  
 ✅ &nbsp;Rich plugin ecosystem  
 ✅ &nbsp;Native IndexedDB support  
-✅ &nbsp;Granular Undo/Redo  
+✅ &nbsp;Granular Undo/Redo
+✅ &nbsp;Global State Snaphots and Rollbacks
 ✅ &nbsp;Devtools support  
 ✅ &nbsp;Effect and Store status tracking  
 ✅ &nbsp;Realtime store performance statistics  
