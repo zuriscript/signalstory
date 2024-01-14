@@ -1,4 +1,3 @@
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Store } from '../lib/store';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { useDeepFreeze } from '../lib/store-plugin-deep-freeze/plugin-deep-freeze';

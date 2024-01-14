@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Subject, filter, lastValueFrom, of, tap, throwError } from 'rxjs';
 import { Store } from '../lib/store';
 import { createEffect } from '../lib/store-effect';

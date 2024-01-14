@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line tree-shaking/no-side-effects-in-initialization
 import { Signal, WritableSignal, computed, signal } from '@angular/core';
 import { Store } from '../store';
 import { StoreEffect } from '../store-effect';

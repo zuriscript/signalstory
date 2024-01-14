@@ -1,4 +1,3 @@
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { delay, lastValueFrom, of, tap } from 'rxjs';
 import { Store } from '../lib/store';
 import { createEffect } from '../lib/store-effect';
