@@ -12,7 +12,7 @@ const isStoreModifiedMap = new WeakMap<
 
 export const runningEffects: WritableSignal<
   [WeakRef<Store<any>>, StoreEffect<any, any, any>, number][]
-> = signal([]);
+> = /*@__PURE__*/ signal([]);
 
 /**
  * Returns a Signal indicating whether the provided store has been modified.
