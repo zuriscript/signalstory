@@ -1,5 +1,3 @@
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
-
 import { PerformanceCounter } from '../lib/store-plugin-performance-counter/performance-counter';
 
 describe('PerformanceCounter', () => {

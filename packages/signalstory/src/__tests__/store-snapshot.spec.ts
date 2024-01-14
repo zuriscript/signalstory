@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Store } from '../lib/store';
 import { clearRegistry, forEachStoreInScope } from '../lib/store-registry';
 import { StateSnapshot, createSnapshot } from '../lib/store-snapshot';

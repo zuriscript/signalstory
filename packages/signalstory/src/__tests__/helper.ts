@@ -1,5 +1,4 @@
 /* eslint-disable @angular-eslint/component-class-suffix */
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Component, InjectionToken, inject } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';

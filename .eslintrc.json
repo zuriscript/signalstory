@@ -1,9 +1,6 @@
 {
   "root": true,
   "ignorePatterns": ["packages/**/*"],
-  "plugins": [
-    "tree-shaking"
-  ],
   "overrides": [
     {
       "files": ["*.ts"],

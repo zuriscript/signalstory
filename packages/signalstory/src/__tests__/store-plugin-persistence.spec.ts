@@ -1,4 +1,3 @@
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 import { Store } from '../lib/store';
 import { AsyncStorage } from '../lib/store-plugin-persistence/persistence-async-storage';
 import { SyncStorage } from '../lib/store-plugin-persistence/persistence-sync-storage';

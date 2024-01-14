@@ -1,4 +1,3 @@
-/* eslint-disable tree-shaking/no-side-effects-in-initialization */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   naiveCloneAndMutateFunc,
