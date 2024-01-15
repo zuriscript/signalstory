@@ -4,9 +4,12 @@ import { Store } from '../store';
 import { StoreEffect } from '../store-effect';
 import { StorePlugin } from '../store-plugin';
 
-const isStoreModifiedMap = new WeakMap<
+const storeStatusMap = new WeakMap<
   Store<unknown>,
-  WritableSignal<boolean>
+  WritableSignal<{
+    hasBeenModified: boolean;
+    hasBeenInitialized: boolean;
+  }>
 >();
 
 export const runningEffects: WritableSignal<
@@ -14,37 +17,78 @@ export const runningEffects: WritableSignal<
 > = /*@__PURE__*/ signal([]);
 
 /**
+ * @deprecated Use `modified` instead. This method is deprecated and will be removed in the next major release (v18).
+ */
+export function isModified(store: Store<any>): Signal<boolean> {
+  return modified(store);
+}
+
+/**
  * Returns a Signal indicating whether the provided store has been modified.
  *
  * @note A store is initially considered unmodified. Any command (`set`, `update`, `mutate`) applied to the store
- * will mark it as modified. Additionally, an effect created with the `setUnmodifiedStatus` flag can reset the store's
+ * will mark it as modified. Additionally, an effect created with the `setInitializedStatus` flag will reset the store's
  * modification status to unmodified.
  *
  * @param store - The store to check for modification status.
  * @returns Signal<boolean> - A signal indicating whether the store has been modified.
  */
-export function isModified(store: Store<any>): Signal<boolean> {
-  const modifiedStatus = isStoreModifiedMap.get(store);
-  if (!modifiedStatus) {
+export function modified(store: Store<any>): Signal<boolean> {
+  const status = storeStatusMap.get(store);
+  if (!status) {
     throw new Error(
       `StatusPlugin has not been activated for store ${store.name}`
     );
   }
 
-  return computed(() => modifiedStatus());
+  return computed(() => status().hasBeenModified);
 }
 
 /**
- * Manually marks the provided store as unmodified.
+ * Returns a Signal indicating whether the provided store has been initialized by an initializing effect.
  *
- * @note This method is intended for exceptional cases. In most scenarios, consider using the `setUnmodifiedStatus`
- * flag on the relevant effects to automatically manage the modification status.
+ * @note A store is initially considered as deinitialized. An effect created with the `setInitializedStatus` flag will set the store's
+ * initialization status to `true`.
  *
- * @param store - The store to manually mark as unmodified.
- * @returns void
+ * @param store - The store to check for initialization status.
+ * @returns Signal<boolean> - A signal indicating whether the store has been initialized.
+ */
+export function initialized(store: Store<any>): Signal<boolean> {
+  const status = storeStatusMap.get(store);
+  if (!status) {
+    throw new Error(
+      `StatusPlugin has not been activated for store ${store.name}`
+    );
+  }
+
+  return computed(() => status().hasBeenInitialized);
+}
+
+/**
+ * @deprecated Use `resetStoreStatus` instead. This method is deprecated and will be removed in the next major release (v18).
  */
 export function markAsUnmodified(store: Store<any>): void {
-  isStoreModifiedMap.get(store)?.set(false);
+  storeStatusMap.get(store)?.update(state => ({
+    ...state,
+    hasBeenModified: false,
+  }));
+}
+
+/**
+ * Manually resets the status indicators for the provided store, marking it as deinitialized and unmodified.
+ * This means that both `unmodified()` and `initialized()` will return false. For manual reset of the loading status,
+ * use `markAsHavingNoRunningEffects`.
+ *
+ * @note This method is intended for exceptional cases.
+ *
+ * @param store - The store to manually reset the status.
+ * @returns void
+ */
+export function resetStoreStatus(store: Store<any>): void {
+  storeStatusMap.get(store)?.set({
+    hasBeenInitialized: false,
+    hasBeenModified: false,
+  });
 }
 
 /**
@@ -143,10 +187,22 @@ export function isEffectRunning(
 export function useStoreStatus(): StorePlugin {
   return {
     init(store) {
-      isStoreModifiedMap.set(store, signal(false));
+      storeStatusMap.set(
+        store,
+        signal({
+          hasBeenInitialized: false,
+          hasBeenModified: false,
+        })
+      );
     },
     postprocessCommand(store) {
-      isStoreModifiedMap.get(store)?.set(true);
+      const status = storeStatusMap.get(store);
+      if (status && !status().hasBeenModified) {
+        storeStatusMap.get(store)?.update(state => ({
+          ...state,
+          hasBeenModified: true,
+        }));
+      }
     },
     preprocessEffect(store, effect, invocationId) {
       runningEffects.update(effects => [
@@ -158,8 +214,11 @@ export function useStoreStatus(): StorePlugin {
       runningEffects.update(effects =>
         effects.filter(x => x[2] !== invocationId)
       );
-      if (effect.config.setUnmodifiedStatus) {
-        isStoreModifiedMap.get(store)?.set(false);
+      if (effect.config.setInitializedStatus) {
+        storeStatusMap.get(store)?.set({
+          hasBeenInitialized: true,
+          hasBeenModified: false,
+        });
       }
     },
   };

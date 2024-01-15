@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Store Status
 
-Enable your store to track the loading and modification status. By utilizing the `StoreStatusPlugin`, you can monitor whether your store is currently loading (running an effect) and if it has been modified.
+Enable your store to track the loading, initialization and modification status. By utilizing the `StoreStatusPlugin`, you can monitor whether your store is currently loading (running an effect) and if it has been initialized or modified.
 
 ## Enabling Store Status
 
@@ -148,18 +148,19 @@ const effectThatLoadsBooks = createEffect(
 );
 ```
 
-## Tracking Modification Status
+## Tracking Initialization Status
 
-The `isModified` function returns a Signal indicating whether the specified store has been modified.
+The `initialized` function returns a Signal indicating whether the specified store has been initialized by an initializing effect.
 
 ```typescript
-const modifiedSignal = isModified(store);
+const initializedSignal = initialized(store);
 ```
 
-A store is initially **unmodified**. Any command (`set`, `update`, `mutate`) applied to the store will mark it as **modified**. Additionally, an effect created with the `setUnmodifiedStatus` flag can reset the store's modification status back to **unmodified**.
+A store is initially **not initialized** and any command (`set`, `update`, `mutate`) applied to the store will not change this status.
+Only an effect created with the `setInitializedStatus` flag can set the store's initialization status to **initialized**.
 
 ```typescript
-const effectThatResetsStore = createEffect(
+const effectThatInitializesStore = createEffect(
   'Load Books',
   (store: BookStore): Observable<unknown> => {
     return inject(BookService);
@@ -167,17 +168,26 @@ const effectThatResetsStore = createEffect(
   },
   // highlight-start
   {
-    setUnmodifiedStatus: true,
+    setInitializedStatus: true,
   }
   // highlight-end
 );
 ```
 
-### Manually Marking as Unmodified
+## Tracking Modification Status
 
-In exceptional cases, you can manually mark a store as unmodified using the `markAsUnmodified` function. But in most scenarios, consider using the `setUnmodifiedStatus`
-flag on the relevant effects to automatically manage the modification status.
+The `modified` function returns a Signal indicating whether the specified store has been modified.
 
 ```typescript
-markAsUnmodified(store);
+const modifiedSignal = modified(store);
+```
+
+A store is initially **unmodified**. Any command (`set`, `update`, `mutate`) applied to the store will mark it as **modified**. Additionally, an effect created with the `setInitializedStatus` flag can reset the store's modification status back to **unmodified**.
+
+## Reset store status
+
+In some cases, it could be necessary to manually reset the store status to `unmodified` and `deinitialized` using the `resetStoreStatus` function.
+
+```typescript
+resetStoreStatus(store);
 ```

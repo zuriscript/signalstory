@@ -31,12 +31,15 @@ export {
   useStorePersistence,
 } from './lib/store-plugin-persistence/plugin-persistence';
 export {
+  initialized,
   isAnyEffectRunning,
   isEffectRunning,
   isLoading,
   isModified,
   markAsHavingNoRunningEffects,
   markAsUnmodified,
+  modified,
+  resetStoreStatus,
   useStoreStatus,
 } from './lib/store-plugin-status/plugin-status';
 export { StoreQuery, createQuery } from './lib/store-query';

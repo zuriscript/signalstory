@@ -18,11 +18,16 @@ export interface StoreEffectConfig {
   setLoadingStatus?: boolean;
 
   /**
-   * Indicates whether the effect sets unmodified status.
+   * @deprecated Use `setInitializedStatus` instead. This method is deprecated and will be removed in the next major release (v18).
+   */
+  setUnmodifiedStatus?: boolean;
+
+  /**
+   * Indicates whether the effect sets initialized status.
    * Only applicable if the `StoreStatus` plugin is used.
    * Defaults to false.
    */
-  setUnmodifiedStatus?: boolean;
+  setInitializedStatus?: boolean;
 }
 
 /**
@@ -92,8 +97,13 @@ export function createEffect<
       withInjectionContext:
         !arg || arg === true || (arg.withInjectionContext ?? true),
       setLoadingStatus: (arg as StoreEffectConfig)?.setLoadingStatus ?? false,
+      //TODO: remove the following line for next major update
       setUnmodifiedStatus:
         (arg as StoreEffectConfig)?.setUnmodifiedStatus ?? false,
+      setInitializedStatus:
+        (arg as StoreEffectConfig)?.setInitializedStatus ??
+        (arg as StoreEffectConfig)?.setUnmodifiedStatus ??
+        false,
     },
   };
 }
