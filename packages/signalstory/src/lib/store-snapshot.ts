@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ProviderToken } from '@angular/core';
 import { Store } from './store';
+import { ImmutableStore } from './store-immutability/immutable-store';
+import { deepClone } from './store-immutability/immutable-utility';
 import { forEachStoreInScope } from './store-registry';
 
 /**
@@ -61,15 +63,20 @@ export function createSnapshot(
 ): StateSnapshot {
   const storesWithState = new WeakMap<Store<unknown>, unknown>();
 
-  if (stores && stores.length > 0) {
-    forEachStoreInScope(store => {
-      if (stores.some(x => x === store || store.constructor === x)) {
-        storesWithState.set(store, store.state());
-      }
-    });
-  } else {
-    forEachStoreInScope(store => storesWithState.set(store, store.state()));
-  }
+  stores ??= [];
+
+  forEachStoreInScope(store => {
+    if (
+      stores.length === 0 ||
+      stores.some(x => x === store || store.constructor === x)
+    ) {
+      const stateSnapshot =
+        store instanceof ImmutableStore
+          ? store.state()
+          : deepClone(store.state());
+      storesWithState.set(store, stateSnapshot);
+    }
+  });
 
   return new StateSnapshotBase(storesWithState);
 }
