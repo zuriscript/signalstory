@@ -2,12 +2,15 @@ import { delay, lastValueFrom, of, tap } from 'rxjs';
 import { Store } from '../lib/store';
 import { createEffect } from '../lib/store-effect';
 import {
+  initialized,
   isAnyEffectRunning,
   isEffectRunning,
   isLoading,
   isModified,
   markAsHavingNoRunningEffects,
   markAsUnmodified,
+  modified,
+  resetStoreStatus,
   runningEffects,
   useStoreStatus,
 } from '../lib/store-plugin-status/plugin-status';
@@ -374,6 +377,119 @@ describe('isModified', () => {
   });
 });
 
+describe('modified', () => {
+  let store: Store<{ value: number }>;
+
+  beforeEach(() => {
+    store = new Store<{ value: number }>({
+      initialState: { value: 10 },
+      plugins: [useStoreStatus()],
+    });
+  });
+
+  it('should be unmodified initially', () => {
+    // assert
+    expect(modified(store)()).toBe(false);
+  });
+
+  it('should mark the store as modified after a command is processed', () => {
+    // act
+    store.set({ value: 10 });
+
+    // assert
+    expect(modified(store)()).toBe(true);
+  });
+
+  it('should mark the store as modified after an effect is processed', async () => {
+    // arrange
+    const effect = createEffect(
+      'dummyEffect',
+      (store: Store<{ value: number }>) =>
+        of(30).pipe(
+          tap(val =>
+            store.mutate(x => {
+              x.value = val;
+            })
+          )
+        )
+    );
+
+    // act
+    await lastValueFrom(store.runEffect(effect));
+
+    // assert
+    expect(modified(store)()).toBe(true);
+  });
+
+  it('should mark the store as unmodified after an effect with setInitializedStatus is processed', async () => {
+    // arrange
+    const effect = createEffect(
+      'dummyEffect',
+      (store: Store<{ value: number }>) =>
+        of(30).pipe(
+          tap(val =>
+            store.mutate(x => {
+              x.value = val;
+            })
+          )
+        ),
+      { setInitializedStatus: true }
+    );
+
+    // act
+    await lastValueFrom(store.runEffect(effect));
+
+    // assert
+    expect(modified(store)()).toBe(false);
+  });
+});
+
+describe('initialized', () => {
+  let store: Store<{ value: number }>;
+
+  beforeEach(() => {
+    store = new Store<{ value: number }>({
+      initialState: { value: 10 },
+      plugins: [useStoreStatus()],
+    });
+  });
+
+  it('should be deinitialized initially', () => {
+    // assert
+    expect(initialized(store)()).toBe(false);
+  });
+
+  it('should not mark the store as initialized after a command is processed', () => {
+    // act
+    store.set({ value: 10 });
+
+    // assert
+    expect(initialized(store)()).toBe(false);
+  });
+
+  it('should mark the store as initialized after an effect with setInitializedStatus is processed', async () => {
+    // arrange
+    const effect = createEffect(
+      'dummyEffect',
+      (store: Store<{ value: number }>) =>
+        of(30).pipe(
+          tap(val =>
+            store.mutate(x => {
+              x.value = val;
+            })
+          )
+        ),
+      { setInitializedStatus: true }
+    );
+
+    // act
+    await lastValueFrom(store.runEffect(effect));
+
+    // assert
+    expect(initialized(store)()).toBe(true);
+  });
+});
+
 describe('markAsUnmodified', () => {
   let store: Store<{ value: number }>;
 
@@ -387,13 +503,51 @@ describe('markAsUnmodified', () => {
   it('should manually mark the store as unmodified', () => {
     // arrange
     store.set({ value: 20 });
-    expect(isModified(store)()).toBe(true); // sanity check
+    expect(modified(store)()).toBe(true); // sanity check
 
     // act
     markAsUnmodified(store);
 
     // assert
-    expect(isModified(store)()).toBe(false);
+    expect(modified(store)()).toBe(false);
+  });
+});
+
+describe('resetStoreStatus', () => {
+  let store: Store<{ value: number }>;
+
+  beforeEach(() => {
+    store = new Store<{ value: number }>({
+      initialState: { value: 10 },
+      plugins: [useStoreStatus()],
+    });
+  });
+
+  it('should reset the store modification status', () => {
+    // arrange
+    store.set({ value: 20 });
+    expect(modified(store)()).toBe(true); // sanity check
+
+    // act
+    resetStoreStatus(store);
+
+    // assert
+    expect(modified(store)()).toBe(false);
+  });
+
+  it('should reset the store initialization status', () => {
+    // arrange
+    const dummyEffect = createEffect('Dummy', () => {}, {
+      setInitializedStatus: true,
+    });
+    store.runEffect(dummyEffect);
+    expect(initialized(store)()).toBe(true); // sanity check
+
+    // act
+    resetStoreStatus(store);
+
+    // assert
+    expect(modified(store)()).toBe(false);
   });
 });
 

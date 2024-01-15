@@ -182,13 +182,14 @@ export const fetchBooksEffect = createEffect(
   },
   {
     setLoadingStatus: true, // indicates that the store is loading while the effect runs
-    setUnmodifiedStatus: true, // it should mark the store as unmodified upon completion
+    setInitializedStatus: true, // it should mark the store as initialized upon completion
   }
 );
 // And then run it
 myBookStore.runEffect(fetchBooksEffect).subscribe();
 const loadingSignal = isLoading(myBookStore); // true while effect is running
-const isModifiedSignal = isModified(myBookStore); // true after store update
+const initializedSignal = initialized(myBookStore); // true after initializing effect completion
+const modifiedSignal = modified(myBookStore); // true after store update
 ```
 
 ## Sample Application
