@@ -133,6 +133,14 @@ useStorePersistence(
         // Your error handler is called in the case of an initialization error
       },
     },
+    projection: {
+      onWrite: state => {
+        // Optional projection on write for obfuscation or to slim down the stored state
+      },
+      onLoad: projection => {
+        // If onWrite was specified, you have to tell the store how to consume the stored state
+      },
+    },
   })
 );
 ```
