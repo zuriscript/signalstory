@@ -1,6 +1,9 @@
 import { filter, first } from 'rxjs';
 import { AsyncStorage } from '../persistence-async-storage';
-import { StorePersistencePluginOptions } from '../plugin-persistence';
+import {
+  PersistenceProjection,
+  StorePersistencePluginOptions,
+} from '../plugin-persistence';
 import { getOrOpenDb, isIDBDatabase } from './idb-pool';
 
 /**
@@ -26,7 +29,7 @@ export interface IndexedDbSetupHandlers {
 /**
  * Represents the options for connecting to an IndexedDB.
  */
-export interface IndexedDbOptions {
+export interface IndexedDbOptions<TState = never, TProjection = never> {
   /**
    * The name of the IndexedDB database.
    */
@@ -54,6 +57,13 @@ export interface IndexedDbOptions {
    * Configuration options for IndexedDB setup handlers.
    */
   handlers?: IndexedDbSetupHandlers;
+
+  /**
+   * Projection functions which are applied before storing and after loading from storage
+   * This can be useful for obfuscating sensitive data prior to storing or for saving space.
+   * Optional, default nothing.
+   */
+  projection?: PersistenceProjection<TState, TProjection>;
 }
 
 /**
@@ -61,9 +71,9 @@ export interface IndexedDbOptions {
  * @param options - The configuration options for IndexedDB.
  * @returns Store persistence plugin options.
  */
-export function configureIndexedDb(
-  options: IndexedDbOptions
-): StorePersistencePluginOptions {
+export function configureIndexedDb<TState = never, TProjection = never>(
+  options: IndexedDbOptions<TState, TProjection>
+): StorePersistencePluginOptions<TState, TProjection> {
   return {
     persistenceStorage: new IndexedDbAdapter(
       options.dbName,
@@ -72,6 +82,7 @@ export function configureIndexedDb(
       options.key,
       options.handlers
     ),
+    projection: options.projection,
   };
 }
 
