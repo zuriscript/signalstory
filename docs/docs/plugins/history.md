@@ -26,9 +26,31 @@ class StoreWithHistory extends Store<MyState> {
 
 By enabling state history, signalstory will automatically store the history of state changes within the store by tracking `set`, `update` and `mutate` calls.
 
+## Configuration
+
+The `useStoreHistory` function accepts an optional configuration object, providing customization options for the history plugin. The available options are:
+
+| Option      | Description                    | Default Value |
+| ----------- | ------------------------------ | ------------- |
+| `maxLength` | Maximum length of the history. | `undefined`   |
+
+Example:
+
+```typescript
+useStoreHistory({
+  maxLength: 100,
+});
+```
+
+:::caution
+
+By defining `maxLength`, you can control the history size, keeping memory usage in check. If left unspecified (`undefined`), the history will expand without constraints. The choice not to set a default max length aims to maintain compatibility with versions `17.*`, as this would introduce a Breaking Change. A designated default value will be introduced starting from version `18`.
+
+:::
+
 ## Accessing State History
 
-Once the state history is enabled, you can access the history of a store using the `getHistory` method provided by signalstory.
+Once the state history is enabled, you can access the history of a store using the `getHistory` method.
 
 ```typescript
 getHistory(store);
