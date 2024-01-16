@@ -7,23 +7,54 @@ import {
   History,
   HistoryItem,
   addToHistory as addToHistoryUtil,
+  prune,
   redo as redoUtil,
   undo as undoUtil,
 } from './history';
 
 /**
+ * Options for configuring the Store History Plugin.
+ */
+export interface StoreHistoryPluginOptions {
+  /**
+   * The maximum length of the history. If set, the history will be pruned
+   * as older entries will be removed to maintain the specified maximum length.
+   * If `undefined`, the history will grow without boundaries.
+   *
+   * @remarks
+   * The `maxLength` property is used as an indicator for pruning, but it is not strictly enforced.
+   * This means that the history array may have more elements than the specified `maxLength` for optimization reasons.
+   */
+  maxLength?: number;
+}
+
+/**
  * Registry to associate a store with its history.
  */
-const storeHistoryRegistry = new WeakMap<Store<unknown>, History<unknown>>();
+const storeHistoryRegistry = new WeakMap<
+  Store<unknown>,
+  { history: History<unknown>; maxLength?: number }
+>();
+
+/**
+ * The fraction of elements to be removed during pruning.
+ */
+const pruneFraction = 0.25;
 
 /**
  * Registers the history for a store.
  * @param store The store to register history for.
  */
 export function registerStateHistory<TStore extends Store<any>>(
-  store: TStore
+  store: TStore,
+  maxLength?: number
 ): void {
-  storeHistoryRegistry.set(store, []);
+  storeHistoryRegistry.set(store, {
+    history: [],
+    maxLength: maxLength
+      ? Math.floor(maxLength / (1 - pruneFraction))
+      : undefined,
+  });
 }
 
 /**
@@ -44,10 +75,9 @@ export function clearStateHistory<TStore extends Store<any>>(
 export function getHistory<TStore extends Store<any>>(
   store: TStore
 ): ReadonlyArray<HistoryItem<StoreState<TStore>>> {
-  const history = storeHistoryRegistry.get(store);
-  return history
-    ? (history as ReadonlyArray<HistoryItem<StoreState<TStore>>>)
-    : [];
+  return (storeHistoryRegistry.get(store)?.history ?? []) as ReadonlyArray<
+    HistoryItem<StoreState<TStore>>
+  >;
 }
 
 /**
@@ -59,13 +89,17 @@ export function addToHistory<TStore extends Store<any>>(
   store: TStore,
   command: string
 ): void {
-  const history = storeHistoryRegistry.get(store);
+  const { history, maxLength } = storeHistoryRegistry.get(store) ?? {};
   if (history) {
     const stateBeforeCommand =
       store instanceof ImmutableStore
         ? store.state()
         : deepClone(store.state());
     addToHistoryUtil(history, command, stateBeforeCommand);
+
+    if (maxLength && history.length > maxLength) {
+      prune(history, pruneFraction);
+    }
   } else {
     throw new Error(
       `Attempted to call addToHistory on ${store.name} but history is disabled for this store`
@@ -78,7 +112,7 @@ export function addToHistory<TStore extends Store<any>>(
  * @param store The store to perform the undo operation on.
  */
 export function undo<TStore extends Store<any>>(store: TStore): void {
-  const history = storeHistoryRegistry.get(store) as History<
+  const history = storeHistoryRegistry.get(store)?.history as History<
     StoreState<TStore>
   >;
   if (history) {
@@ -98,7 +132,7 @@ export function undo<TStore extends Store<any>>(store: TStore): void {
  * @param store The store to perform the redo operation on.
  */
 export function redo<TStore extends Store<any>>(store: TStore): void {
-  const history = storeHistoryRegistry.get(store) as History<
+  const history = storeHistoryRegistry.get(store)?.history as History<
     StoreState<TStore>
   >;
 
@@ -122,11 +156,13 @@ export function redo<TStore extends Store<any>>(store: TStore): void {
  *
  * @returns History Storeplugin.
  */
-export function useStoreHistory(): StorePlugin {
+export function useStoreHistory(
+  options: StoreHistoryPluginOptions = {}
+): StorePlugin {
   return {
     precedence: 10, // should come early in initialization
     init(store) {
-      registerStateHistory(store);
+      registerStateHistory(store, options.maxLength);
     },
     preprocessCommand(store, command) {
       addToHistory(store, command ?? 'Unspecified Command');

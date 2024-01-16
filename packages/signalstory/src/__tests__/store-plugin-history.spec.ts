@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Store } from '../lib/store';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { useDeepFreeze } from '../lib/store-plugin-deep-freeze/plugin-deep-freeze';
-import { RedoCommand, UndoCommand } from '../lib/store-plugin-history/history';
+import {
+  RedoCommand,
+  UndoCommand,
+  prune,
+} from '../lib/store-plugin-history/history';
 import {
   addToHistory,
   getHistory,
@@ -67,6 +72,39 @@ describe('addToHistory', () => {
       // assert
       expect(getHistory(store)).toHaveLength(0);
     });
+
+    it('should never prune if no maxLength is set', () => {
+      // arrange
+      const numberOfCommands = 1000;
+      registerStateHistory(store);
+
+      // act
+      for (let i = 0; i < numberOfCommands; i++) {
+        addToHistory(store, i.toString());
+      }
+
+      // assert
+      expect(getHistory(store)).toHaveLength(numberOfCommands);
+    });
+
+    it('should prune if maxLength is set', () => {
+      // arrange
+      const numberOfCommands = 20;
+      const maxLength = 5;
+      registerStateHistory(store, maxLength);
+
+      // act & assert
+      for (let i = 0; i < numberOfCommands; i++) {
+        addToHistory(store, i.toString());
+        const history = getHistory(store);
+        if (i < maxLength) {
+          expect(history).toHaveLength(i + 1);
+        } else {
+          expect(history.length).toBeGreaterThanOrEqual(maxLength);
+          expect(history.length).toBeLessThanOrEqual(maxLength * 1.25);
+        }
+      }
+    });
   });
 
   describe('with immutable store', () => {
@@ -122,6 +160,39 @@ describe('addToHistory', () => {
 
       // assert
       expect(getHistory(store)).toHaveLength(0);
+    });
+
+    it('should never prune if no maxLength is set', () => {
+      // arrange
+      const numberOfCommands = 1000;
+      registerStateHistory(store);
+
+      // act
+      for (let i = 0; i < numberOfCommands; i++) {
+        addToHistory(store, i.toString());
+      }
+
+      // assert
+      expect(getHistory(store)).toHaveLength(numberOfCommands);
+    });
+
+    it('should prune if maxLength is set', () => {
+      // arrange
+      const numberOfCommands = 20;
+      const maxLength = 5;
+      registerStateHistory(store, maxLength);
+
+      // act & assert
+      for (let i = 0; i < numberOfCommands; i++) {
+        addToHistory(store, i.toString());
+        const history = getHistory(store);
+        if (i < maxLength) {
+          expect(history).toHaveLength(i + 1);
+        } else {
+          expect(history.length).toBeGreaterThanOrEqual(maxLength);
+          expect(history.length).toBeLessThanOrEqual(maxLength * 1.25);
+        }
+      }
     });
   });
 });
@@ -425,5 +496,95 @@ describe('registration', () => {
     expect(store['commandPreprocessor']![0]).toBe(
       historyPlugin.preprocessCommand
     );
+  });
+});
+
+describe('prune', () => {
+  it('should prune the history by the specified fraction', () => {
+    // arrange
+    const initialHistory = [
+      { command: 'Command1', before: { value: 10 } },
+      { command: 'Command2', before: { value: 20 } },
+      { command: 'Command3', before: { value: 30 } },
+    ];
+    const fraction = 0.5;
+
+    // act
+    prune(initialHistory, fraction);
+
+    // assert
+    expect(initialHistory).toStrictEqual([
+      { command: 'Command2', before: { value: 20 } },
+      { command: 'Command3', before: { value: 30 } },
+    ]);
+  });
+
+  it('should handle pruning when the history is empty', () => {
+    // arrange
+    const initialHistory: any[] = [];
+    const fraction = 0.5;
+
+    // act
+    prune(initialHistory, fraction);
+
+    // assert
+    expect(initialHistory).toStrictEqual([]);
+  });
+
+  it('should not prune the history if the fraction is too small', () => {
+    // arrange
+    const initialHistory = [
+      { command: 'Command1', before: { value: 10 } },
+      { command: 'Command2', before: { value: 20 } },
+      { command: 'Command3', before: { value: 30 } },
+    ];
+    const fraction = 0.1;
+
+    // act
+    prune(initialHistory, fraction);
+
+    // assert
+    expect(initialHistory).toHaveLength(3);
+  });
+
+  it('should adjust redoneCommandIndex and undoneCommandIndex after pruning', () => {
+    // arrange
+    const initialHistory = [
+      { command: 'Command1', before: { value: 10 } },
+      { command: 'Command2', before: { value: 20 }, undoneCommandIndex: 0 },
+      { command: 'Command3', before: { value: 30 }, redoneCommandIndex: 1 },
+      { command: 'Command4', before: { value: 55 } },
+      { command: 'Command2', before: { value: 20 }, undoneCommandIndex: 3 },
+    ];
+    const fraction = 0.5;
+
+    // act
+    prune(initialHistory, fraction);
+
+    // assert
+    expect(initialHistory).toStrictEqual([
+      { command: 'Command3', before: { value: 30 }, redoneCommandIndex: -1 },
+      { command: 'Command4', before: { value: 55 } },
+      { command: 'Command2', before: { value: 20 }, undoneCommandIndex: 1 },
+    ]);
+  });
+
+  it('should handle pruning with negative redoneCommandIndex and undoneCommandIndex', () => {
+    // arrange
+    const initialHistory = [
+      { command: 'Command1', before: { value: 10 }, undoneCommandIndex: -1 },
+      { command: 'Command2', before: { value: 20 }, redoneCommandIndex: -2 },
+      { command: 'Command3', before: { value: 30 }, redoneCommandIndex: -1 },
+    ];
+    const fraction = 0.5;
+
+    // act
+    prune(initialHistory, fraction);
+
+    // assert
+    expect(initialHistory).toStrictEqual([
+      { command: 'Command2', before: { value: 20 }, redoneCommandIndex: -3 },
+      { command: 'Command3', before: { value: 30 }, redoneCommandIndex: -2 },
+    ]);
   });
 });

@@ -155,3 +155,34 @@ export function redo<TState>(
 
   return null;
 }
+
+/**
+ * Prunes the history by removing a fraction from the beginning of its elements.
+ *
+ * @param history - The history to be pruned.
+ * @param fraction - The fraction of elements to be removed. Should be a value between 0 and 1.
+ *
+ * @remarks
+ * This function modifies the input `history` array in place by removing the specified fraction of elements.
+ * The `fraction` parameter represents the portion of elements to be removed from the beginning of the history.
+ * Additionally, it adjusts special properties such as `redoneCommandIndex` and `undoneCommandIndex` in the history items.
+ *
+ */
+export function prune<TState>(
+  history: History<TState>,
+  fraction: number
+): void {
+  const deleteCount = Math.floor(history.length * fraction);
+
+  if (deleteCount > 0) {
+    history.splice(0, deleteCount);
+
+    history.forEach(command => {
+      if (isHistoryRedoItem(command)) {
+        command.redoneCommandIndex -= deleteCount;
+      } else if (isHistoryUndoItem(command)) {
+        command.undoneCommandIndex -= deleteCount;
+      }
+    });
+  }
+}
