@@ -10,6 +10,7 @@ export { ImmutableStore } from './lib/store-immutability/immutable-store';
 export { ImmutableStoreConfig } from './lib/store-immutability/immutable-store-config';
 export { Immutable } from './lib/store-immutability/immutable-type';
 export { publishStoreEvent } from './lib/store-mediator';
+export { StorePlugin } from './lib/store-plugin';
 export { useDeepFreeze } from './lib/store-plugin-deep-freeze/plugin-deep-freeze';
 export { useDevtools } from './lib/store-plugin-devtools/plugin-devtools';
 export {
