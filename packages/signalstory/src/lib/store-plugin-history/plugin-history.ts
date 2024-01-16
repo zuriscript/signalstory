@@ -58,16 +58,6 @@ export function registerStateHistory<TStore extends Store<any>>(
 }
 
 /**
- * Clears the history for a store.
- * @param store The store to clear history for.
- */
-export function clearStateHistory<TStore extends Store<any>>(
-  store: TStore
-): void {
-  storeHistoryRegistry.delete(store);
-}
-
-/**
  * Gets the history of commands for a store as readonly.
  * @param store The store to get history for.
  * @returns An array of history items as readonly
