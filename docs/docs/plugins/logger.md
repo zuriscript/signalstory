@@ -41,12 +41,13 @@ Once the logger is enabled, it logs events at different stages of the store life
 - `preprocessEffect`: Logs the start of effect execution.
 - `postprocessEffect`: Logs the completion of effect execution.
 
-```typescript
-// Example of logged events
+Example of logged events:
+
+```
 [My Store with Logger->Init] { ...initialState }
 [My Store with Logger->Command] CommandName { ...currentState }
 [My Store with Logger->Effect STARTED] EffectName { ...currentState }
-[My Store with Logger->Effect FINISHED] EffectName { ...currentState }
+[My Store with Logger->Effect FINISHED in 342 ms] EffectName { ...currentState }
 ```
 
 Adjust the log content and format by providing a custom log function.

@@ -22,7 +22,6 @@ class MyStore extends Store<MyState> {
     super({
         initialState: { ... },
         name: 'My Store',
-        enableLogging: true,
         plugins: [
           useDevtools(),
           useStoreHistory(),

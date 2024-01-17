@@ -25,7 +25,7 @@ store3.updateBecauseTheOtherStoresDid();
 Adopt a more streamlined approach:
 
 ```typescript
-publishStoreEvent(somethingHappenedEventAndIWantMyStoresToReact);
+publishStoreEvent(somethingHappenedEvent);
 // All relevant stores (store1, store2, store3) react immediately and synchronously
 // -> As if they were called imperatively after each other
 ```
@@ -37,7 +37,7 @@ Considerations:
 
 ## Event Blueprint
 
-An `event` is represented by the `StoreEvent` interface, which typically includes a name and an optional payload. The name serves as a unique identifier for the event, while the payload contains any additional data associated with the event. You can use the `createEvent` function provided by signalstory to create `event blueprints` with a name and payload type. Those blueprint can then be published alongside a payload parameter:
+An `event` is represented by the `StoreEvent` interface, which includes a name and an optional payload. The name serves as a unique identifier for the event, while the payload contains any additional data associated with the event. You can use the `createEvent` function provided by signalstory to create `event blueprints` with a name and payload type. Those blueprint can then be published alongside a payload parameter:
 
 ```typescript
 import { createEvent } from 'signalstory';
@@ -67,9 +67,10 @@ export class BooksStore extends Store<Book[]> {
   constructor() {
     super({
       initialState: [],
-      enableEvents: true,
     });
 
+    // Registration may also happen outside of the class
+    // You can also register an anonymous function
     this.registerHandler(
       googleBooksLoadedFailure,
       this.handleGoogleBooksLoadedFailureEvent
