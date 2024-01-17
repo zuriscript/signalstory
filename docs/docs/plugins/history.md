@@ -8,6 +8,12 @@ sidebar_position: 1
 
 ## Enabling State History
 
+:::tip
+
+While the plugin works with regular stores, it is recommended to use it exclusively with immutable stores to ensure optimal performance.
+
+:::
+
 To activate the state history feature in signalstory, you need to include the plugin using the exposed `useStoreHistory` factory method:
 
 ```typescript

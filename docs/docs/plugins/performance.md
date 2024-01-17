@@ -30,7 +30,7 @@ You can use the exposed `getReport` to get the current snapshot of the performan
 
 ## Realtime report using redux devtools
 
-If you have enabled [devtools](./devtools.md) for at least one store, you can directly see your performance counters in the state panel under the key: `@signalstory\performance-counter`.
+If you have enabled [devtools](./devtools.md) for at least one store, you can directly see your performance counters in the state panel under the key: `@signalstory/performance-counter`.
 
 import ThemedImage from '@theme/ThemedImage';
 import useBaseUrl from '@docusaurus/useBaseUrl';
