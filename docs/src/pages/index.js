@@ -24,6 +24,16 @@ function HomepageHeader() {
             to="/docs/prolog">
             Start the Adventure ✨
           </Link>
+          <span className={styles.ghbtns}>
+            <iframe
+              src="https://ghbtns.com/github-btn.html?user=zuriscript&amp;repo=signalstory&amp;type=star&amp;count=true&amp;size=large"
+              frameBorder={0}
+              scrolling={0}
+              width={160}
+              height={30}
+              title="GitHub Stars"
+            />
+          </span>
         </div>
       </div>
     </header>
