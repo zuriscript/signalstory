@@ -91,6 +91,11 @@ const config = {
             'https://zuriscript.github.io/signalstory/img/social-card.png',
         },
       ],
+      algolia: {
+        appId: 'PMI5BJD9PV',
+        apiKey: '197c8a48b1dd0bac861c7ff2170b3fba',
+        indexName: 'signalstory',
+      },
       navbar: {
         title: 'signalstory',
         logo: {
@@ -174,6 +179,10 @@ const config = {
               {
                 label: 'Docs powered by Docusaurus',
                 href: 'https://docusaurus.io/',
+              },
+              {
+                label: 'Search powered by Algolia',
+                href: 'https://docsearch.algolia.com/',
               },
               {
                 label: 'Wizard by Freepik - Flaticon',
