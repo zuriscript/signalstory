@@ -43,3 +43,10 @@ export const isSessionStorageAvailable = /*@__PURE__*/ makeFeatureDetector(
 export const isDevtoolsAvailable = /*@__PURE__*/ makeFeatureDetector(
   () => window && '__REDUX_DEVTOOLS_EXTENSION__' in window
 );
+
+/**
+ * Feature detection for setTimeout availability.
+ */
+export const isSetTimeoutAvailable = /*@__PURE__*/ makeFeatureDetector(
+  () => !!setTimeout
+);

@@ -1,11 +1,10 @@
 /* eslint-disable @angular-eslint/component-selector */
-import { Component, effect } from '@angular/core';
+import { Component, OnDestroy, effect } from '@angular/core';
 import {
-  getHistory,
+  HistoryTracker,
   isLoading,
   publishStoreEvent,
-  redo,
-  undo,
+  trackHistory,
 } from 'signalstory';
 import {
   getGoogleBooksBySearchArgument,
@@ -39,10 +38,16 @@ import { storeResetRequestEvent } from './state/events';
     <div>
       <h2>History</h2>
       <div class="buttons">
-        <button (click)="undo(store)">Undo</button>
-        <button (click)="redo(store)">Redo</button>
+        <button [disabled]="!tracker.canUndo()" (click)="tracker.undo()">
+          Undo
+        </button>
+        <button [disabled]="!tracker.canRedo()" (click)="tracker.redo()">
+          Redo
+        </button>
       </div>
-      <div class="chip" *ngFor="let command of history">{{ command }}</div>
+      <div class="chip" *ngFor="let command of history">
+        {{ command }}
+      </div>
     </div>
   `,
   styles: [
@@ -83,18 +88,23 @@ import { storeResetRequestEvent } from './state/events';
     `,
   ],
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
+  tracker: HistoryTracker;
   history: string[] = [];
-  undo = undo;
-  redo = redo;
   isCollectionLoading = isLoading(this.store);
 
   constructor(public store: BooksStore) {
+    this.tracker = trackHistory(10, store);
+
     effect(() => {
       if (store.state()) {
-        this.history = getHistory(store).map(x => x.command);
+        this.history = this.tracker.getHistory().map(x => x.command);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.tracker.destroy();
   }
 
   onSearchTextChanged(searchText: string) {

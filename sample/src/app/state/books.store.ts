@@ -7,7 +7,6 @@ import {
   useDevtools,
   useLogger,
   usePerformanceCounter,
-  useStoreHistory,
   useStorePersistence,
   useStoreStatus,
 } from 'signalstory';
@@ -22,7 +21,6 @@ export class BooksStore extends ImmutableStore<Book[]> {
       name: 'BookStore',
       plugins: [
         useDevtools(),
-        useStoreHistory(),
         useDeepFreeze(),
         useStorePersistence(
           configureIndexedDb({

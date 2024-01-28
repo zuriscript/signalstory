@@ -4,7 +4,7 @@ import { Store } from './store';
 /**
  * Store registry of stores currently in scope
  */
-const storeRegistry = new Set<WeakRef<Store<unknown>>>();
+export const storeRegistry = new Set<WeakRef<Store<unknown>>>();
 
 /**
  * Iterates over each store in the registry and executes the specified callback function.
