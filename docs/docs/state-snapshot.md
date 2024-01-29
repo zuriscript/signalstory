@@ -1,12 +1,10 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 # State Snapshot
 
 The snapshot feature enables you to capture and restore the state of all stores currently in scope or a selected subset of stores within your application. This can be particularly useful for scenarios where you need to save and later revert application state, such as when performing a rollback or in response to user actions.
-
-While the [history plugin](./plugins/history.md) effectively captures the history of one store, a snapshot allows you to **rollback multiple actions across various stores.** Using snapshots you can provide transactional guarantees spanning the full application state.
 
 ## Usage
 

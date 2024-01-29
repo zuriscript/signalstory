@@ -2,7 +2,13 @@
 sidebar_position: 1
 ---
 
-# History
+# History (Deprecated)
+
+:::caution
+
+**Deprecation Notice:** The single-store history plugin (`useStoreHistory`) is now deprecated and will be removed in future Major releases. We recommend migrating to the new and improved [trackHistory](../history.md) function for enhanced flexibility and expanded features. The new API supports multiple stores, allowing you to track and manage state changes across various parts of your application. It provides more advanced capabilities, including transactional undo/redo operations and a more efficient handling of memory.
+
+:::
 
 `signalstory` provides a convenient way for consumers to access and navigate the state history of a store. By enabling the `StoreHistoryPlugin`, you can use undo and redo functionality and gain insights into the sequence of actions that have occurred within your application.
 
@@ -47,12 +53,6 @@ useStoreHistory({
   maxLength: 100,
 });
 ```
-
-:::caution
-
-By defining `maxLength`, you can control the history size, keeping memory usage in check. If left unspecified (`undefined`), the history will expand without constraints. The choice not to set a default max length aims to maintain compatibility with versions `17.*`, as this would introduce a Breaking Change. A designated default value will be introduced starting from version `18`.
-
-:::
 
 ## Accessing State History
 
