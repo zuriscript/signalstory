@@ -131,6 +131,11 @@ export interface HistoryTracker {
   redo: () => boolean;
 }
 
+const PRUNE_FRACTION = 0.25;
+const UNDO_COMMAND = '_UNDO_';
+const REDO_COMMAND = '_REDO_';
+const UNSPECIFIED_COMMAND = 'Unspecified';
+
 class HistoryTrackerBase implements HistoryTracker {
   private readonly stores: Set<WeakRef<Store<any>>>;
   private readonly pool: WeakMap<Store<any>, WeakRef<Store<any>>>;
@@ -141,16 +146,9 @@ class HistoryTrackerBase implements HistoryTracker {
 
   private activeTransactions: number;
 
-  private static readonly PRUNE_FRACTION = 0.25;
-  private static readonly UNDO_COMMAND = '_UNDO_';
-  private static readonly REDO_COMMAND = '_REDO_';
-  private static readonly UNSPECIFIED_COMMAND = 'Unspecified';
-
   constructor(stores: Set<WeakRef<Store<any>>>, maxLength: number) {
     this.stores = stores;
-    this.maxLength = Math.floor(
-      maxLength * (1 + HistoryTrackerBase.PRUNE_FRACTION)
-    );
+    this.maxLength = Math.floor(maxLength * (1 + PRUNE_FRACTION));
     this.pool = new WeakMap<Store<any>, WeakRef<Store<any>>>();
     this._history = [];
     this.activeTransactions = 0;
@@ -205,11 +203,11 @@ class HistoryTrackerBase implements HistoryTracker {
   ) {
     if (
       this.activeTransactions === 0 &&
-      command !== HistoryTrackerBase.UNDO_COMMAND &&
-      command !== HistoryTrackerBase.REDO_COMMAND
+      command !== UNDO_COMMAND &&
+      command !== REDO_COMMAND
     ) {
       this.pushToHistory({
-        command: command ?? HistoryTrackerBase.UNSPECIFIED_COMMAND,
+        command: command ?? UNSPECIFIED_COMMAND,
         before: store.state(),
         store: this.pool.get(store) ?? new WeakRef(store),
       });
@@ -263,9 +261,7 @@ class HistoryTrackerBase implements HistoryTracker {
   }
 
   private prune(): void {
-    const deleteCount = Math.floor(
-      this._history.length * HistoryTrackerBase.PRUNE_FRACTION
-    );
+    const deleteCount = Math.floor(this._history.length * PRUNE_FRACTION);
 
     if (deleteCount > 0) {
       this._history.splice(0, deleteCount);
@@ -335,7 +331,7 @@ class HistoryTrackerBase implements HistoryTracker {
   beginTransaction(tag?: string) {
     if (this.activeTransactions === 0) {
       this.pushToHistory({
-        command: tag ?? HistoryTrackerBase.UNSPECIFIED_COMMAND,
+        command: tag ?? UNSPECIFIED_COMMAND,
         before: this.collectCurrentStates(),
       });
     }
@@ -354,10 +350,7 @@ class HistoryTrackerBase implements HistoryTracker {
       const toBeUndone = this.popFromHistory();
       if (toBeUndone && toBeUndone.before instanceof WeakMap) {
         this.foreachStore(store =>
-          store.set(
-            toBeUndone.before.get(store),
-            HistoryTrackerBase.UNDO_COMMAND
-          )
+          store.set(toBeUndone.before.get(store), UNDO_COMMAND)
         );
       }
 
@@ -372,23 +365,23 @@ class HistoryTrackerBase implements HistoryTracker {
 
       if (newState instanceof WeakMap) {
         this.pushToHistory({
-          command: HistoryTrackerBase.UNDO_COMMAND,
+          command: UNDO_COMMAND,
           before: this.collectCurrentStates(),
           undoneCommandIndex: toBeUndoneCommandIndex,
         });
         this.foreachStore(store =>
-          store.set(newState.get(store), HistoryTrackerBase.UNDO_COMMAND)
+          store.set(newState.get(store), UNDO_COMMAND)
         );
       } else if ('store' in toBeUndoneCommand) {
         const store = toBeUndoneCommand.store.deref();
         if (store) {
           this.pushToHistory({
-            command: HistoryTrackerBase.UNDO_COMMAND,
+            command: UNDO_COMMAND,
             store: toBeUndoneCommand.store,
             before: store.state(),
             undoneCommandIndex: toBeUndoneCommandIndex,
           });
-          store.set(newState, HistoryTrackerBase.UNDO_COMMAND);
+          store.set(newState, UNDO_COMMAND);
         }
       }
 
@@ -409,23 +402,23 @@ class HistoryTrackerBase implements HistoryTracker {
       const newState = toBeRedoneCommand.before;
       if (newState instanceof WeakMap) {
         this.pushToHistory({
-          command: HistoryTrackerBase.REDO_COMMAND,
+          command: REDO_COMMAND,
           before: this.collectCurrentStates(),
           redoneCommandIndex: toBeRedoneCommandIndex,
         });
         this.foreachStore(store =>
-          store.set(newState.get(store), HistoryTrackerBase.REDO_COMMAND)
+          store.set(newState.get(store), REDO_COMMAND)
         );
       } else if ('store' in toBeRedoneCommand) {
         const store = toBeRedoneCommand.store.deref();
         if (store) {
           this.pushToHistory({
-            command: HistoryTrackerBase.REDO_COMMAND,
+            command: REDO_COMMAND,
             store: toBeRedoneCommand.store,
             before: store.state(),
             redoneCommandIndex: toBeRedoneCommandIndex,
           });
-          store.set(newState, HistoryTrackerBase.REDO_COMMAND);
+          store.set(newState, REDO_COMMAND);
         }
       }
 
