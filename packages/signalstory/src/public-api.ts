@@ -6,6 +6,7 @@ export { Store } from './lib/store';
 export { StoreConfig } from './lib/store-config';
 export { StoreEffect, createEffect } from './lib/store-effect';
 export { StoreEvent, createEvent } from './lib/store-event';
+export { HistoryTracker, trackHistory } from './lib/store-history';
 export { ImmutableStore } from './lib/store-immutability/immutable-store';
 export { ImmutableStoreConfig } from './lib/store-immutability/immutable-store-config';
 export { Immutable } from './lib/store-immutability/immutable-type';
