@@ -6,6 +6,8 @@ sidebar_position: 8
 
 The history tracking feature enables you to capture and manage state changes within your application, offering robust `undo` and `redo` functionalities that span an arbitrary number of stores. By utilizing `transactions`, you can group a series of related actions, ensuring they are treated as a single, atomic unit during undo and redo operations.
 
+Tracking history is exclusively supported for `immutable stores`.
+
 ## Usage
 
 `trackHistory` accepts the maximum length of the history as a parameter, along with the stores you intend to track.

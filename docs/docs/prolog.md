@@ -58,7 +58,7 @@ And then:
   <li style={{ marginBottom: '0.5em' }}>📦 Don't want to use a class for stores? - You don't have to.</li>
   <li style={{ marginBottom: '0.5em' }}>🛠️ Tired of debugging state changes in the console? - Enable redux devtools.</li>
   <li style={{ marginBottom: '0.5em' }}>🪄 Still want some good old logging magic? - Enable Store logger plugin</li>
-  <li style={{ marginBottom: '0.5em' }}>⏳ Need to keep track of store history and selectively perform undo/redo operations? - Enable the history plugin.</li>
+  <li style={{ marginBottom: '0.5em' }}>⏳ Need to keep track of store history and perform undo/redo operations? - track history.</li>
   <li style={{ marginBottom: '0.5em' }}>💾 Want to sync your state with local storage? - Enable the persistence plugin.</li>
   <li style={{ marginBottom: '0.5em' }}>🗄️ Need a more sophisticated store storage or building an offline app? - Use IndexedDB adapter.</li>
   <li style={{ marginBottom: '0.5em' }}>📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.</li>

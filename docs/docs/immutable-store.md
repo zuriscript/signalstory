@@ -16,12 +16,6 @@ store.update(state => {
 });
 ```
 
-:::info
-
-We've chosen to maintain the status quo for both `Store` and `ImmutableStore`,retaining their pre-Version 17 public API. The reason behind it: We want `Store` to mimic the behavior of a regular signal while retaining the convenience of the `mutate` function as syntactic sugar. Note, however, that `mutate` will create a shallow copy of the state prior to applying the mutation function.
-
-:::
-
 ## Immutable Store vs regular Store
 
 At the moment, there is no full immutability support for signals out-of-the-box, eventhough there had been [experiments](https://github.com/angular/angular/pull/49644) in the past. This is unsurprising, given the broad spectrum of applications that signals were initially intended for:
@@ -46,7 +40,7 @@ There are many advantages to immutability, and deep or full immutability provide
 :::tip
 `ImmutableStore` comes with full immutability, compile-time immutability check support and the possibility to plugin `immer.js` and the like.
 
-- Choose `ImmutableStore` for securitiy and peace of mind.
+- Choose `ImmutableStore` for securitiy and peace of mind and if you want to perform undo/redo operations on the store
 - Choose `Store` if you really need peak performance or if you just don't like the syntax and type constraints that `ImmutableStore` brings.
 
 :::
@@ -65,7 +59,6 @@ class MyImmutableStore extends ImmutableStore<MyState> {
         name: 'My Store',
         plugins: [
           useDevtools(),
-          useStoreHistory(),
           useStorePersistence(),
           useDeepFreeze(),
         ],
@@ -74,6 +67,12 @@ class MyImmutableStore extends ImmutableStore<MyState> {
 }
 
 ```
+
+:::caution
+
+If you are using the `mutate` method with immutable stores, consider to plug in an optimized mutation producer library. The fallback implementation for producing immutable state is a basic Clone-and-Mutate approach, leveraging [structuredClone](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone). While this method might be acceptables, the user is expected to pass a more sophisticated implementation from libraries like [immer.js](https://immerjs.github.io/immer/) or [structura.js](https://giusepperaso.github.io/structura.js/) for more robustness and speed.
+
+:::
 
 You can also use it as dynamic store without declaring a class first:
 
@@ -90,12 +89,6 @@ console.log(counterStore.state()); // prints "{ val: 6 }"
 The Immutable store wraps the state object inside a generic `Immutable<T>` type which provides compile time deep immutability for any object type.
 
 Be aware, that typeScript's type system doesn't always prevent violations of `readonly`, and therefore `Immutable<T>` constraints. Scenarios like type assertions, structural typing compatibility, and passing readonly objects to functions that expect mutable ones, can all bypass these immutability checks. For a stronger guarantee of immutability, consider utilizing the [deep freeze store plugin](./plugins/deep-freeze.md).
-
-:::tip
-
-The default implementation for producing immutable state is a basic Clone-and-Mutate approach, leveraging [structuredClone](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone) - or JSON Stringify/Parse as alternative, if structuredClone is unsupported. While this method might be acceptable for various scenarios, the user is expected to pass a more sophisticated implementation from libraries like [immer.js](https://immerjs.github.io/immer/) or [structura.js](https://giusepperaso.github.io/structura.js/) for more robustness and speed.
-
-:::
 
 ## Immer.js
 
