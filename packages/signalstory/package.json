@@ -1,6 +1,6 @@
 {
   "name": "signalstory",
-  "version": "17.3.0",
+  "version": "17.4.0",
   "description": "Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.",
   "publishConfig": {
     "access": "public"
