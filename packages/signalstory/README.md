@@ -23,7 +23,8 @@ Here's a snapshot of some notable highlights:
 ✅ &nbsp;Immutability on demand  
 ✅ &nbsp;Rich plugin ecosystem  
 ✅ &nbsp;Native IndexedDB support  
-✅ &nbsp;Granular Undo/Redo  
+✅ &nbsp;Transactional Undo/Redo  
+✅ &nbsp;Global State Snaphots and Rollbacks  
 ✅ &nbsp;Devtools support  
 ✅ &nbsp;Effect and Store status tracking  
 ✅ &nbsp;Realtime store performance statistics  
@@ -46,7 +47,7 @@ Here's a snapshot of some notable highlights:
 - 📦 Don't want to use a class for stores? - You don't have to.
 - 🛠️ Tired of debugging state changes in the console? - Enable redux devtools.
 - 🪄 Still want some good old logging magic? - Enable Store logger plugin
-- ⏳ Need to keep track of store history and perform undo/redo operations? - Enable the history plugin.
+- ⏳ Need to keep track of store history and perform undo/redo operations? - track the history.
 - 💾 Want to sync your state with local storage? - Enable the persistence plugin.
 - 🗄️ Need a more sophisticated store storage or building an offline app? - Use IndexedDB adapter
 - 📈 Need to get notified of whether your store is modified or currently loading? - Enable the Store Status plugin.
@@ -67,7 +68,8 @@ npm install signalstory
 ```typescript
 import { produce } from 'immer';
 
-// Fully immutable store class with immer.js for boosting immutable mutation performance
+// Immutable store class using immer.js for boosting immutable mutations
+@Injectable({ providedIn: 'root' })
 class BookStore extends ImmutableStore<Book[]> {
   constructor() {
     super({
@@ -76,11 +78,13 @@ class BookStore extends ImmutableStore<Book[]> {
         mutationProducerFn: produce,
         plugins: [
           useDevtools(),
-          useStoreHistory(),
-          useStorePersistence(),
+          usePerformanceCounter(),
           useLogger(),
           useStoreStatus(),
-          usePerformanceCounter(),
+          useStorePersistence(
+            configureIndexedDb({
+              dbName: 'SharedDatabase',
+          })),
         ],
     });
 
@@ -105,24 +109,34 @@ class BookStore extends ImmutableStore<Book[]> {
     }, 'Add Book To Collection');
   }
 }
+```
 
-
+```typescript
 // Encapsulated multi store query object
 export const BooksAndPublishersByAuthorInSwitzerlandQuery = createQuery(
   [BookStore, PublisherStore],
   (books, publishers, authorId: string) => {
     const booksFromAuthor = books.state().filter(x => x.author === authorId);
-    const publishersInSwitzerland = publishers.state().filter(x => x.country === 'CH');
+    const publishersInSwitzerland = publishers
+      .state()
+      .filter(x => x.country === 'CH');
 
     return booksFromAuthor.map(book => ({
       book,
-      publisher: publishersInSwitzerland.find(p => p.id === book.mainPublisherId),
+      publisher: publishersInSwitzerland.find(
+        p => p.id === book.mainPublisherId
+      ),
     }));
   }
 );
 // And then run it
-const query = myBookStore.runQuery(BooksAndPublishersByAuthorInSwitzerlandQuery, 'sapowski');
+const query = myBookStore.runQuery(
+  BooksAndPublishersByAuthorInSwitzerlandQuery,
+  'sapowski'
+);
+```
 
+```typescript
 // Encapsulated effect object
 export const fetchBooksEffect = createEffect(
   'Fetch Books',
@@ -148,6 +162,26 @@ myBookStore.runEffect(fetchBooksEffect).subscribe();
 const loadingSignal = isLoading(myBookStore); // true while effect is running
 const initializedSignal = initialized(myBookStore); // true after initializing effect completion
 const modifiedSignal = modified(myBookStore); // true after store update
+```
+
+```typescript
+// Track history spanning multiple stores
+const tracker = trackHistory(50, store1, store2);
+
+// Undo single commands
+store1.set({ value: 10 }, 'ChangeCommand');
+tracker.undo();
+
+tracker.beginTransaction('Transaction Label');
+store1.set({ value: 42 }, 'ChangeCommand');
+store2.set({ value: 23 }, 'AnotherCommand');
+tracker.endTransaction();
+
+// Undo both commands on store1 and store2 at once
+tracker.undo();
+
+// Redo the whole transaction
+tracker.redo();
 ```
 
 ## Sample Application

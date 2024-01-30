@@ -117,8 +117,8 @@ const config = {
         ],
       },
       announcementBar: {
-        id: '17.3.0',
-        content: '<b>signalstory 17.3.0</b> has just been released 🥳',
+        id: '17.4.0',
+        content: '<b>signalstory 17.4.0</b> is out 🥳🥳🥳',
         backgroundColor: '#e35e75',
         textColor: '#091E42',
         isCloseable: true,
