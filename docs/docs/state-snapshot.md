@@ -6,6 +6,8 @@ sidebar_position: 9
 
 The snapshot feature enables you to capture and restore the state of all stores currently in scope or a selected subset of stores within your application. This can be particularly useful for scenarios where you need to save and later revert application state, such as when performing a rollback or in response to user actions.
 
+Snapshot works with both `regular stores` and `immutable stores`.
+
 ## Usage
 
 A snapshot is a representation of the application state at a specific point in time. It includes a timestamp indicating when the snapshot was created and a `restore` method to revert the application state to the captured snapshot.
