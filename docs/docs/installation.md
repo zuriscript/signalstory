@@ -10,7 +10,7 @@ signalstory is based on [signal](https://angular.io/guide/signals), and hence re
 
 :::
 
-Install using `yarn` or `npm`:
+Install using `yarn`, `npm` or `pnpm`:
 
 ```bash
 yarn add signalstory
@@ -18,4 +18,8 @@ yarn add signalstory
 
 ```bash
 npm install signalstory
+```
+
+```bash
+pnpm install signalstory
 ```
