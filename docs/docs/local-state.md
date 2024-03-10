@@ -53,7 +53,7 @@ class BooksStore extends Store<Book[]> {
     this.mutate(state => {
       const book = state.find(x => x.id === bookId);
       if (book) {
-        book.isInCollection = true;
+        book.isInMyCollection = true;
       }
     }, 'Add Book To Collection');
   }
