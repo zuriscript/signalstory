@@ -130,8 +130,9 @@ class BookStore extends ImmutableStore<Book[]> {
           })),
         ],
     });
-
-    // Handle store reset request events
+    
+    // Handle store reset request events. Note, the storeResetRequestEvent would 
+    // be created or imported, see the events documentation for more details
     this.registerHandler(storeResetRequestEvent, store => {
       store.set([], 'Reset');
     });
