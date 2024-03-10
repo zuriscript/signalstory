@@ -139,7 +139,7 @@ class BookStore extends ImmutableStore<Book[]> {
 
   // Query
   public get getBooksInCollection() {
-    return computed(() => this.state().filter(x => x isInCollection));
+    return computed(() => this.state().filter(x => x.isInCollection));
   }
 
   // Command
