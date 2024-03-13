@@ -38,7 +38,7 @@ class CounterStore extends Store<number> {
 const counterStore = new CounterStore();
 
 console.log(counterStore.state()); // prints 0
-console.log(counterStore.plus100()()); // prints 100
+console.log(counterStore.plus100()); // prints 100
 console.log(counterStore.plusN(200)()); // prints 300
 ```
 
