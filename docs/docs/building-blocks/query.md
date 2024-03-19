@@ -10,7 +10,7 @@ Since `signalstory` uses [signals](https://angular.io/guide/signals#computed-sig
 
 ## Store Queries
 
-You can use the `state()` getter to access the entire state of the store. To select a slice or to apply transformations use angulars `computed` function. To define a query, you can create a function within your store that encapsulates the logic for accessing the desired data from the state.
+You can use the `state()` getter to access the entire state of the store. To select a slice or to apply transformations use angular's `computed` function or the `computed` function provided by the store. To define a query, you can create a function within your store that encapsulates the logic for accessing the desired data from the state.
 
 ```typescript
 import { computed } from '@angular/core';
@@ -40,6 +40,8 @@ const counterStore = new CounterStore();
 console.log(counterStore.state()); // prints 0
 console.log(counterStore.plus100()); // prints 100
 console.log(counterStore.plusN(200)()); // prints 300
+console.log(counterStore.computed(state => state + 500)); // returns a Signal<number>
+console.log(counterStore.computed(state => state + 500)()); // prints 500
 ```
 
 The created signals `plus100` and `plusN` depend on the state signal and are notified and whenever it changes.
