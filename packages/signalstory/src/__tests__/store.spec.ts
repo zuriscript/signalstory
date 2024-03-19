@@ -340,3 +340,35 @@ describe('runQuery', () => {
     );
   });
 });
+
+
+describe('computed', () => {
+
+  it('returns a computed signal that selects the value from the store state', () => {
+    // arrange
+    const store = new Store({ initialState: { value: 5 } });
+
+    // act
+    const computedSignal = store.computed(state => state.value);
+
+    // assert
+    expect(computedSignal()).toBe(5);
+  })
+
+  it('updates the computed signal when the state changes', () => {
+    // arrange
+    const store = new Store({ initialState: { value: 5 } });
+
+    // act
+    const computedSignal = store.computed(state => state.value);
+
+    // assert
+    expect(computedSignal()).toBe(5);
+
+    // act
+    store.set({ value: 10 });
+
+    // assert
+    expect(computedSignal()).toBe(10);
+  })
+})
