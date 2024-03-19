@@ -222,7 +222,22 @@ export class Store<TState> {
   }
 
   /**
-   * Runs a store query potentially targeting many differnt stores with the provided arguments and returns the result.
+   * Creates a computed signal that selects a value from the store's state. This is useful
+   * for creating derived state and binding it into the component tree.
+   *
+   * Use the `runQuery` method if you are targeting multiple stores.
+   *
+   * @param selectFunction A function to select the computed value from the store's state.
+   * @typeparam T The type of the computed signal result.
+   * @typeparam TState The type of the store's state.
+   * @returns The computed signal.
+   */
+  public computed<T>(selectFunction: (state: TState) => T): Signal<T> {
+    return computed(() => selectFunction(this._state()));
+  }
+
+  /**
+   * Runs a store query potentially targeting many different stores with the provided arguments and returns the result.
    * @typeparam TResult The type of the query's result.
    * @typeparam TStores The types of the stores used in the query.
    * @typeparam TArgs The type of the query's arguments.
