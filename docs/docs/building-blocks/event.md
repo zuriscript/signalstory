@@ -10,7 +10,7 @@ By utilizing events and event handlers, you can establish communication between 
 
 :::
 
-## Wyh should I use Events?
+## Why should I use Events?
 
 Events can be used for untangling and breaking down dependencies among stores, commands, and actions. They also provide means for propagating state across stores. For instance, if you want `store2` to immediately react when the state of `store1` changes without directly invoking `store2`, events offer an elegant solution. Unlike signal effects, where modifying signals within the effect's scope is forbidden by default, signalstory events and handlers operate synchronously. This helps mitigate potential issues stemming from asynchronous dispatches, such as errors or unnecessary change detection cycles.
 

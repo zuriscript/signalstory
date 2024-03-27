@@ -6,7 +6,7 @@ sidebar_position: 3
 
 `Stores` serve as a central hub for managing a specific slice of the application's state. A store may be used globally but can also be scoped at a component or service level. Rather than using a single store for the entire application, the state can be distributed across multiple isolated stores. Each store could be responsible for managing state related to a specific domain entity or a feature.
 
-A store encapsulates a `WrtiableSignal` as state. It exposes the functions `set`, `update`, and `mutate` for performing state modifications, as well as the `state` as readonly signal. While Signalstory offers a variety of features for your everyday needs, it goes beyond that by introducing concepts and abstractions to help you build a maintainable and scalable architecture. Some of these abstractions include:
+A store encapsulates a `WritableSignal` as state. It exposes the functions `set`, `update`, and `mutate` for performing state modifications, as well as the `state` as readonly signal. While Signalstory offers a variety of features for your everyday needs, it goes beyond that by introducing concepts and abstractions to help you build a maintainable and scalable architecture. Some of these abstractions include:
 
 - [Command](./building-blocks/command.md): A structured approach to exposing state-modifying methods.
 - [Query](./building-blocks/query.md): Patterns and utilities facilitating testable multi-store queries.
