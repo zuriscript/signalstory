@@ -44,5 +44,9 @@ export {
   resetStoreStatus,
   useStoreStatus,
 } from './lib/store-plugin-status/plugin-status';
+export {
+  StoreTransferStatePluginOptions,
+  useStoreTransferState,
+} from './lib/store-plugin-transfer-state/plugin-transfer-state';
 export { StoreQuery, createQuery } from './lib/store-query';
 export { createSnapshot } from './lib/store-snapshot';
