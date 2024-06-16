@@ -17,13 +17,6 @@ export const runningEffects: WritableSignal<
 > = /*@__PURE__*/ signal([]);
 
 /**
- * @deprecated Use `modified` instead. This method is deprecated and will be removed in the next major release (v18).
- */
-export function isModified(store: Store<any>): Signal<boolean> {
-  return modified(store);
-}
-
-/**
  * Returns a Signal indicating whether the provided store has been modified.
  *
  * @note A store is initially considered unmodified. Any command (`set`, `update`, `mutate`) applied to the store
@@ -62,16 +55,6 @@ export function initialized(store: Store<any>): Signal<boolean> {
   }
 
   return computed(() => status().hasBeenInitialized);
-}
-
-/**
- * @deprecated Use `resetStoreStatus` instead. This method is deprecated and will be removed in the next major release (v18).
- */
-export function markAsUnmodified(store: Store<any>): void {
-  storeStatusMap.get(store)?.update(state => ({
-    ...state,
-    hasBeenModified: false,
-  }));
 }
 
 /**

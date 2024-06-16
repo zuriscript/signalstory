@@ -217,20 +217,6 @@ describe('runEffect', () => {
     expect(func).toHaveBeenCalledWith(store, argument);
   });
 
-  it('should runEffect without injection context using deprecated method', () => {
-    // arrange
-    const func = jest.fn();
-    const effect = createEffect('effect', func, false);
-    const argument = 42;
-
-    // act
-    store.runEffect(effect, argument);
-
-    // assert
-    expect(func).toHaveBeenCalledTimes(1);
-    expect(func).toHaveBeenCalledWith(store, argument);
-  });
-
   it('should runEffect in injection context by default', () => {
     // arrange
     const argumentFunc = jest.fn();
