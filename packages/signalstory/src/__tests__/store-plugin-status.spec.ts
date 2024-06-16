@@ -6,9 +6,7 @@ import {
   isAnyEffectRunning,
   isEffectRunning,
   isLoading,
-  isModified,
   markAsHavingNoRunningEffects,
-  markAsUnmodified,
   modified,
   resetStoreStatus,
   runningEffects,
@@ -310,73 +308,6 @@ describe('isEffectRunning', () => {
   });
 });
 
-describe('isModified', () => {
-  let store: Store<{ value: number }>;
-
-  beforeEach(() => {
-    store = new Store<{ value: number }>({
-      initialState: { value: 10 },
-      plugins: [useStoreStatus()],
-    });
-  });
-
-  it('should be unmodified initially', () => {
-    // assert
-    expect(isModified(store)()).toBe(false);
-  });
-
-  it('should mark the store as modified after a command is processed', () => {
-    // act
-    store.set({ value: 10 });
-
-    // assert
-    expect(isModified(store)()).toBe(true);
-  });
-
-  it('should mark the store as modified after an effect is processed', async () => {
-    // arrange
-    const effect = createEffect(
-      'dummyEffect',
-      (store: Store<{ value: number }>) =>
-        of(30).pipe(
-          tap(val =>
-            store.mutate(x => {
-              x.value = val;
-            })
-          )
-        )
-    );
-
-    // act
-    await lastValueFrom(store.runEffect(effect));
-
-    // assert
-    expect(isModified(store)()).toBe(true);
-  });
-
-  it('should mark the store as unmodified after an effect with setUnmodifiedStatus is processed', async () => {
-    // arrange
-    const effect = createEffect(
-      'dummyEffect',
-      (store: Store<{ value: number }>) =>
-        of(30).pipe(
-          tap(val =>
-            store.mutate(x => {
-              x.value = val;
-            })
-          )
-        ),
-      { setUnmodifiedStatus: true }
-    );
-
-    // act
-    await lastValueFrom(store.runEffect(effect));
-
-    // assert
-    expect(isModified(store)()).toBe(false);
-  });
-});
-
 describe('modified', () => {
   let store: Store<{ value: number }>;
 
@@ -487,29 +418,6 @@ describe('initialized', () => {
 
     // assert
     expect(initialized(store)()).toBe(true);
-  });
-});
-
-describe('markAsUnmodified', () => {
-  let store: Store<{ value: number }>;
-
-  beforeEach(() => {
-    store = new Store<{ value: number }>({
-      initialState: { value: 10 },
-      plugins: [useStoreStatus()],
-    });
-  });
-
-  it('should manually mark the store as unmodified', () => {
-    // arrange
-    store.set({ value: 20 });
-    expect(modified(store)()).toBe(true); // sanity check
-
-    // act
-    markAsUnmodified(store);
-
-    // assert
-    expect(modified(store)()).toBe(false);
   });
 });
 

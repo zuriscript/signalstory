@@ -28,11 +28,6 @@ export interface StoreConfig<TState> {
    */
   stateEqualityFn?: ValueEqualityFn<TState> | null;
   /**
-   * Indicates whether logging is enabled. (optional, default: false).
-   * @deprecated Use the `StoreLogger` plugin created by `useLogger` instead.
-   */
-  enableLogging?: boolean;
-  /**
    * A list of plugins to use
    */
   plugins?: StorePlugin[];

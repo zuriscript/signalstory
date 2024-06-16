@@ -22,7 +22,6 @@ import {
   EffectPreprocessor,
   InitPostprocessor,
 } from './store-plugin';
-import { useLogger } from './store-plugin-logger/plugin-logger';
 import { StoreQuery } from './store-query';
 import { addToRegistry } from './store-registry';
 import { getInjectorOrNull } from './utility/injector-helper';
@@ -54,21 +53,12 @@ export class Store<TState> {
       initialState: config.initialState,
       injector: config.injector ?? getInjectorOrNull(),
       stateEqualityFn: config.stateEqualityFn ?? null,
-      enableLogging: config.enableLogging ?? false,
       plugins: config.plugins ?? [],
     };
 
     this._state = signal(this.config.initialState, {
       equal: this.config.stateEqualityFn ?? undefined,
     });
-
-    //TODO: Remove as soon as enableLogging removed due to deprecation
-    if (
-      this.config.enableLogging &&
-      !this.config.plugins.some(x => 'name' in x && x['name'] === 'StoreLogger')
-    ) {
-      this.config.plugins.push(useLogger());
-    }
 
     addToRegistry(this);
 

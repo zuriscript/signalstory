@@ -14,12 +14,6 @@ export { publishStoreEvent } from './lib/store-mediator';
 export { StorePlugin } from './lib/store-plugin';
 export { useDeepFreeze } from './lib/store-plugin-deep-freeze/plugin-deep-freeze';
 export { useDevtools } from './lib/store-plugin-devtools/plugin-devtools';
-export {
-  getHistory,
-  redo,
-  undo,
-  useStoreHistory,
-} from './lib/store-plugin-history/plugin-history';
 export { useLogger } from './lib/store-plugin-logger/plugin-logger';
 export {
   getReport,
@@ -37,9 +31,7 @@ export {
   isAnyEffectRunning,
   isEffectRunning,
   isLoading,
-  isModified,
   markAsHavingNoRunningEffects,
-  markAsUnmodified,
   modified,
   resetStoreStatus,
   useStoreStatus,
