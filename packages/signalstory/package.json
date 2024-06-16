@@ -1,6 +1,6 @@
 {
   "name": "signalstory",
-  "version": "17.4.0",
+  "version": "18.0.0",
   "description": "Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.",
   "publishConfig": {
     "access": "public"
@@ -25,12 +25,12 @@
   ],
   "author": {
     "name": "Zur Vonarburg-Shmaria",
-    "url": "https://zurshmaria.ch"
+    "url": "https://zuriscript.ch"
   },
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^17.0.0",
-    "@angular/core": "^17.0.0"
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
