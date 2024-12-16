@@ -68,20 +68,20 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/sample",
+            "statsJson": true,
+            "outputPath": {
+              "base": "dist/sample"
+            },
             "index": "sample/src/index.html",
-            "main": "sample/src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "sample/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": [
-              "sample/src/favicon.ico",
-              "sample/src/assets"
-            ],
+            "assets": ["sample/src/favicon.ico", "sample/src/assets"],
             "styles": ["sample/src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "browser": "sample/src/main.ts"
           },
           "configurations": {
             "production": {
@@ -100,9 +100,7 @@
               "outputHashing": "all"
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true

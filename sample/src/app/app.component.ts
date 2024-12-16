@@ -87,6 +87,7 @@ import { storeResetRequestEvent } from './state/events';
       }
     `,
   ],
+  standalone: false,
 })
 export class AppComponent implements OnDestroy {
   tracker: HistoryTracker;

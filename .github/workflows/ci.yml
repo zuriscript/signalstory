@@ -45,4 +45,4 @@ jobs:
         run: npm run test
 
       - name: Check Tree-shakeability
-        run: npx agadoo ./dist/signalstory/esm2022/signalstory.mjs
+        run: npx agadoo ./dist/signalstory/fesm2022/signalstory.mjs

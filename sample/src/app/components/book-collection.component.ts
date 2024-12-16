@@ -46,6 +46,7 @@ import { BookData } from '../state/books.state';
       }
     `,
   ],
+  standalone: false,
 })
 export class BookCollectionComponent {
   @Input() books: Array<Immutable<BookData>> = [];
