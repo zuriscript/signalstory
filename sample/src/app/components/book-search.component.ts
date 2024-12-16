@@ -18,6 +18,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
       }
     `,
   ],
+  standalone: false,
 })
 export class BookSearchComponent implements OnInit {
   searchInput = 'sapowski';
