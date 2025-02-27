@@ -15,23 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
+      matrix:
+        version: [18, 20, 22]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ matrix.version }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - uses: actions/setup-node@v2
+            ${{ runner.os }}-node-${{ matrix.version }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-node-${{ matrix.version }}-build-
+            ${{ runner.os }}-node-${{ matrix.version }}-
+
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ matrix.version }}
           cache: 'npm'
 
       - name: Install dependencies
