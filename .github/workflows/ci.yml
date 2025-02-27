@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+      - feature/github-action-matrix
   pull_request:
     paths-ignore:
       - 'docs/**'
+
 
 jobs:
   build:
