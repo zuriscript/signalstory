@@ -1,6 +1,6 @@
 {
   "name": "signalstory",
-  "version": "19.0.0",
+  "version": "20.0.0",
   "description": "Signal-based state management for Angular that grows with your project. Explore a versatile toolbox with enriching plugins for developers at all levels.",
   "publishConfig": {
     "access": "public"
@@ -29,8 +29,8 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
