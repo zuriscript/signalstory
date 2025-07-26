@@ -12,9 +12,18 @@ const storeStatusMap = new WeakMap<
   }>
 >();
 
-export const runningEffects: WritableSignal<
+let _runningEffects: WritableSignal<
   [WeakRef<Store<any>>, StoreEffect<any, any, any>, number][]
-> = /*@__PURE__*/ signal([]);
+> | undefined;
+
+export function getRunningEffects(): WritableSignal<
+  [WeakRef<Store<any>>, StoreEffect<any, any, any>, number][]
+> {
+  if (!_runningEffects) {
+    _runningEffects = signal([]);
+  }
+  return _runningEffects;
+}
 
 /**
  * Returns a Signal indicating whether the provided store has been modified.
@@ -86,11 +95,11 @@ export function resetStoreStatus(store: Store<any>): void {
 export function isLoading(...stores: Store<any>[]): Signal<boolean> {
   if (!stores || stores.length === 0) {
     return computed(() =>
-      runningEffects().some(effect => effect[1].config.setLoadingStatus)
+     getRunningEffects()().some(effect => effect[1].config.setLoadingStatus)
     );
   } else {
     return computed(() =>
-      runningEffects().some(runningEffect => {
+     getRunningEffects()().some(runningEffect => {
         const affectedStore = runningEffect[0].deref();
         return (
           affectedStore &&
@@ -114,7 +123,7 @@ export function isLoading(...stores: Store<any>[]): Signal<boolean> {
  * @returns void
  */
 export function markAsHavingNoRunningEffects(store: Store<any>): void {
-  runningEffects.update(state =>
+ getRunningEffects().update(state =>
     state.filter(runningEffect => runningEffect[0].deref() !== store)
   );
 }
@@ -127,10 +136,10 @@ export function markAsHavingNoRunningEffects(store: Store<any>): void {
  */
 export function isAnyEffectRunning(...stores: Store<any>[]): Signal<boolean> {
   if (!stores || stores.length === 0) {
-    return computed(() => runningEffects().length > 0);
+    return computed(() =>getRunningEffects()().length > 0);
   } else {
     return computed(() =>
-      runningEffects().some(runningEffect => {
+     getRunningEffects()().some(runningEffect => {
         const affectedStore = runningEffect[0].deref();
         return affectedStore && stores.some(store => store === affectedStore);
       })
@@ -150,10 +159,10 @@ export function isEffectRunning(
   ...stores: Store<any>[]
 ): Signal<boolean> {
   if (!stores || stores.length === 0) {
-    return computed(() => runningEffects().some(x => x[1] === effect));
+    return computed(() =>getRunningEffects()().some(x => x[1] === effect));
   } else {
     return computed(() =>
-      runningEffects()
+     getRunningEffects()()
         .filter(runningEffect => runningEffect[1] === effect)
         .some(runningEffect => {
           const affectedStore = runningEffect[0].deref();
@@ -188,13 +197,13 @@ export function useStoreStatus(): StorePlugin {
       }
     },
     preprocessEffect(store, effect, invocationId) {
-      runningEffects.update(effects => [
+     getRunningEffects().update(effects => [
         ...effects,
         [new WeakRef(store), effect, invocationId],
       ]);
     },
     postprocessEffect(store, effect, _, invocationId) {
-      runningEffects.update(effects =>
+     getRunningEffects().update(effects =>
         effects.filter(x => x[2] !== invocationId)
       );
       if (effect.config.setInitializedStatus) {
