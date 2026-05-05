@@ -117,8 +117,8 @@ const config = {
         ],
       },
       announcementBar: {
-        id: '20.0.0',
-        content: '<b>signalstory 20.0.0</b> is out 📯',
+        id: '21.0.0',
+        content: '<b>signalstory 21.0.0</b> is out 📯',
         backgroundColor: '#e35e75',
         textColor: '#091E42',
         isCloseable: true,
