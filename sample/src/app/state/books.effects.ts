@@ -35,7 +35,12 @@ const MOCK_BOOKS: BookData[] = [
     id: 'mock-4',
     volumeInfo: {
       title: 'Design Patterns',
-      authors: ['Erich Gamma', 'Richard Helm', 'Ralph Johnson', 'John Vlissides'],
+      authors: [
+        'Erich Gamma',
+        'Richard Helm',
+        'Ralph Johnson',
+        'John Vlissides',
+      ],
       publishedDate: '1994-10-31',
     },
   },
