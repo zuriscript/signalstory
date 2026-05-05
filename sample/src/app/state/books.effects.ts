@@ -17,7 +17,9 @@ export const getGoogleBooksBySearchArgument = createEffect(
 
     const http = inject(HttpClient);
     return http
-      .get<{ items: BookData[] }>(
+      .get<{
+        items: BookData[];
+      }>(
         `https://www.googleapis.com/books/v1/volumes?maxResults=6&orderBy=relevance&q=${searchArgument}`
       )
       .pipe(
