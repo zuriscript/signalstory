@@ -12,8 +12,9 @@ All contributions are submitted under the [MIT License](https://github.com/zuris
 
 ## Developing
 
+- Select the project's Node.js version with `nvm install` and `nvm use` (see `.nvmrc`).
 - Run `npm i`
-- Run specs: `ng test`
+- Run specs: `npm run test -- --watch=false` (omit `--watch=false` for watch mode)
 - Run build: `ng build signalstory`
 - Run checks: `npm run check`
 - Run sample: `ng serve sample --open`
