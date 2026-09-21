@@ -14,16 +14,16 @@ describe('load from storage', () => {
 
     beforeEach(() => {
       storage = {
-        getItem: jest.fn(),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
       };
     });
 
     it('should load the stored value from persistence storage on init', () => {
       // arrange
       const storedValue = { val: 'stored' };
-      storage.getItem = jest.fn(() => JSON.stringify(storedValue));
+      storage.getItem = vi.fn(() => JSON.stringify(storedValue));
 
       // act
       const store = new Store({
@@ -45,7 +45,7 @@ describe('load from storage', () => {
       // arrange
       const storedValue = { val: 'stored' };
       const projectedValue = { val: 'storedAndModified' };
-      storage.getItem = jest.fn(() => JSON.stringify(storedValue));
+      storage.getItem = vi.fn(() => JSON.stringify(storedValue));
 
       // act
       const store = new Store({
@@ -55,8 +55,8 @@ describe('load from storage', () => {
             persistenceStorage: storage,
             persistenceKey: key,
             projection: {
-              onLoad: jest.fn(() => projectedValue),
-              onWrite: jest.fn(),
+              onLoad: vi.fn(() => projectedValue),
+              onWrite: vi.fn(),
             },
           }),
         ],
@@ -69,7 +69,7 @@ describe('load from storage', () => {
     it('should not set initial state when unable to parse the stored value', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
-      storage.getItem = jest.fn(() => 'INVALID STATE');
+      storage.getItem = vi.fn(() => 'INVALID STATE');
 
       // act
       const store = new Store({
@@ -90,7 +90,7 @@ describe('load from storage', () => {
     it('should not set initial state when unable to parse the stored value while using projection function', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
-      storage.getItem = jest.fn(() => 'INVALID STATE');
+      storage.getItem = vi.fn(() => 'INVALID STATE');
 
       // act
       const store = new Store({
@@ -100,8 +100,8 @@ describe('load from storage', () => {
             persistenceStorage: storage,
             persistenceKey: key,
             projection: {
-              onLoad: jest.fn(),
-              onWrite: jest.fn(),
+              onLoad: vi.fn(),
+              onWrite: vi.fn(),
             },
           }),
         ],
@@ -114,7 +114,7 @@ describe('load from storage', () => {
     it('should not set initial state when there is no stored value', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
-      storage.getItem = jest.fn(() => null);
+      storage.getItem = vi.fn(() => null);
 
       //act
       const store = new Store({
@@ -138,17 +138,17 @@ describe('load from storage', () => {
 
     beforeEach(() => {
       storage = {
-        getItemAsync: jest.fn(),
-        setItemAsync: jest.fn(),
-        removeItemAsync: jest.fn(),
-        initAsync: jest.fn((_, callback) => callback?.()),
+        getItemAsync: vi.fn(),
+        setItemAsync: vi.fn(),
+        removeItemAsync: vi.fn(),
+        initAsync: vi.fn((_, callback) => callback?.()),
       };
     });
 
     it('should load the stored value from persistence storage on init', () => {
       // arrange
       const storedValue = { val: 'stored' };
-      storage.getItemAsync = jest.fn((_, callback) => callback(storedValue));
+      storage.getItemAsync = vi.fn((_, callback) => callback(storedValue));
 
       // act
       const store = new Store({
@@ -168,7 +168,7 @@ describe('load from storage', () => {
       // arrange
       const storedValue = { val: 'stored' };
       const projectedValue = { val: 'storedAndModified' };
-      storage.getItemAsync = jest.fn((_, callback) => callback(storedValue));
+      storage.getItemAsync = vi.fn((_, callback) => callback(storedValue));
 
       // act
       const store = new Store({
@@ -177,8 +177,8 @@ describe('load from storage', () => {
           useStorePersistence({
             persistenceStorage: storage,
             projection: {
-              onLoad: jest.fn(() => projectedValue),
-              onWrite: jest.fn(),
+              onLoad: vi.fn(() => projectedValue),
+              onWrite: vi.fn(),
             },
           }),
         ],
@@ -191,7 +191,7 @@ describe('load from storage', () => {
     it('should not set initial state when there is no stored value', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
-      storage.getItemAsync = jest.fn((_, callback) => callback(null));
+      storage.getItemAsync = vi.fn((_, callback) => callback(null));
 
       //act
       const store = new Store({
@@ -210,7 +210,7 @@ describe('load from storage', () => {
     it('should not set initial state when there is no stored value while using projection functions', () => {
       // arrange
       const stateBeforeInit = { val: 'dummy' };
-      storage.getItemAsync = jest.fn((_, callback) => callback(null));
+      storage.getItemAsync = vi.fn((_, callback) => callback(null));
 
       //act
       const store = new Store({
@@ -219,8 +219,8 @@ describe('load from storage', () => {
           useStorePersistence({
             persistenceStorage: storage,
             projection: {
-              onLoad: jest.fn(),
-              onWrite: jest.fn(),
+              onLoad: vi.fn(),
+              onWrite: vi.fn(),
             },
           }),
         ],
@@ -241,9 +241,9 @@ describe('save to storage', () => {
 
     beforeEach(() => {
       storage = {
-        getItem: jest.fn(),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
       };
 
       store = registerAndGetStore({
@@ -314,8 +314,8 @@ describe('save to storage', () => {
 
             persistenceKey: key,
             projection: {
-              onLoad: jest.fn(),
-              onWrite: jest.fn(() => projectedValue),
+              onLoad: vi.fn(),
+              onWrite: vi.fn(() => projectedValue),
             },
           }),
         ],
@@ -338,10 +338,10 @@ describe('save to storage', () => {
 
     beforeEach(() => {
       storage = {
-        getItemAsync: jest.fn(),
-        setItemAsync: jest.fn(),
-        removeItemAsync: jest.fn(),
-        initAsync: jest.fn((_, callback) => callback?.()),
+        getItemAsync: vi.fn(),
+        setItemAsync: vi.fn(),
+        removeItemAsync: vi.fn(),
+        initAsync: vi.fn((_, callback) => callback?.()),
       };
 
       store = registerAndGetStore({
@@ -402,8 +402,8 @@ describe('save to storage', () => {
             persistenceStorage: storage,
             persistenceKey: key,
             projection: {
-              onLoad: jest.fn(),
-              onWrite: jest.fn(() => projectedValue),
+              onLoad: vi.fn(),
+              onWrite: vi.fn(() => projectedValue),
             },
           }),
         ],
@@ -427,9 +427,9 @@ describe('clearStorage', () => {
 
     beforeEach(() => {
       storage = {
-        getItem: jest.fn(),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
       };
 
       store = registerAndGetStore({
@@ -458,10 +458,10 @@ describe('clearStorage', () => {
 
     beforeEach(() => {
       storage = {
-        getItemAsync: jest.fn(),
-        setItemAsync: jest.fn(),
-        removeItemAsync: jest.fn(),
-        initAsync: jest.fn((_, callback) => callback?.()),
+        getItemAsync: vi.fn(),
+        setItemAsync: vi.fn(),
+        removeItemAsync: vi.fn(),
+        initAsync: vi.fn((_, callback) => callback?.()),
       };
 
       store = registerAndGetStore({

@@ -174,7 +174,7 @@ describe('runEffect', () => {
     const store = new ImmutableStore<{ value: number }>({
       initialState: { value: 10 },
     });
-    const func = jest.fn();
+    const func = vi.fn();
     const effect = createEffect('effect', func);
     const argument = 42;
 

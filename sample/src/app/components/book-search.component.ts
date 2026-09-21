@@ -1,5 +1,11 @@
 /* eslint-disable @angular-eslint/component-selector */
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 @Component({
   selector: 'app-book-search',
@@ -18,6 +24,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class BookSearchComponent implements OnInit {

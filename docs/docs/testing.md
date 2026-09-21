@@ -8,7 +8,7 @@ Stores are injectable services and can be unit-tested in isolation, much like an
 
 For testing effect and query objects, signalstory provides utility methods under `signalstory/testing`, offering a more readable and targeted syntax than using `TestBed` as-is.
 
-There are lot of strategies and flavours for unit testing services, or unit testing per se. Following sections will demonstrate some strategies for testing different store aspects using [jest](https://jestjs.io/), although any other testing and mocking framework may work here.
+There are lot of strategies and flavours for unit testing services, or unit testing per se. Following sections will demonstrate some strategies for testing different store aspects using [Vitest](https://vitest.dev/), although any other testing and mocking framework may work here.
 
 For demonstration, following store class will be used.
 
@@ -133,7 +133,7 @@ describe('fetchUsersEffect', () => {
     configureInjectionContext(store, opt =>
       opt
         .addMocked(UserService, service => {
-          service.fetchUsers = jest.fn(() => of(usersToBeFetched));
+          service.fetchUsers = vi.fn(() => of(usersToBeFetched));
         })
         .addRegular(NotificationService)
     );
@@ -151,12 +151,12 @@ describe('fetchUsersEffect', () => {
     configureInjectionContext(store, opt =>
       opt
         .addMocked(UserService, service => {
-          service.fetchUsers = jest.fn(() =>
+          service.fetchUsers = vi.fn(() =>
             throwError(() => new Error('Http Error'))
           );
         })
         .addMocked(NotificationService, service => {
-          service.alertError = jest.fn();
+          service.alertError = vi.fn();
         })
     );
 
@@ -281,7 +281,7 @@ it('should remove user and publish store event', () => {
   // arrange
   const store = new UserStore();
   store.addUser('Mike');
-  const handler = jest.fn();
+  const handler = vi.fn();
   store.registerHandler(userRemovedEvent, handler);
 
   // act

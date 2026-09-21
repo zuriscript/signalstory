@@ -1,5 +1,10 @@
 /* eslint-disable @angular-eslint/component-class-suffix */
-import { Component, InjectionToken, inject } from '@angular/core';
+import {
+  Component,
+  InjectionToken,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ImmutableStore } from '../lib/store-immutability/immutable-store';
 import { Store, StoreConfig } from '../public-api';
@@ -20,6 +25,7 @@ export class ImmutableTestStore extends ImmutableStore<any> {
 
 @Component({
   template: '',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class Cmp {}

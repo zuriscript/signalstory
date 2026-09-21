@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        version: [20, 22]
+        version: [22, 24]
 
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +37,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm i --legacy-peer-deps
+        run: npm ci
 
       - name: Run ESLint
         run: npm run lint

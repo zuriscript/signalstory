@@ -23,7 +23,7 @@ describe('register', () => {
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event1');
     const store = new DummyStore();
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     // act
     register(registry, store, storeEvent, handler);
@@ -44,9 +44,9 @@ describe('register', () => {
     const store1 = new DummyStore();
     const store2 = new DummyStore();
     const store3 = new DummyStore();
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
-    const handler3 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
+    const handler3 = vi.fn();
 
     // act
     register(registry, store1, storeEvent1, handler1);
@@ -74,8 +74,8 @@ describe('register', () => {
     // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
     const store1 = new DummyStore();
     const store2 = new DummyStore();
 
@@ -99,9 +99,9 @@ describe('publish', () => {
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
     const paylaod = 42;
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
-    const handler3 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
+    const handler3 = vi.fn();
     const store1 = new DummyStore();
     const store2 = new DummyStore();
     const store3 = new DummyStore();
@@ -129,8 +129,8 @@ describe('publish', () => {
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
     const paylaod = 42;
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
     const store = new DummyStore();
 
     register(registry, store, storeEvent, handler1);
@@ -154,9 +154,9 @@ describe('publishStoreEvent', () => {
     // arrange
     const storeEvent = createEvent<number>('event');
     const paylaod = 42;
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
-    const handler3 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
+    const handler3 = vi.fn();
     const store1 = new DummyStore();
     const store2 = new DummyStore();
 
@@ -185,8 +185,8 @@ describe('unregister', () => {
     // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event');
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
     const store1 = new DummyStore();
     const store2 = new DummyStore();
 
@@ -210,8 +210,8 @@ describe('unregister', () => {
     const registry = createRegistry();
     const storeEvent1 = createEvent<number>('event1');
     const storeEvent2 = createEvent<string>('event2');
-    const handler1 = jest.fn();
-    const handler2 = jest.fn();
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
     const store1 = new DummyStore();
 
     register(registry, store1, storeEvent1, handler1);
@@ -229,7 +229,7 @@ describe('unregister', () => {
     // arrange
     const registry = createRegistry();
     const storeEvent = createEvent<number>('event1');
-    const handler2 = jest.fn();
+    const handler2 = vi.fn();
     const store1 = new DummyStore();
     const store2 = new DummyStore();
 

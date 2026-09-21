@@ -5,6 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr,
 } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { BookCollectionComponent } from './components/book-collection.component';
@@ -29,7 +30,7 @@ import { idbMigration } from './idbMigration';
       useFactory: () => idbMigration,
       multi: true,
     },
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
   ],
 })
 export class AppModule {}

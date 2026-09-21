@@ -4,10 +4,9 @@
   "compilerOptions": {
     "paths": {
       "signalstory": [
-        "dist/signalstory"
+        "./dist/signalstory"
       ]
     },
-    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

@@ -1,5 +1,10 @@
 /* eslint-disable @angular-eslint/component-selector */
-import { Component, OnDestroy, effect } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  effect,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   HistoryTracker,
   isLoading,
@@ -87,6 +92,7 @@ import { storeResetRequestEvent } from './state/events';
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AppComponent implements OnDestroy {

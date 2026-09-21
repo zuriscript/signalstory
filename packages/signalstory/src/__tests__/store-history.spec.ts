@@ -55,7 +55,7 @@ describe('addToHistory', () => {
 
   it('should prune if maxLength is exceeded', () => {
     // arrange
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const numberOfCommands = 20;
     const maxLength = 5;
     const tracker = trackHistory(maxLength, store);
@@ -63,7 +63,7 @@ describe('addToHistory', () => {
     // act & assert
     for (let i = 0; i < numberOfCommands; i++) {
       store.set({ value: i }, i.toString());
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       const history = tracker.getHistory().map(x => x.command);
       if (i < maxLength) {
@@ -74,12 +74,12 @@ describe('addToHistory', () => {
       }
     }
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should adjust redoneCommandIndex and undoneCommandIndex after pruning', () => {
     // arrange
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const tracker = trackHistory(3, store);
 
     // act
@@ -88,7 +88,7 @@ describe('addToHistory', () => {
     tracker.undo();
     tracker.redo();
     store.set({ value: 30 }, 'Command3');
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     // assert
     expect((tracker as any)['_history']).toStrictEqual([
@@ -110,7 +110,7 @@ describe('addToHistory', () => {
         store: expect.any(WeakRef),
       },
     ]);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
