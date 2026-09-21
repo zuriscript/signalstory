@@ -25,16 +25,9 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:jest",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "packages/signalstory/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "include": [
-              "packages/**/*.spec.ts"
-            ]
+            "tsConfig": "packages/signalstory/tsconfig.spec.json"
           }
         }
       }

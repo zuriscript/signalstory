@@ -2,7 +2,7 @@ import { PerformanceCounter } from '../lib/store-plugin-performance-counter/perf
 
 describe('PerformanceCounter', () => {
   let performanceCounter: PerformanceCounter;
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   beforeEach(() => {
     performanceCounter = new PerformanceCounter();
@@ -27,7 +27,7 @@ describe('PerformanceCounter', () => {
       performanceCounter.startTimer();
 
       // Act
-      jest.advanceTimersByTime(100); // Simulate 100ms passing
+      vi.advanceTimersByTime(100); // Simulate 100ms passing
       performanceCounter.stopTimer();
 
       // Assert
@@ -41,11 +41,11 @@ describe('PerformanceCounter', () => {
     it('should handle multiple measurements and calculate averages', () => {
       // Arrange & Act
       performanceCounter.startTimer();
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
       performanceCounter.stopTimer();
 
       performanceCounter.startTimer();
-      jest.advanceTimersByTime(150);
+      vi.advanceTimersByTime(150);
       performanceCounter.stopTimer();
 
       // Assert

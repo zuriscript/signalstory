@@ -203,7 +203,7 @@ describe('runEffect', () => {
 
   it('should runEffect without injection context', () => {
     // arrange
-    const func = jest.fn();
+    const func = vi.fn();
     const effect = createEffect('effect', func, {
       withInjectionContext: false,
     });
@@ -219,7 +219,7 @@ describe('runEffect', () => {
 
   it('should runEffect in injection context by default', () => {
     // arrange
-    const argumentFunc = jest.fn();
+    const argumentFunc = vi.fn();
     const effect = createEffect('effect', (_, arg) => {
       const store2 = inject(ImmutableTestStore);
       arg(store2);
@@ -235,7 +235,7 @@ describe('runEffect', () => {
 
   it('should runEffect in injection context configured by config object', () => {
     // arrange
-    const argumentFunc = jest.fn();
+    const argumentFunc = vi.fn();
     const effect = createEffect(
       'effect',
       (_, arg) => {

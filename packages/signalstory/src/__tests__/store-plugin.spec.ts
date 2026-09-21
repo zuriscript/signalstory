@@ -21,11 +21,11 @@ describe('StorePlugin', () => {
 
   it('should add processors to store successfully', () => {
     // arrange
-    const init = jest.fn();
-    const preprocessCommand = jest.fn();
-    const postprocessCommand = jest.fn();
-    const preprocessEffect = jest.fn();
-    const postprocessEffect = jest.fn();
+    const init = vi.fn();
+    const preprocessCommand = vi.fn();
+    const postprocessCommand = vi.fn();
+    const preprocessEffect = vi.fn();
+    const postprocessEffect = vi.fn();
     const useTestPlugin = () =>
       <StorePlugin>{
         init,
@@ -58,7 +58,7 @@ describe('StorePlugin', () => {
 
     beforeEach(() => {
       processedStoreValue = undefined;
-      commandPreprocessorMock = jest.fn(store => {
+      commandPreprocessorMock = vi.fn(store => {
         processedStoreValue = store.state().value;
       });
       store = new Store<{ value: number }>({
@@ -114,7 +114,7 @@ describe('StorePlugin', () => {
 
     beforeEach(() => {
       processedStoreValue = undefined;
-      commandPostprocessorMock = jest.fn(store => {
+      commandPostprocessorMock = vi.fn(store => {
         processedStoreValue = store.state().value;
       });
       store = new Store<{ value: number }>({
@@ -169,7 +169,7 @@ describe('StorePlugin', () => {
 
     beforeEach(() => {
       processedStoreValue = undefined;
-      effectPreprocessorMock = jest.fn(store => {
+      effectPreprocessorMock = vi.fn(store => {
         processedStoreValue = store.state().value;
       });
       store = new Store<{ value: number }>({
@@ -208,7 +208,7 @@ describe('StorePlugin', () => {
 
     it('should preprocess effect successfully using multiple preprocessors', () => {
       // arrange
-      const effectPreprocessorMock2 = jest.fn();
+      const effectPreprocessorMock2 = vi.fn();
       const effect = createEffect(
         'dummyEffect',
         (store: Store<{ value: number }>) => {
@@ -247,7 +247,7 @@ describe('StorePlugin', () => {
 
     beforeEach(() => {
       processedStoreValue = undefined;
-      effectPostprocessorMock = jest.fn(store => {
+      effectPostprocessorMock = vi.fn(store => {
         processedStoreValue = store.state().value;
       });
       store = new Store<{ value: number }>({

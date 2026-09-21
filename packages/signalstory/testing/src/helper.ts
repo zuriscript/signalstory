@@ -6,7 +6,7 @@
  *
  * As every store can have its own injector (store.config.injector) you can create a separate injection context
  * for every test case. This is especially handy if you are testing effect or query objects as you don't necessarily
- * need to use Testbed or jest.mock (or any other mocking lib) to setup a mocked DI Context + mocked dependencies.
+ * need to use TestBed or vi.mock (or any other mocking lib) to set up a mocked DI context and dependencies.
  * But you could also use this for independent services, register them in the stores injector and using the method getFromStoreInjector to get an instance
  */
 import { Injector, ProviderToken, StaticProvider } from '@angular/core';
@@ -86,7 +86,7 @@ export interface InjectionContextConfiguration {
  * configureInjectionContext(myStore, (config) => {
  *   config.addRegular(MyService);
  *   config.addMocked(OtherService, (instance) => {
- *     instance.methodToMock = jest.fn(() => 'mocked result');
+ *     instance.methodToMock = vi.fn(() => 'mocked result');
  *   });
  * });
  * ```
