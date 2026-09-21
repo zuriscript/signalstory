@@ -1,6 +1,6 @@
 {
   "name": "signalstory-workspace",
-  "version": "21.0.0",
+  "version": "22.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -12,6 +12,9 @@
     "cz": "cz"
   },
   "private": true,
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "dependencies": {
     "@angular/animations": "^22.1.0",
     "@angular/common": "^22.1.0",
@@ -57,8 +60,5 @@
   },
   "lint-staged": {
     "*.{ts,json,html,tsx}": "prettier --write"
-  },
-  "engines": {
-    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   }
 }
