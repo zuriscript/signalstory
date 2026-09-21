@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "check": "ng build signalstory && npx agadoo ./dist/signalstory/fesm2022/signalstory.mjs",
     "cz": "cz"
   },
